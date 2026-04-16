@@ -11,6 +11,11 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:                          # ← Nuevo: espera a que MySQL esté listo
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build: ./backend
@@ -19,7 +24,8 @@ services:
     volumes:
       - ./backend:/var/www/html
     depends_on:
-      - db
+      db:
+        condition: service_healthy       # ← Nuevo: espera al healthcheck
     networks:
       - app-network
 
@@ -27,7 +33,7 @@ services:
     image: nginx:alpine
     container_name: app_api_web
     ports:
-      - "8000:80" # Este es el puerto para la API
+      - "8000:80"
     volumes:
       - ./backend:/var/www/html
       - ./backend/default.conf:/etc/nginx/conf.d/default.conf
@@ -41,7 +47,7 @@ services:
       context: ./frontend
       target: production
     container_name: app_frontend
-    restart: always
+    restart: "no"                        # ← Sin restart en base; el override lo sobreescribe en dev
     networks:
       - app-network
 
