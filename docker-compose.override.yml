@@ -7,6 +7,7 @@ services:
     build:
       context: ./frontend
       target: development # Aquí le decimos que use npm run dev
+    restart: "no"
     ports:
       - "5173:5173" # Exponemos el puerto de Vite para el navegador
     volumes:
