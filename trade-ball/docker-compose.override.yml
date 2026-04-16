@@ -1,0 +1,14 @@
+services:
+  api:
+    volumes:
+      - ./backend:/var/www/html # Sincroniza Laravel al instante
+
+  frontend:
+    build:
+      context: ./frontend
+      target: development # Aquí le decimos que use npm run dev
+    ports:
+      - "5173:5173" # Exponemos el puerto de Vite para el navegador
+    volumes:
+      - ./frontend:/app # Sincroniza React al instante
+      - /app/node_modules # Protege los módulos internos
