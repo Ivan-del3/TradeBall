@@ -2,6 +2,7 @@ services:
   api:
     volumes:
       - ./backend:/var/www/html # Sincroniza Laravel al instante
+      - /var/www/html/vendor 
 
   frontend:
     build:
