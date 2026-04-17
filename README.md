@@ -2,6 +2,10 @@
 
 ## Clonar repositorio
 
+## En linux
+
+```sudo chown -R $USER:$USER TradeBall/```
+
 ## Copiar el .env.example a .env
 
 ## Levantar contenedores
@@ -23,3 +27,9 @@
 
 ### 4. Limpiar caché
 ```docker compose exec api php artisan config:clear```
+
+
+
+# Alias en Docker
+alias api='docker compose exec -it api sh'
+alias artisan="docker compose exec api php artisan"
