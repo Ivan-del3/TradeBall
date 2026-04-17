@@ -33,3 +33,17 @@
 # Alias en Docker
 alias api='docker compose exec -it api sh'
 alias artisan="docker compose exec api php artisan"
+
+# Crear rutas en routes/
+
+Al crear una nueva ruta tenemos que instalarla
+```docker compose exec api php artisan install:api```
+
+despues registrarla en boostrap app.php
+
+y reiniciar la caché de rutas:
+```docker compose exec api php artisan route:clear```
+
+Listar rutas:
+```docker compose exec api php artisan route:list```
+```docker compose exec api cat routes/api.php```
