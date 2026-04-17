@@ -33,6 +33,7 @@
 # Alias en Docker
 alias api='docker compose exec -it api sh'
 alias artisan="docker compose exec api php artisan"
+alias database='docker compose exec app_db mysql -u root -p'
 
 # Crear rutas en routes/
 
