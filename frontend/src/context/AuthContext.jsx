@@ -20,10 +20,10 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const register = async (name, email, password, passwordConfirmation) => {
+  const register = async (name, lastname, email, password, passwordConfirmation) => {
     const data = await client('/register', {
       method: 'POST',
-      body: { name, email, password, password_confirmation: passwordConfirmation },
+      body: { name, lastname, email, password, password_confirmation: passwordConfirmation },
     })
     localStorage.setItem('token', data.token)
     setUser(data.user)
