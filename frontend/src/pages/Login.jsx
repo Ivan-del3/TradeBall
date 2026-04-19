@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-export default function Login({ onSwitch }) {
+export default function Login({ onSwitch, onSuccess }) {
   const { login }                   = useAuth()
   const [email, setEmail]           = useState('')
   const [password, setPassword]     = useState('')
@@ -14,6 +14,7 @@ export default function Login({ onSwitch }) {
     setLoading(true)
     try {
       await login(email, password)
+      onSuccess?.()
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión')
     } finally {
