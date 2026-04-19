@@ -32,7 +32,7 @@ class ProductSeeder extends Seeder
                 'price'       => 89.99,
                 'condition'   => 'casi_nuevo',
                 'description' => 'Charizard VMAX en perfecto estado, viene en su funda protectora. Comprada en tienda oficial.',
-                'image'       => 'https://i.ebayimg.com/images/g/DB0AAOSwZTZlN68x/s-l1600.webp',
+                'image'       => 'https://images.wikidexcdn.net/mwuploads/wikidex/0/02/latest/20201113022241/Charizard_(Voltaje_V%C3%ADvido_TCG).png',
             ],
             [
                 'category_id' => 1,
