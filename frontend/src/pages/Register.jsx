@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-export default function Register({ onSwitch }) {
+export default function Register({ onSwitch, onSuccess  }) {
   const { register }                        = useAuth()
   const [name, setName]                     = useState('')
   const [email, setEmail]                   = useState('')
@@ -20,6 +20,7 @@ export default function Register({ onSwitch }) {
     setLoading(true)
     try {
       await register(name, email, password, passwordConfirm)
+      onSuccess?.()
     } catch (err) {
       const firstError = err.errors
         ? Object.values(err.errors)[0][0]
