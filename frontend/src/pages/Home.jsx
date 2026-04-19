@@ -19,7 +19,10 @@ export default function Home() {
   useEffect(() => {
     setLoading(true)
     const params = new URLSearchParams()
-    Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v) })
+    
+    Object.entries(filters).forEach(([k, v]) => { 
+      if (v) params.append(k, v) 
+    })
 
     client(`/products?${params.toString()}`)
       .then(data => setProducts(data.data))
