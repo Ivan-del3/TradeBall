@@ -1,26 +1,18 @@
 import { useAuth } from './context/AuthContext'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import { useState } from 'react'
+import Home from './pages/Home'
 
 function App() {
-  const { user, loading } = useAuth()
-  const [showRegister, setShowRegister] = useState(false)
+  const { loading } = useAuth()
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
+        <p className="text-gray-400">Cargando...</p>
       </div>
     )
   }
 
-  if (user) return <Dashboard />
-
-  return showRegister
-    ? <Register onSwitch={() => setShowRegister(false)} />
-    : <Login onSwitch={() => setShowRegister(true)} />
+  return <Home />
 }
 
 export default App
