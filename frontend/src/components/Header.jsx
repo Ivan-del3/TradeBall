@@ -45,7 +45,7 @@ export default function Header() {
                 >
                   Tu - {user.name}
                 </a>
-                <button onClick={logout()}>
+                <button onClick={logout}>
                   Cerrar sesión
                 </button>
 

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 export default function Register({ onSwitch, onSuccess  }) {
   const { register }                        = useAuth()
   const [name, setName]                     = useState('')
+  const [lastname, setLastname]               = useState('')
   const [email, setEmail]                   = useState('')
   const [password, setPassword]             = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -19,7 +20,7 @@ export default function Register({ onSwitch, onSuccess  }) {
     }
     setLoading(true)
     try {
-      await register(name, email, password, passwordConfirm)
+      await register(name, lastname ,email, password, passwordConfirm)
       onSuccess?.()
     } catch (err) {
       const firstError = err.errors
@@ -53,6 +54,17 @@ export default function Register({ onSwitch, onSuccess  }) {
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+            <input
+              type="text"
+              value={lastname}
+              onChange={e => setLastname(e.target.value)}
+              required
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
