@@ -17,7 +17,7 @@ function Modal({ children, onClose }) {
 }
 
 export default function Header() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
 
@@ -45,6 +45,9 @@ export default function Header() {
                 >
                   Tu - {user.name}
                 </a>
+                <button onClick={logout()}>
+                  Cerrar sesión
+                </button>
 
                 
               </div>
