@@ -2,3 +2,4 @@
 nginx-proxy/data/
 nginx-proxy/letsencrypt/
 .env
+docker-compose.override.yml
