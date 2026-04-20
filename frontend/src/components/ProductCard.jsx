@@ -9,9 +9,17 @@ export default function ProductCard({ product }) {
 
   const condition = conditionLabel[product.condition]
 
+  const handleClick = () => {
+    window.dispatchEvent(new CustomEvent('navigate:product', {
+      detail: { productId: product.id }
+    }))
+  }
+
   return (
-    <a href={`/product/${product.id}`} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group">
-      {/* Imagen */}
+    <div
+      onClick={handleClick}
+      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer"
+    >
       <div className="aspect-square bg-gray-100 overflow-hidden">
         {image ? (
           <img
@@ -20,21 +28,21 @@ export default function ProductCard({ product }) {
             className="w-full h-full object-contain p-2 group-hover:scale-105 transition"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl">🎴</div>
+          <div className="w-full h-full flex items-center justify-center text-gray-300">
+            Sin imagen
+          </div>
         )}
       </div>
-
-      {/* Info */}
       <div className="p-3">
         <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{product.name}</p>
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-gray-900">{product.price}€</span>
+          <span className="text-lg font-bold text-gray-900">{Number(product.price).toFixed(2)}€</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.color}`}>
             {condition.text}
           </span>
         </div>
         <p className="text-xs text-gray-400 mt-1">{product.category?.name}</p>
       </div>
-    </a>
+    </div>
   )
 }
