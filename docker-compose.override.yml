@@ -1,16 +1,22 @@
 services:
   api:
+    env_file:
+      - ./backend/.env
     volumes:
-      - ./backend:/var/www/html # Sincroniza Laravel al instante
-      - /var/www/html/vendor 
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
 
   frontend:
     build:
       context: ./frontend
-      target: development # Aquí le decimos que use npm run dev
+      target: development
     restart: "no"
     ports:
-      - "5173:5173" # Exponemos el puerto de Vite para el navegador
+      - "5173:5173"
     volumes:
-      - ./frontend:/app # Sincroniza React al instante
-      - /app/node_modules # Protege los módulos internos
+      - ./frontend:/app
+      - /app/node_modules
+
+  api_web:
+    ports:
+      - "8000:80" 
