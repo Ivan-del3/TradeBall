@@ -1,3 +1,4 @@
 # Nginx Proxy Manager - datos runtime, nunca al repo
 nginx-proxy/data/
 nginx-proxy/letsencrypt/
+.env
