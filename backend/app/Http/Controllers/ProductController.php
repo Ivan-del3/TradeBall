@@ -141,4 +141,20 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Producto eliminado']);
     }
+
+    // POST /products/{id}/favorite
+    public function addFavorite(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        $request->user()->favorites()->syncWithoutDetaching([$product->id]);
+        return response()->json(['message' => 'Añadido a favoritos']);
+    }
+
+    // DELETE /products/{id}/favorite
+    public function removeFavorite(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        $request->user()->favorites()->detach($product->id);
+        return response()->json(['message' => 'Eliminado de favoritos']);
+    }
 }
