@@ -48,3 +48,15 @@ y reiniciar la caché de rutas:
 Listar rutas:
 ```docker compose exec api php artisan route:list```
 ```docker compose exec api cat routes/api.php```
+
+
+```
+docker compose up -d --build
+docker compose exec api composer install --no-interaction
+docker compose exec api php artisan key:generate
+docker compose exec api php artisan config:clear
+docker compose exec api php artisan migrate --force
+docker compose exec api php artisan db:seed
+docker compose exec api chown -R www-data:www-data storage bootstrap/cache
+docker compose exec api chmod -R 775 storage bootstrap/cache
+```
