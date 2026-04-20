@@ -27,90 +27,117 @@ class ProductSeeder extends Seeder
 
         $products = [
             [
-                'category_id' => 1, // Cartas
+                'category_id' => 1,
                 'name'        => 'Charizard VMAX Rainbow Rare',
                 'price'       => 89.99,
                 'condition'   => 'casi_nuevo',
-                'description' => 'Charizard VMAX en perfecto estado, viene en su funda protectora. Comprada en tienda oficial.',
-                'image'       => 'https://images.wikidexcdn.net/mwuploads/wikidex/0/02/latest/20201113022241/Charizard_(Voltaje_V%C3%ADvido_TCG).png',
+                'description' => 'Charizard VMAX en perfecto estado, viene en su funda protectora. Comprada en tienda oficial. Nunca jugada en torneo, solo para colección. Incluye certificado de autenticidad.',
+                'images'      => [
+                    ['url' => 'https://images.pokemontcg.io/swsh3/74_hires.png', 'main' => true],
+                    ['url' => 'https://images.pokemontcg.io/swsh3/73_hires.png', 'main' => false],
+                    ['url' => 'https://images.pokemontcg.io/swsh3/75_hires.png', 'main' => false],
+                ],
             ],
             [
                 'category_id' => 1,
-                'name'        => 'Pikachu Ilustrador Promo',
-                'price'       => 249.99,
+                'name'        => 'Pikachu V Full Art',
+                'price'       => 45.00,
                 'condition'   => 'nuevo',
-                'description' => 'Carta promo Pikachu Ilustrador, nunca jugada. Certificado de autenticidad incluido.',
-                'image'       => 'https://images.pokemontcg.io/basep/1_hires.png',
+                'description' => 'Pikachu V Full Art de la expansión Vivid Voltage. Carta sin usar, guardada en sleeve desde el primer día. Estado impecable.',
+                'images'      => [
+                    ['url' => 'https://images.pokemontcg.io/swsh4/170_hires.png', 'main' => true],
+                    ['url' => 'https://images.pokemontcg.io/swsh4/43_hires.png',  'main' => false],
+                ],
             ],
             [
                 'category_id' => 1,
                 'name'        => 'Mewtwo EX Full Art',
                 'price'       => 34.50,
                 'condition'   => 'usado',
-                'description' => 'Mewtwo EX Full Art de la expansión Legendary Treasures. Leve desgaste en bordes.',
-                'image'       => 'https://images.pokemontcg.io/xy8/61_hires.png',
+                'description' => 'Mewtwo EX Full Art de Legendary Treasures. Leve desgaste en bordes visible solo de cerca. Perfectamente legible y jugable.',
+                'images'      => [
+                    ['url' => 'https://images.pokemontcg.io/xy8/61_hires.png',  'main' => true],
+                    ['url' => 'https://images.pokemontcg.io/xy8/62_hires.png',  'main' => false],
+                ],
             ],
             [
-                'category_id' => 2, // Figuras
+                'category_id' => 1,
+                'name'        => 'Blastoise Base Set Holo',
+                'price'       => 120.00,
+                'condition'   => 'usado',
+                'description' => 'Blastoise holo de la Base Set original 1999. Desgaste normal por el tiempo. Para coleccionistas que buscan completar la base set original.',
+                'images'      => [
+                    ['url' => 'https://images.pokemontcg.io/base1/2_hires.png', 'main' => true],
+                ],
+            ],
+            [
+                'category_id' => 2,
                 'name'        => 'Figura Gengar Nendoroid',
                 'price'       => 55.00,
                 'condition'   => 'nuevo',
-                'description' => 'Figura Nendoroid de Gengar en caja original sellada. Importación japonesa.',
-                'image'       => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png',
+                'description' => 'Figura Nendoroid de Gengar en caja original sellada. Importación japonesa directa del Centro Pokémon Tokyo. Incluye accesorios originales.',
+                'images'      => [
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png', 'main' => true],
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png', 'main' => false],
+                ],
             ],
             [
                 'category_id' => 2,
                 'name'        => 'Figura Snorlax Funko Pop',
                 'price'       => 18.99,
                 'condition'   => 'casi_nuevo',
-                'description' => 'Funko Pop Snorlax #643, caja en buen estado con leve golpe en esquina.',
-                'image'       => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/143.png',
-            ],
-            [
-                'category_id' => 3, // Videojuegos
-                'name'        => 'Pokémon Esmeralda GBA',
-                'price'       => 75.00,
-                'condition'   => 'usado',
-                'description' => 'Cartucho original de Pokémon Esmeralda para Game Boy Advance. Batería funcional.',
-                'image'       => 'https://tse1.explicit.bing.net/th/id/OIP.BmZ-1hcZh5HAYduhH0MjKgAAAA?rs=1&pid=ImgDetMain&o=7&rm=3',
+                'description' => 'Funko Pop Snorlax #643. Caja en buen estado con leve golpe en esquina inferior. La figura interior perfecta.',
+                'images'      => [
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/143.png', 'main' => true],
+                ],
             ],
             [
                 'category_id' => 3,
-                'name'        => 'Pokémon Plata Nintendo DS',
+                'name'        => 'Pokémon Esmeralda GBA',
+                'price'       => 75.00,
+                'condition'   => 'usado',
+                'description' => 'Cartucho original de Pokémon Esmeralda para Game Boy Advance. Batería funcional, partida guardada con los 8 badges. Etiqueta en perfecto estado.',
+                'images'      => [
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/misc/games/emerald/pokemon-emerald-logo.png', 'main' => true],
+                ],
+            ],
+            [
+                'category_id' => 3,
+                'name'        => 'Pokémon SoulSilver DS',
                 'price'       => 120.00,
                 'condition'   => 'casi_nuevo',
-                'description' => 'HeartGold/SoulSilver edición plata. Incluye Pokéwalker en caja original.',
-                'image'       => 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d0/latest/20241023140611/Pok%C3%A9mon_Edici%C3%B3n_Plata_SoulSilver_car%C3%A1tula_ES.png',
+                'description' => 'Pokémon SoulSilver para Nintendo DS. Incluye Pokéwalker en caja original. Caja con leve desgaste en esquinas. Juego y Pokéwalker en perfecto estado.',
+                'images'      => [
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/misc/games/ss/pokemon-soulsilver-logo.png', 'main' => true],
+                ],
             ],
             [
-                'category_id' => 4, // Peluches
-                'name'        => 'Peluche Eevee 30cm',
+                'category_id' => 4,
+                'name'        => 'Peluche Eevee 30cm Centro Pokémon',
                 'price'       => 22.00,
                 'condition'   => 'nuevo',
-                'description' => 'Peluche oficial de Eevee de 30cm. Centro Pokémon Japón. Nunca usado.',
-                'image'       => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/133.png',
+                'description' => 'Peluche oficial de Eevee de 30cm del Centro Pokémon Japón. Nunca sacado de la bolsa original. Importación personal.',
+                'images'      => [
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/133.png', 'main' => true],
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/134.png', 'main' => false],
+                    ['url' => 'https://assets.pokemon.com/assets/cms2/img/pokedex/full/135.png', 'main' => false],
+                ],
             ],
             [
-                'category_id' => 5, // Coleccionables
-                'name'        => 'Caja de sobres Evoluciones',
+                'category_id' => 5,
+                'name'        => 'Caja sellada XY Evoluciones',
                 'price'       => 180.00,
                 'condition'   => 'nuevo',
-                'description' => 'Caja sellada de 36 sobres de la expansión XY Evoluciones. Sin abrir.',
-                'image'       => 'https://images.pokemontcg.io/xy12/logo.png',
-            ],
-            [
-                'category_id' => 1,
-                'name'        => 'Blastoise Base Set',
-                'price'       => 45.00,
-                'condition'   => 'usado',
-                'description' => 'Blastoise holo de la Base Set original. Leve desgaste por el tiempo.',
-                'image'       => 'https://images.pokemontcg.io/base1/2_hires.png',
+                'description' => 'Caja sellada de 36 sobres de la expansión XY Evoluciones. Sin abrir. Una de las expansiones más buscadas por coleccionistas por sus reimpresiones de la Base Set.',
+                'images'      => [
+                    ['url' => 'https://images.pokemontcg.io/xy12/logo.png', 'main' => true],
+                ],
             ],
         ];
 
         foreach ($products as $data) {
-            $image = $data['image'];
-            unset($data['image']);
+            $images = $data['images'];
+            unset($data['images']);
 
             $product = Product::create(array_merge($data, [
                 'user_id'   => $user->id,
@@ -118,11 +145,13 @@ class ProductSeeder extends Seeder
                 'visible'   => true,
             ]));
 
-            ProductImage::create([
-                'product_id' => $product->id,
-                'image_url'  => $image,
-                'is_main'    => true,
-            ]);
+            foreach ($images as $image) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_url'  => $image['url'],
+                    'is_main'    => $image['main'],
+                ]);
+            }
         }
     }
 }

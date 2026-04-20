@@ -19,4 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products',          [ProductController::class, 'store']);
     Route::put('/products/{id}',      [ProductController::class, 'update']);
     Route::delete('/products/{id}',   [ProductController::class, 'destroy']);
+
+    Route::post('/products/{id}/favorite',        [ProductController::class, 'addFavorite']);
+    Route::delete('/products/{id}/favorite',      [ProductController::class, 'removeFavorite']);
 });
