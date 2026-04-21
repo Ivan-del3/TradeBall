@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import { useState } from 'react'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
+import Favorites from '../pages/Favorites'
 
 function Modal({ children, onClose }) {
   return (
@@ -17,9 +18,10 @@ function Modal({ children, onClose }) {
 }
 
 export default function Header() {
-  const { user, logout } = useAuth()
-  const [showLogin, setShowLogin] = useState(false)
-  const [showRegister, setShowRegister] = useState(false)
+  const { user, logout }            = useAuth()
+  const [showLogin, setShowLogin]           = useState(false)
+  const [showRegister, setShowRegister]     = useState(false)
+  const [showFavorites, setShowFavorites]   = useState(false)
 
   return (
     <div>
@@ -32,24 +34,34 @@ export default function Header() {
             {user ? (
               <div className="flex items-center gap-3">
                 
-                <a 
+                <a
                   href="/sell"
                   className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
                 >
                   + Vender
                 </a>
-                
+
+                <button
+                  onClick={() => setShowFavorites(true)}
+                  className="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                >
+                  <span className="text-red-400">♥</span>
+                  <span className="hidden sm:inline">Favoritos</span>
+                </button>
+
                 <a
                   href="/profile"
                   className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
                 >
-                  Tu - {user.name}
+                  Tú - {user.name}
                 </a>
-                <button onClick={logout}>
-                  Cerrar sesión
-                </button>
 
-                
+                <button
+                  onClick={logout}
+                  className="text-sm text-gray-500 hover:text-gray-800 transition"
+                >
+                  Salir
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -63,7 +75,7 @@ export default function Header() {
                   onClick={() => setShowLogin(true)}
                   className="text-sm font-medium text-gray-700 hover:text-black transition"
                 >
-                  Iniciar sesión
+                  Iniciar sesion
                 </button>
                 <button
                   onClick={() => setShowRegister(true)}
@@ -93,6 +105,10 @@ export default function Header() {
             onSuccess={() => setShowRegister(false)}
           />
         </Modal>
+      )}
+
+      {showFavorites && (
+        <Favorites onClose={() => setShowFavorites(false)} />
       )}
     </div>
   )
