@@ -15,5 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Cuando no hay autenticación, devolver JSON en vez de redirigir
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'No autenticado'], 401);
+            }
+        });
     })->create();
