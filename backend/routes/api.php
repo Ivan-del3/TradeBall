@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\FavoriteController; 
 
 // Públicas
 Route::post('/register', [AuthController::class, 'register']);
@@ -20,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/products/{id}',      [ProductController::class, 'update']);
     Route::delete('/products/{id}',   [ProductController::class, 'destroy']);
 
-    Route::post('/products/{id}/favorite',        [ProductController::class, 'addFavorite']);
-    Route::delete('/products/{id}/favorite',      [ProductController::class, 'removeFavorite']);
+    Route::get('/favorites',                   [FavoriteController::class, 'index']);
+    Route::post('/favorites/{productId}',      [FavoriteController::class, 'store']);
+    Route::delete('/favorites/{productId}',    [FavoriteController::class, 'destroy']);
 });
