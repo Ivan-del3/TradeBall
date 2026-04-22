@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 import Header from '../components/Header'
 import Login from './Login'
+import { useAuthModal } from '../context/AuthModalContext'
+import Register from './Register'
 
 export default function ProductDetail({ productId }) {
   const { user }                              = useAuth()
@@ -11,7 +13,7 @@ export default function ProductDetail({ productId }) {
   const [selectedImage, setSelectedImage]     = useState(0)
   const [isFavorite, setIsFavorite]           = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
-  const [showLogin, setShowLogin]             = useState(false)
+  const { modal, openLogin, openRegister, closeModal } = useAuthModal()
 
   useEffect(() => {
     client(`/products/${productId}`)
@@ -35,7 +37,7 @@ export default function ProductDetail({ productId }) {
 
   const handleFavorite = async () => {
     if (!user) {
-      setShowLogin(true)
+      openLogin()
       return
     }
     setFavoriteLoading(true)
@@ -211,15 +213,20 @@ export default function ProductDetail({ productId }) {
                     ? 'Guardado en favoritos'
                     : 'Guardar en favoritos'}
                 </button>
-                {showLogin && (
-                  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div onClick={e => e.stopPropagation()}>
-                      <Login
-                        onSuccess={() => setShowLogin(false)}  
-                        onSwitch={() => setShowLogin(false)}
-                      />
-                    </div>
-                  </div>
+
+                {modal === 'login' && (
+                  <Login
+                    onSwitch={() => openRegister()}
+                    onSuccess={closeModal}
+                    onClose={closeModal}
+                  />
+                )}
+                {modal === 'register' && (
+                  <Register
+                    onSwitch={() => openLogin()}
+                    onSuccess={closeModal}
+                    onClose={closeModal}
+                  />
                 )}
 
                 {!user && (
