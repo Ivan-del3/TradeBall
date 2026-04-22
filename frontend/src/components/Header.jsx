@@ -1,27 +1,25 @@
 import { useAuth } from '../context/AuthContext'
+import { useAuthModal } from '../context/AuthModalContext'
 import { useState } from 'react'
+import Favorites from '../pages/Favorites'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
-import Favorites from '../pages/Favorites'
+import LogoutModal from '../components/LogoutModal'
 
-function Modal({ children, onClose }) {
-  return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div onClick={e => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
-  )
-}
+// Componente auxiliar para el fondo del modal
+
 
 export default function Header() {
-  const { user, logout }            = useAuth()
-  const [showLogin, setShowLogin]           = useState(false)
-  const [showRegister, setShowRegister]     = useState(false)
-  const [showFavorites, setShowFavorites]   = useState(false)
+  const { user, logout } = useAuth()
+  const { modal, openLogin, openRegister, closeModal } = useAuthModal()
+  const [showFavorites, setShowFavorites] = useState(false)
+  const [showLogout, setShowLogout] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    setShowLogout(false)
+    window.dispatchEvent(new CustomEvent('navigate:home'))
+  }
 
   return (
     <div>
@@ -30,17 +28,17 @@ export default function Header() {
           <a href="/" className="text-2xl font-bold text-yellow-400 tracking-tight">
             TradeBall
           </a>
+
           <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                
                 <a
                   href="/sell"
                   className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
                 >
                   + Vender
                 </a>
-
+                
                 <button
                   onClick={() => setShowFavorites(true)}
                   className="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
@@ -48,7 +46,7 @@ export default function Header() {
                   <span className="text-red-400">♥</span>
                   <span className="hidden sm:inline">Favoritos</span>
                 </button>
-
+                
                 <a
                   href="/profile"
                   className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
@@ -57,7 +55,7 @@ export default function Header() {
                 </a>
 
                 <button
-                  onClick={logout}
+                  onClick={() => setShowLogout(true)}
                   className="text-sm text-gray-500 hover:text-gray-800 transition"
                 >
                   Salir
@@ -66,19 +64,19 @@ export default function Header() {
             ) : (
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setShowLogin(true)}
+                  onClick={openLogin}
                   className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
                 >
                   + Vender
                 </button>
                 <button
-                  onClick={() => setShowLogin(true)}
+                  onClick={openLogin}
                   className="text-sm font-medium text-gray-700 hover:text-black transition"
                 >
-                  Iniciar sesion
+                  Iniciar sesión
                 </button>
                 <button
-                  onClick={() => setShowRegister(true)}
+                  onClick={openRegister}
                   className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition"
                 >
                   Registrarse
@@ -88,27 +86,32 @@ export default function Header() {
           </div>
         </div>
       </header>
-
-      {showLogin && (
-        <Modal onClose={() => setShowLogin(false)}>
-          <Login
-            onSwitch={() => { setShowLogin(false); setShowRegister(true) }}
-            onSuccess={() => setShowLogin(false)}
-          />
-        </Modal>
+      
+      {modal === 'login' && (
+        <Login
+          onSwitch={() => openRegister()}
+          onSuccess={closeModal}
+          onClose={closeModal}
+        />
       )}
-
-      {showRegister && (
-        <Modal onClose={() => setShowRegister(false)}>
-          <Register
-            onSwitch={() => { setShowRegister(false); setShowLogin(true) }}
-            onSuccess={() => setShowRegister(false)}
-          />
-        </Modal>
+      {modal === 'register' && (
+        <Register
+          onSwitch={() => openLogin()}
+          onSuccess={closeModal}
+          onClose={closeModal}
+        />
       )}
 
       {showFavorites && (
         <Favorites onClose={() => setShowFavorites(false)} />
+      )}
+
+      {showLogout && (
+        <LogoutModal
+          userName={user?.name}
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogout(false)}
+        />
       )}
     </div>
   )
