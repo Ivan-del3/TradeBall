@@ -12,6 +12,9 @@ WORKDIR /var/www/html
 COPY . .
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
+# Aumentar tamaño de uploads
+COPY php-uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
