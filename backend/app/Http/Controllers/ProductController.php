@@ -93,7 +93,7 @@ class ProductController extends Controller
             $path = $image->store('products', 'public');
             ProductImage::create([
                 'product_id' => $product->id,
-                'image_url'  => Storage::url($path),
+                'image_url'  => config('app.url') . '/storage/' . $path,
                 'is_main'    => $index === 0,
             ]);
         }

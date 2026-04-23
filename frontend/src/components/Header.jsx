@@ -32,13 +32,14 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                <a
-                  href="/sell"
+
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('navigate:sell'))}
                   className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
                 >
                   + Vender
-                </a>
-                
+                </button> 
+
                 <button
                   onClick={() => setShowFavorites(true)}
                   className="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
@@ -47,12 +48,19 @@ export default function Header() {
                   <span className="hidden sm:inline">Favoritos</span>
                 </button>
                 
-                <a
-                  href="/profile"
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('navigate:profile'))}
                   className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
                 >
-                  Tú - {user.name}
-                </a>
+                  <div className="w-7 h-7 bg-yellow-400 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-black">
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      user.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  {user.name}
+                </button>
 
                 <button
                   onClick={() => setShowLogout(true)}
