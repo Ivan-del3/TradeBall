@@ -3,24 +3,28 @@ import { useAuth } from './context/AuthContext'
 import { AuthModalProvider } from './context/AuthModalContext'
 import Home from './pages/Home'
 import ProductDetail from './pages/ProductDetail'
+import Profile from './pages/Profile'
+import Sell from './pages/Sell'
 
 function App() {
   const { loading }     = useAuth()
   const [page, setPage] = useState({ name: 'home', params: {} })
 
   useEffect(() => {
-    const handler = (e) => {
-      const productId = e.detail?.productId
-      if (productId) setPage({ name: 'product', params: { id: productId } })
+    const handlers = {
+      'navigate:product': (e) => setPage({ name: 'product', params: { id: e.detail?.productId } }),
+      'navigate:profile': ()  => setPage({ name: 'profile', params: {} }),
+      'navigate:sell':    ()  => setPage({ name: 'sell',    params: {} }),
+      'navigate:home':    ()  => setPage({ name: 'home',    params: {} }),
     }
-    window.addEventListener('navigate:product', handler)
-    return () => window.removeEventListener('navigate:product', handler)
-  }, [])
-
-  useEffect(() => {
-    const handler = () => setPage({ name: 'home', params: {} })
-    window.addEventListener('navigate:home', handler)
-    return () => window.removeEventListener('navigate:home', handler)
+    Object.entries(handlers).forEach(([event, handler]) => {
+      window.addEventListener(event, handler)
+    })
+    return () => {
+      Object.entries(handlers).forEach(([event, handler]) => {
+        window.removeEventListener(event, handler)
+      })
+    }
   }, [])
 
   if (loading) {
@@ -31,15 +35,12 @@ function App() {
     )
   }
 
-  return (
-    <AuthModalProvider>
-      {page.name === 'product' ? (
-        <ProductDetail productId={page.params.id} />
-      ) : (
-        <Home />
-      )}
-    </AuthModalProvider>
-  )
+  switch (page.name) {
+    case 'product': return <ProductDetail productId={page.params.id} />
+    case 'profile': return <Profile />
+    case 'sell':    return <Sell />
+    default:        return <Home />
+  }
 }
 
 export default App
