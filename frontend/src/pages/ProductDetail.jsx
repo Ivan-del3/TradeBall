@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import Login from './Login'
 import { useAuthModal } from '../context/AuthModalContext'
 import Register from './Register'
+import Home from './Home'
 
 export default function ProductDetail({ productId }) {
   const { user }                              = useAuth()
@@ -14,6 +15,7 @@ export default function ProductDetail({ productId }) {
   const [isFavorite, setIsFavorite]           = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
+  const [home, setHome] = useState(false)
 
   useEffect(() => {
     client(`/products/${productId}`)
@@ -93,10 +95,10 @@ export default function ProductDetail({ productId }) {
       <main className="max-w-5xl mx-auto px-4 py-8">
 
         <button
-          onClick={() => window.history.back()}
+          onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
         >
-          Volver
+          ← Volver
         </button>
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -176,7 +178,11 @@ export default function ProductDetail({ productId }) {
               {product.user && (
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-6">
                   <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black">
-                    {product.user.name.charAt(0).toUpperCase()}
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">
