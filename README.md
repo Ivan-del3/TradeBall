@@ -59,4 +59,15 @@ docker compose exec api php artisan migrate --force
 docker compose exec api php artisan db:seed
 docker compose exec api chown -R www-data:www-data storage bootstrap/cache
 docker compose exec api chmod -R 775 storage bootstrap/cache
+
+
+HACER STORAGE LINK AL RECONSTRUIR CONTENEDORES
+docker compose exec api php artisan storage:link 
+
+y cerrar el puerto 81 del compose.yml
+
+cuando hagas cambios en default.conf:
+bashdocker compose up -d --force-recreate api_web
+O para recrear todo:
+bashdocker compose up -d --force-recreate
 ```
