@@ -113,8 +113,8 @@ export default function Sell() {
       <main className="max-w-2xl mx-auto px-4 py-8">
 
         <button
-          onClick={() => window.history.back()}
-          className="text-sm text-gray-500 hover:text-gray-800 mb-6 transition flex items-center gap-1"
+          onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
         >
           ← Volver
         </button>
