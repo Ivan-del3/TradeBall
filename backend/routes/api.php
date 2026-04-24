@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/favorites/{productId}', [FavoriteController::class, 'destroy']);
 
     // Perfil
-    Route::get('/profile',           [ProfileController::class, 'show']);
+    Route::post('/profile',        [ProfileController::class, 'update']);
 
     // Ventas
     Route::get('/sales',          [SalesController::class,    'index']);
