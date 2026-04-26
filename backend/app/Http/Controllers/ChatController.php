@@ -130,6 +130,17 @@ class ChatController extends Controller
 
         $message->load('sender');
 
+        // Restore visibility for the recipient if they had hidden this conversation
+        if ($userId === $order->buyer_id) {
+            if ($order->hidden_by_seller) {
+                $order->update(['hidden_by_seller' => false]);
+            }
+        } else {
+            if ($order->hidden_by_buyer) {
+                $order->update(['hidden_by_buyer' => false]);
+            }
+        }
+
         broadcast(new MessageSent($message))->toOthers();
 
         return response()->json($message);
