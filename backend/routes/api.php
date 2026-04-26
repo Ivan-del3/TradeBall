@@ -50,9 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reviews',        [ReviewController::class,   'index']);
 
     // Chat
-    Route::get('/chat/conversations',                     [ChatController::class, 'conversations']);
-    Route::post('/chat/conversations',                    [ChatController::class, 'createConversation']);
-    Route::get('/chat/conversations/{orderId}/messages',  [ChatController::class, 'messages']);
-    Route::post('/chat/conversations/{orderId}/messages', [ChatController::class, 'sendMessage']);
+    Route::get('/chat/conversations',                        [ChatController::class, 'conversations']);
+    Route::post('/chat/conversations',                       [ChatController::class, 'createConversation']);
+    Route::get('/chat/conversations/{orderId}/messages',     [ChatController::class, 'messages']);
+    Route::post('/chat/conversations/{orderId}/messages',    [ChatController::class, 'sendMessage']);
+    Route::patch('/chat/conversations/{orderId}/hide',       [ChatController::class, 'hideConversation']);
 
 });
