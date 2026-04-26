@@ -58,6 +58,24 @@ export default function ProductDetail({ productId }) {
     }
   }
 
+  const handleContact = async () => {
+    if (!user) {
+      openLogin()
+      return
+    }
+    try {
+      const order = await client('/chat/conversations', {
+        method: 'POST',
+        body: { product_id: productId },
+      })
+      window.dispatchEvent(new CustomEvent('navigate:profile:chat', {
+        detail: { orderId: order.id }
+      }))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const conditionLabel = {
     nuevo:      { text: 'Nuevo',      color: 'bg-green-100 text-green-700 border-green-200' },
     casi_nuevo: { text: 'Casi nuevo', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -195,7 +213,10 @@ export default function ProductDetail({ productId }) {
 
               <div className="flex flex-col gap-3 mt-auto">
                 {user && user.id !== product.user?.id && (
-                  <button className="w-full bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 transition">
+                  <button
+                    onClick={handleContact}
+                    className="w-full bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 transition"
+                  >
                     Contactar con el vendedor
                   </button>
                 )}

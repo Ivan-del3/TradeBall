@@ -9,6 +9,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ChatController;
 
 // Públicas
 Route::post('/register', [AuthController::class, 'register']);
@@ -47,5 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
+
+    // Chat
+    Route::get('/chat/conversations',                        [ChatController::class, 'conversations']);
+    Route::post('/chat/conversations',                       [ChatController::class, 'createConversation']);
+    Route::get('/chat/conversations/{orderId}/messages',     [ChatController::class, 'messages']);
+    Route::post('/chat/conversations/{orderId}/messages',    [ChatController::class, 'sendMessage']);
+    Route::patch('/chat/conversations/{orderId}/hide',       [ChatController::class, 'hideConversation']);
 
 });

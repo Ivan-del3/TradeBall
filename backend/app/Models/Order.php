@@ -9,11 +9,16 @@ class Order extends Model
     protected $fillable = [
         'buyer_id', 'seller_id', 'product_id',
         'purchase_price', 'status', 'escrow_active',
+        'hidden_by_buyer', 'hidden_by_seller',
     ];
 
     protected function casts(): array
     {
-        return ['escrow_active' => 'boolean'];
+        return [
+            'escrow_active'    => 'boolean',
+            'hidden_by_buyer'  => 'boolean',
+            'hidden_by_seller' => 'boolean',
+        ];
     }
 
     public function buyer() {
