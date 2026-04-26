@@ -4,18 +4,26 @@ import client from '../../api/client'
 import { LoadingCard } from './shared'
 
 export default function Chat({ initialOrderId }) {
-  const { user }                          = useAuth()
-  const [conversations, setConversations] = useState([])
-  const [activeConv, setActiveConv]       = useState(null)
-  const [messages, setMessages]           = useState([])
-  const [newMessage, setNewMessage]       = useState('')
-  const [loading, setLoading]             = useState(true)
-  const [sending, setSending]             = useState(false)
-  // id_order abierto desde ProductDetail sin mensajes aún enviados
+  const { user }                            = useAuth()
+  const [conversations, setConversations]   = useState([])
+  const [activeConv, setActiveConv]         = useState(null)
+  const [messages, setMessages]             = useState([])
+  const [newMessage, setNewMessage]         = useState('')
+  const [loading, setLoading]               = useState(true)
+  const [sending, setSending]               = useState(false)
   const [pendingOrderId, setPendingOrderId] = useState(null)
-  const messagesEndRef                    = useRef(null)
-  const channelRef                        = useRef(null)
+  const messagesEndRef                      = useRef(null)
+  const prevMsgCountRef                     = useRef(0)
+  // Ref para acceder al activeConv actual dentro de closures de polling
+  const activeConvRef                       = useRef(null)
+  // IDs ocultados manualmente: evita que el poll de lista los restaure por race condition
+  const hiddenIdsRef                        = useRef(new Set())
 
+  useEffect(() => {
+    activeConvRef.current = activeConv
+  }, [activeConv])
+
+  // Carga inicial de la lista
   useEffect(() => {
     client('/chat/conversations')
       .then(data => {
@@ -26,27 +34,99 @@ export default function Chat({ initialOrderId }) {
           const conv = data.find(c => c.id === initialOrderId)
           if (conv) {
             setActiveConv(conv)
-            // Marcar como pendiente si no tiene mensajes
-            if (!conv.last_message) {
-              setPendingOrderId(conv.id)
-            }
+            if (!conv.last_message) setPendingOrderId(conv.id)
           }
         }
       })
       .catch(() => setLoading(false))
   }, [initialOrderId])
 
-  // Cargar mensajes cuando cambia la conversación activa
+  // Polling de la lista de conversaciones cada 3s (arranca cuando termina la carga inicial)
+  useEffect(() => {
+    if (loading) return
+
+    const pollList = () => {
+      client('/chat/conversations')
+        .then(newConvs => {
+          setConversations(prev => {
+            const prevMap  = new Map(prev.map(c => [c.id, c]))
+            const freshMap = new Map(newConvs.map(c => [c.id, c]))
+
+            // Actualizar conversaciones existentes
+            const merged = prev.map(c => {
+              const fresh = freshMap.get(c.id)
+              if (!fresh) return c  // Puede ser pendingOrderId u otro estado local
+
+              // El poll de mensajes gestiona unread_count para la conv activa
+              const isActive = activeConvRef.current?.id === c.id
+              return {
+                ...c,
+                unread_count: isActive ? c.unread_count : fresh.unread_count,
+                last_message: fresh.last_message ?? c.last_message,
+              }
+            })
+
+            // Añadir conversaciones restauradas (chats ocultos que recibieron un mensaje)
+            newConvs.forEach(fresh => {
+              if (prevMap.has(fresh.id)) return  // Ya existe, actualizada arriba
+
+              const wasHiddenManually = hiddenIdsRef.current.has(fresh.id)
+
+              if (!wasHiddenManually) {
+                // Conversación nueva visible (no la ocultó este usuario)
+                merged.push(fresh)
+              } else if (fresh.last_message) {
+                // El backend la restauró porque el otro usuario envió un mensaje
+                hiddenIdsRef.current.delete(fresh.id)
+                merged.push(fresh)
+              }
+              // Si wasHiddenManually && !last_message: ignorar (race condition de ocultado)
+            })
+
+            return merged
+          })
+        })
+        .catch(() => {})
+    }
+
+    const intervalId = setInterval(pollList, 3000)
+    return () => clearInterval(intervalId)
+  }, [loading])
+
+  // Carga inicial + polling de mensajes de la conversación activa cada 3s
   useEffect(() => {
     if (!activeConv) return
-    client(`/chat/conversations/${activeConv.id}/messages`)
-      .then(data => setMessages(data))
-      .catch(() => {})
+
+    prevMsgCountRef.current = 0
+
+    const load = () => {
+      client(`/chat/conversations/${activeConv.id}/messages`)
+        .then(data => {
+          setMessages(data)
+          setConversations(prev => prev.map(c =>
+            c.id === activeConv.id
+              ? {
+                  ...c,
+                  unread_count: 0,
+                  last_message: data[data.length - 1] ?? c.last_message,
+                }
+              : c
+          ))
+        })
+        .catch(() => {})
+    }
+
+    load()
+    const intervalId = setInterval(load, 3000)
+    return () => clearInterval(intervalId)
   }, [activeConv])
 
-  // Scroll al último mensaje
+  // Scroll al fondo solo cuando llegan mensajes nuevos
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messages.length > prevMsgCountRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    prevMsgCountRef.current = messages.length
   }, [messages])
 
   // Limpiar chat pendiente (sin mensajes) cuando el usuario cambia de conversación
@@ -57,8 +137,7 @@ export default function Chat({ initialOrderId }) {
     }
   }, [activeConv, pendingOrderId])
 
-  // Conversaciones visibles: ocultar las que no tienen mensajes,
-  // salvo la activa (que puede ser la recién creada desde ProductDetail)
+  // Conversaciones visibles: ocultar las sin mensajes salvo la activa
   const visibleConversations = conversations.filter(c =>
     c.last_message !== null || c.id === activeConv?.id
   )
@@ -73,14 +152,9 @@ export default function Chat({ initialOrderId }) {
       })
       setMessages(prev => [...prev, data])
       setNewMessage('')
-      // El chat ya tiene mensajes: dejar de ser pendiente
       setPendingOrderId(null)
-
-      // Actualizar último mensaje en la lista de conversaciones
       setConversations(prev => prev.map(c =>
-        c.id === activeConv.id
-          ? { ...c, last_message: data }
-          : c
+        c.id === activeConv.id ? { ...c, last_message: data } : c
       ))
     } catch (err) {
       console.error(err)
@@ -97,15 +171,14 @@ export default function Chat({ initialOrderId }) {
   }
 
   const handleProductClick = (productId) => {
-    window.dispatchEvent(new CustomEvent('navigate:product', {
-      detail: { productId }
-    }))
+    window.dispatchEvent(new CustomEvent('navigate:product', { detail: { productId } }))
   }
 
   const handleHide = async (orderId) => {
     if (!window.confirm('¿Eliminar esta conversación? Los mensajes se conservarán.')) return
     try {
       await client(`/chat/conversations/${orderId}/hide`, { method: 'PATCH' })
+      hiddenIdsRef.current.add(orderId)
       setConversations(prev => prev.filter(c => c.id !== orderId))
       if (activeConv?.id === orderId) setActiveConv(null)
       if (pendingOrderId === orderId) setPendingOrderId(null)
@@ -155,7 +228,6 @@ export default function Chat({ initialOrderId }) {
 
             {/* Header del chat */}
             <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-              {/* Botón volver en móvil */}
               <button
                 onClick={() => setActiveConv(null)}
                 className="md:hidden text-gray-400 hover:text-gray-600"
@@ -163,7 +235,6 @@ export default function Chat({ initialOrderId }) {
                 ←
               </button>
 
-              {/* Miniatura del producto */}
               <div
                 onClick={() => handleProductClick(activeConv.product?.id)}
                 className="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition"
@@ -233,7 +304,6 @@ export default function Chat({ initialOrderId }) {
             </div>
           </div>
         ) : (
-          /* Pantalla vacía en escritorio cuando no hay conv activa */
           <div className="hidden md:flex flex-1 items-center justify-center flex-col gap-3">
             <p className="text-4xl">💬</p>
             <p className="text-gray-400 text-sm">Selecciona una conversación</p>
@@ -244,7 +314,6 @@ export default function Chat({ initialOrderId }) {
   )
 }
 
-// Componente fila de conversación
 function ConversationRow({ conv, user, isActive, onClick, onHide }) {
   const other     = getOtherUser(conv, user)
   const lastMsg   = conv.last_message
@@ -256,7 +325,6 @@ function ConversationRow({ conv, user, isActive, onClick, onHide }) {
         onClick={onClick}
         className="flex-1 flex items-center gap-3 px-4 py-3 text-left pr-8"
       >
-        {/* Miniatura producto */}
         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           {conv.product?.main_image?.image_url ? (
             <img
@@ -293,7 +361,6 @@ function ConversationRow({ conv, user, isActive, onClick, onHide }) {
         </div>
       </button>
 
-      {/* Botón eliminar */}
       <button
         onClick={(e) => { e.stopPropagation(); onHide(conv.id) }}
         title="Eliminar conversación"
@@ -305,12 +372,14 @@ function ConversationRow({ conv, user, isActive, onClick, onHide }) {
   )
 }
 
-// Componente burbuja de mensaje
 function MessageBubble({ message, isOwn }) {
+  const senderName = message.sender?.name ?? ''
+
   return (
-    <div className={`flex ${isOwn ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex flex-col gap-0.5 ${isOwn ? 'items-end' : 'items-start'}`}>
+      <p className="text-xs text-gray-400 px-1">{senderName}</p>
       <div className={`max-w-xs lg:max-w-sm px-4 py-2.5 rounded-2xl text-sm
-        ${isOwn ? 'bg-yellow-400 text-black rounded-bl-sm' : 'bg-gray-100 text-gray-900 rounded-br-sm'}`}
+        ${isOwn ? 'bg-yellow-400 text-black rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'}`}
       >
         <p className="leading-relaxed">{message.message}</p>
         <p className={`text-xs mt-1 ${isOwn ? 'text-yellow-800' : 'text-gray-400'}`}>
@@ -321,7 +390,6 @@ function MessageBubble({ message, isOwn }) {
   )
 }
 
-// Helpers
 function getOtherUser(conv, user) {
   return conv.buyer?.id === user.id ? conv.seller : conv.buyer
 }
@@ -331,8 +399,8 @@ function formatTime(dateString) {
   const now  = new Date()
   const diff = now - date
 
-  if (diff < 60000)     return 'ahora'
-  if (diff < 3600000)   return `${Math.floor(diff / 60000)}m`
-  if (diff < 86400000)  return `${Math.floor(diff / 3600000)}h`
+  if (diff < 60000)    return 'ahora'
+  if (diff < 3600000)  return `${Math.floor(diff / 60000)}m`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`
   return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
 }
