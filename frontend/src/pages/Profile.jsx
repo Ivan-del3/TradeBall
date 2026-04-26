@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import UserInfo from '../components/profile/UserInfo'
@@ -20,21 +20,21 @@ const SECTIONS = [
 ]
 
 
-export default function Profile() {
+export default function Profile({ initialSection, initialOrderId }) {
   const { user } = useAuth()
-  const [activeSection, setActiveSection] = useState('info')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const avatar  = user?.avatar_url || null
+  const [activeSection, setActiveSection] = useState(initialSection || 'info')
+  const [sidebarOpen, setSidebarOpen]     = useState(false)
+  const [chatOrderId, setChatOrderId]     = useState(initialOrderId || null)
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex justify-center items-center py-32">
-          <p className="text-gray-400">Debes iniciar sesión para ver tu perfil</p>
-        </div>
-      </div>
-    )
+  
+  useEffect(() => {
+    if (initialSection) setActiveSection(initialSection)
+    if (initialOrderId) setChatOrderId(initialOrderId)
+  }, [initialSection, initialOrderId])
+
+  const handleSectionChange = (key) => {
+    setActiveSection(key)
+    if (key !== 'chat') setChatOrderId(null)
   }
 
   const renderSection = () => {
@@ -42,7 +42,7 @@ export default function Profile() {
       case 'info':          return <UserInfo />
       case 'sales':         return <Sales />
       case 'purchases':     return <Purchases />
-      case 'chat':          return <Chat />
+      case 'chat':          return <Chat initialOrderId={chatOrderId} />
       case 'notifications': return <Notifications />
       case 'wallet':        return <Wallet />
       case 'reviews':       return <Reviews />
@@ -74,7 +74,7 @@ export default function Profile() {
               {SECTIONS.map((section, index) => (
                 <button
                   key={section.key}
-                  onClick={() => setActiveSection(section.key)}
+                  onClick={() => handleSectionChange(section.key)}
                   className={`w-full flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition text-left
                     ${index !== SECTIONS.length - 1 ? 'border-b border-gray-50' : ''}
                     ${activeSection === section.key
@@ -107,7 +107,7 @@ export default function Profile() {
                 {SECTIONS.map(section => (
                   <button
                     key={section.key}
-                    onClick={() => { setActiveSection(section.key); setSidebarOpen(false) }}
+                    onClick={() => { handleSectionChange(section.key); setSidebarOpen(false) }}
                     className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-medium transition text-left border-b border-gray-50 last:border-0
                       ${activeSection === section.key
                         ? 'bg-yellow-50 text-yellow-700'
