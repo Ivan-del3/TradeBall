@@ -38,6 +38,10 @@ class Product extends Model
     }
 
     public function order() {
-        return $this->hasOne(Order::class);
+        return $this->hasOne(Order::class)->latestOfMany();
+    }
+
+    public function pendingOrder() {
+        return $this->hasOne(Order::class)->where('status', 'pendiente');
     }
 }
