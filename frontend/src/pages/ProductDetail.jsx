@@ -14,6 +14,10 @@ export default function ProductDetail({ productId }) {
   const [selectedImage, setSelectedImage]     = useState(0)
   const [isFavorite, setIsFavorite]           = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [walletBalance, setWalletBalance]     = useState(null)
+  const [buyLoading, setBuyLoading]           = useState(false)
+  const [buyError, setBuyError]               = useState('')
+  const [buySuccess, setBuySuccess]           = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
   const [home, setHome] = useState(false)
 
@@ -37,6 +41,14 @@ export default function ProductDetail({ productId }) {
       .catch(() => {})
   }, [user, product])
 
+  // Cargar saldo del monedero si el usuario no es el propietario del producto
+  useEffect(() => {
+    if (!user || !product || user.id === product.user?.id) return
+    client('/wallet')
+      .then(data => setWalletBalance(Number(data?.balance || 0)))
+      .catch(() => {})
+  }, [user, product])
+
   const handleFavorite = async () => {
     if (!user) {
       openLogin()
@@ -55,6 +67,30 @@ export default function ProductDetail({ productId }) {
       console.error(err)
     } finally {
       setFavoriteLoading(false)
+    }
+  }
+
+  const handleBuy = async () => {
+    if (!user) { openLogin(); return }
+
+    if (walletBalance !== null && walletBalance < product.price) {
+      setBuyError('Saldo insuficiente. Recarga tu monedero antes de comprar.')
+      return
+    }
+
+    setBuyLoading(true)
+    setBuyError('')
+    try {
+      await client('/purchases', {
+        method: 'POST',
+        body: { product_id: product.id },
+      })
+      setBuySuccess(true)
+      setProduct(prev => ({ ...prev, available: 'reservado' }))
+    } catch (err) {
+      setBuyError(err.message || 'Error al realizar la compra.')
+    } finally {
+      setBuyLoading(false)
     }
   }
 
@@ -212,6 +248,33 @@ export default function ProductDetail({ productId }) {
               )}
 
               <div className="flex flex-col gap-3 mt-auto">
+                {user && user.id !== product.user?.id && product.available === 'disponible' && (
+                  <>
+                    {buySuccess ? (
+                      <div className="w-full bg-green-50 border border-green-200 text-green-700 font-semibold py-3 rounded-xl text-center text-sm">
+                        Solicitud enviada al vendedor
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleBuy}
+                        disabled={buyLoading}
+                        className="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+                      >
+                        {buyLoading ? 'Procesando...' : 'Comprar'}
+                      </button>
+                    )}
+                    {buyError && (
+                      <p className="text-xs text-red-500 text-center -mt-1">{buyError}</p>
+                    )}
+                  </>
+                )}
+
+                {user && user.id !== product.user?.id && product.available === 'reservado' && (
+                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
+                    Producto reservado
+                  </div>
+                )}
+
                 {user && user.id !== product.user?.id && (
                   <button
                     onClick={handleContact}

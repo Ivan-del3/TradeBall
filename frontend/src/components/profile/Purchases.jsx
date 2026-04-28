@@ -19,7 +19,7 @@ export default function Purchases() {
       <h2 className="text-lg font-bold text-gray-900 mb-6">Mis compras</h2>
 
       {purchases.length === 0 ? (
-        <Empty text="No tienes compras todavia" />
+        <Empty text="No tienes compras todavía" />
       ) : (
         <div className="space-y-3">
           {purchases.map(order => (
@@ -58,11 +58,16 @@ function PurchaseRow({ order }) {
           Vendedor: {order.seller?.name} {order.seller?.lastname}
         </p>
       </div>
-      <div className="text-right">
+      <div className="text-right flex-shrink-0">
         <p className="text-sm font-bold text-gray-900">
-            {Number(order.purchase_price).toFixed(2)}€
+          {Number(order.purchase_price).toFixed(2)}€
         </p>
-        <p className="text-xs text-gray-400 mt-0.5">{new Date(order.created_at).toLocaleDateString('es-ES')}</p>
+        <p className="text-xs text-gray-400 mt-0.5">
+          {new Date(order.updated_at).toLocaleDateString('es-ES')}
+        </p>
+        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">
+          Completado
+        </span>
       </div>
     </div>
   )

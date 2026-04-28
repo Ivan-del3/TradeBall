@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
-use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -68,7 +67,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric|min:0',
+            'price'       => 'required|numeric|min:0|max:99999',
             'condition'   => 'required|in:nuevo,casi_nuevo,usado',
             'description' => 'nullable|string',
             'images'      => 'required|array|min:1|max:5',
@@ -76,11 +75,6 @@ class ProductController extends Controller
         ]);
 
         
-        Wallet::firstOrCreate(
-            ['user_id' => $request->user()->id],
-            ['balance' => 0]
-        );
-
         // Creo el producto mezclando los datos validados que ha introducido el usuario, con los datos manuales del array.
         $product = Product::create(array_merge($validated, [
             'user_id'   => $request->user()->id, // Al tener el token, puedo extraer el id del propio usuario que ha hecho la petición.
@@ -113,7 +107,7 @@ class ProductController extends Controller
 
         $validated = $request->validate([
             'name'        => 'sometimes|string|max:150',
-            'price'       => 'sometimes|numeric|min:0',
+            'price'       => 'sometimes|numeric|min:0|max:99999',
             'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
             'description' => 'nullable|string',
             'available'   => 'sometimes|in:disponible,reservado,vendido',
