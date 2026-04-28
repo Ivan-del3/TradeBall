@@ -10,7 +10,7 @@ class SalesController extends Controller
     {
         $sales = $request->user()
             ->products()
-            ->with(['mainImage', 'category'])
+            ->with(['mainImage', 'category', 'pendingOrder.buyer'])
             ->orderBy('created_at', 'desc')
             ->get();
 
