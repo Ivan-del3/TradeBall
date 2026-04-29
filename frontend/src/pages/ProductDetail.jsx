@@ -284,25 +284,26 @@ export default function ProductDetail({ productId }) {
                   </button>
                 )}
 
-                <button
-                  onClick={handleFavorite}
-                  disabled={favoriteLoading}
-                  className={`w-full py-3 rounded-xl font-semibold border-2 transition flex items-center justify-center gap-2 ${
-                    isFavorite
-                      ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-
-                  <span className={isFavorite ? 'text-red-500' : 'text-gray-400'}>
-                    {isFavorite ? '♥' : '♡'}
-                  </span>
-                  {favoriteLoading
-                    ? 'Cargando...'
-                    : isFavorite
-                    ? 'Guardado en favoritos'
-                    : 'Guardar en favoritos'}
-                </button>
+                {!product.already_purchased && user?.id !== product.user?.id && (
+                  <button
+                    onClick={handleFavorite}
+                    disabled={favoriteLoading}
+                    className={`w-full py-3 rounded-xl font-semibold border-2 transition flex items-center justify-center gap-2 ${
+                      isFavorite
+                        ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className={isFavorite ? 'text-red-500' : 'text-gray-400'}>
+                      {isFavorite ? '♥' : '♡'}
+                    </span>
+                    {favoriteLoading
+                      ? 'Cargando...'
+                      : isFavorite
+                      ? 'Guardado en favoritos'
+                      : 'Guardar en favoritos'}
+                  </button>
+                )}
 
                 {modal === 'login' && (
                   <Login
