@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
@@ -46,13 +47,22 @@ class ProductController extends Controller
 
     // GET /api/products/5
     // Devuelvo un producto por su ID al hacer click en él, cargamos todas la imagenes del producto, si no existe 404.
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $product = Product::with(['user', 'images', 'category'])
             ->where('visible', true)
             ->findOrFail($id);
 
-        return response()->json($product);
+        $alreadyPurchased = false;
+        if ($request->user() && $product->available === 'vendido') {
+            $alreadyPurchased = Order::where('buyer_id', $request->user()->id)
+                ->where('product_id', $product->id)
+                ->exists();
+        }
+
+        return response()->json(array_merge($product->toArray(), [
+            'already_purchased' => $alreadyPurchased,
+        ]));
     }
 
     // GET /api/categories
