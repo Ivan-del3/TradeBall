@@ -12,7 +12,7 @@
 
 - Si un producto guardado en favoritos se vende, se elimina de la lista de favoritos.
 
-- Arreglar los formularios para ingresar dinero, retirar dinero o para poner el precio de un producto
+- Arreglar los formularios para ingresar dinero, retirar dinero o para poner el precio de un producto. TODOS LOS FORMULARIOS INCLUIDO EL CHAT TIENENN QUE TENER UN LÍMITE, NO SE PUEDE ESCRIBIR MÁS DEL TAMAÑO MÁXIMO FIJADO EN EL BACKEND O EN LA LÓGICA (EN CHAT NO SE PUEDEN ESCRIBIR MÁS DE 1000 CARÁCTERES, EN LOS PRECIOS DE WALLET O PRODUCTOS NO PUEDEN ESCRIBIR MÁS DE  99999)
 
 - Revisar las multiples orders por el mismo producto.
 
@@ -22,3 +22,101 @@ Crear un sistema que tenga las siguientes funcionalidades:
 En el Header.jsx tiene que haber una campana, la cuál mostrará una cuenta de las notificaciones pendientes, ese contador será la suma de las notificaciones de Profile.jsx
 
 En profile.jsx hay que hacer que
+
+
+
+Comparativa real de carga
+Con polling cada 3s:
+
+1 usuario conectado = 20 peticiones HTTP por minuto
+100 usuarios = 2.000 peticiones por minuto
+Cada petición abre conexión, autentica, consulta BD, cierra conexión
+La mayoría devuelven exactamente los mismos datos que la vez anterior
+
+Con WebSocket:
+
+1 conexión persistente por usuario, se abre una vez
+0 peticiones si no hay mensajes nuevos
+El servidor solo habla cuando hay algo que decir
+100 usuarios = 100 conexiones abiertas, silenciosas hasta que alguien escribe
+
+
+Actualmente tiene el canal inutilizado
+Lo más probable es que el canal se implementara con la intención de usarlo, pero el polling se dejó como solución provisional y nunca se reemplazó. Es un patrón muy común: el WebSocket está correctamente configurado en el backend (el evento, el canal, la autorización), pero el frontend nunca se suscribe a él.
+La solución es sustituir el setInterval del useEffect de mensajes por la suscripción con Echo que te mostré arriba. El polling de la lista de conversaciones sí tiene más sentido mantenerlo (a un intervalo mayor), porque ahí no tienes un canal WebSocket configurado para notificar conversaciones nuevas.
+
+
+
+PURCHASE Y WALLET
+
+SOLICITUD (requestPurchase):
+Comprador pulsa "Comprar"
+  │
+  ├─► ¿Producto visible y disponible? ── No ──► 422
+  ├─► ¿Es su propio producto?         ── Sí ──► 422
+  ├─► ¿Tiene saldo suficiente?        ── No ──► 422
+  │
+  └─► PurchaseRepository::createOrder() → Order (status: pendiente, escrow: true)
+        └─► Product::available = 'reservado'
+              └─► Devuelve la Order al controlador
+
+CONFIRMACIÓN (confirmPurchase):
+Vendedor pulsa "Confirmar"
+  │
+  ├─► ¿La orden es suya y está pendiente? ── No ──► 404
+  │
+  ├─► Order::status = 'completado', escrow_active = false
+  ├─► Product::available = 'vendido'
+  │
+  └─► event(new PurchaseConfirmed($order))
+        │
+        └─► DeductBuyerWallet::handle()
+              ├─► WalletRepository::subtractBalance(comprador, precio, 'pago_pedido')
+              │     ├─► UPDATE wallets SET balance = balance - precio
+              │     └─► INSERT transactions (tipo: pago_pedido, order_id)
+              │
+              └─► WalletRepository::addBalance(vendedor, precio, 'cobro_pedido')
+                    ├─► UPDATE wallets SET balance = balance + precio
+                    └─► INSERT transactions (tipo: cobro_pedido, order_id)
+
+RECHAZO (rejectPurchase):
+Vendedor pulsa "Rechazar"
+  │
+  ├─► Order::status = 'cancelado', escrow_active = false
+  └─► Product::available = 'disponible'  (ningún movimiento de dinero)
+
+
+
+  CONTROLADOR
+                   ┌──────────────────────────────────────┐
+                   │ - Valida el request                  │
+                   │ - Llama al servicio                  │
+                   │ - Captura excepciones → 422          │
+                   │ - Devuelve JSON                      │
+                   └──────────────┬───────────────────────┘
+                                  │
+                    SERVICIO      ▼
+                   ┌──────────────────────────────────────┐
+                   │ - Aplica reglas de negocio           │
+                   │ - Lanza InvalidArgumentException     │
+                   │ - Dispara eventos                    │
+                   │ - Llama a repositorios               │
+                   └──────┬───────────────┬───────────────┘
+                          │               │
+              REPOSITORIO ▼               ▼ EVENTO
+          ┌───────────────────┐   ┌───────────────────────┐
+          │ - Ejecuta queries │   │ - Señal de que algo   │
+          │ - INSERT / UPDATE │   │   ocurrió             │
+          │ - SELECT          │   │ - No hace nada solo   │
+          └───────────────────┘   └──────────┬────────────┘
+                                             │
+                                  LISTENER   ▼
+                                  ┌─────────────────────────┐
+                                  │ - Reacciona al evento   │
+                                  │ - Llama a repositorios  │
+                                  └──────────┬──────────────┘
+                                             │
+                                  REPOSITORIO▼
+                                  ┌─────────────────────────┐
+                                  │ - INSERT / UPDATE       │
+                                  └─────────────────────────┘
