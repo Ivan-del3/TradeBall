@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
@@ -53,6 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
+
+    // Broadcasting auth con Sanctum (EventSource no puede enviar headers, pero Echo sí)
+    Route::post('/broadcasting/auth', fn () => Broadcast::auth(request()));
 
     // Chat
     Route::get('/chat/conversations',                        [ChatController::class, 'conversations']);
