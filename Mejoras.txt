@@ -1,10 +1,8 @@
-- En Purchases.jsx, la función handleClick dispara un evento de navegación hasta productDetail.jsx, pero al volver al ProductDetail.jsx se puede volver a contactar con el vendedor y guardarlo en favoritos, esos botones no pueden aparecer si el producto ya se ha vendido.
-
-- Al darle al botón de comprar, tiene que aparecer en Purchases.jsx  el producto marcado como reservdo. Si el vendedor rechaza la compra, aparecerá cancelado, y si el vendedor acepta, aparecerá completado.
-
-- Al darle al botón de comprar, no se elimina de la vista el producto del Home, simplemente aparecerá como reservado para todos los usuarios y no se podrá darle al botón de comprar.
-
 - Hasta que el usuario no da el OK de que el producto está bien, no se realiza la transacción.
+
+- Al darle al botón de comprar, no se elimina de la vista el producto del Home, se elimina cuando se realiza la transacción
+
+- Cuando el vendedor confirma la compra, se le tiene que quitar la burbuja de la notificación.
 
 - El monedero de ambos usuarios se tiene que actualizar automáticamente tras la transacción, aunque no se cambie de vista ni se recargue la página
 
@@ -20,9 +18,6 @@
 Crear un sistema que tenga las siguientes funcionalidades:
 
 En el Header.jsx tiene que haber una campana, la cuál mostrará una cuenta de las notificaciones pendientes, ese contador será la suma de las notificaciones de Profile.jsx
-
-En profile.jsx hay que hacer que
-
 
 
 Comparativa real de carga
