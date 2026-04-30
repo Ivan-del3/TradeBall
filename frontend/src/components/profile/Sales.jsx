@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 
@@ -11,24 +11,23 @@ const STATUS_LABEL = {
 export default function Sales() {
   const [sales, setSales]           = useState([])
   const [loading, setLoading]       = useState(true)
-  const [popup, setPopup]           = useState(null) // product with pending_order
+  const [popup, setPopup]           = useState(null)
   const [actionLoading, setAction]  = useState(false)
   const [actionError, setActionErr] = useState('')
 
-  const loadSales = useCallback(() => {
+  useEffect(() => {
     client('/sales')
       .then(data => { setSales(data); setLoading(false) })
       .catch(() => setLoading(false))
+
+    const id = setInterval(() => {
+      client('/sales')
+        .then(data => setSales(data))
+        .catch(() => {})
+    }, 15000)
+    return () => clearInterval(id)
   }, [])
 
-  // Initial load + polling every 3s (same pattern as Chat)
-  useEffect(() => {
-    loadSales()
-    const id = setInterval(loadSales, 3000)
-    return () => clearInterval(id)
-  }, [loadSales])
-
-  // Count products with pending purchase requests
   const pendingCount = sales.filter(p => p.pending_order).length
 
   const openPopup = (product) => {
@@ -201,7 +200,6 @@ function PurchasePopup({ product, loading, error, onConfirm, onReject, onClose }
           </button>
         </div>
 
-        {/* Product info */}
         <div className="flex items-center gap-4 mb-5 p-3 bg-gray-50 rounded-xl">
           <div className="w-16 h-16 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-gray-100">
             {image ? (
@@ -218,7 +216,6 @@ function PurchasePopup({ product, loading, error, onConfirm, onReject, onClose }
           </div>
         </div>
 
-        {/* Buyer info */}
         <div className="mb-5">
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Comprador</p>
           <div className="flex items-center gap-3">
