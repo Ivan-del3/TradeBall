@@ -248,28 +248,28 @@ export default function ProductDetail({ productId }) {
               )}
 
               <div className="flex flex-col gap-3 mt-auto">
-                {user && user.id !== product.user?.id && product.available === 'disponible' && (
+                {user && user.id !== product.user?.id && buySuccess && (
+                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
+                    Solicitud pendiente — esperando confirmación del vendedor
+                  </div>
+                )}
+
+                {user && user.id !== product.user?.id && !buySuccess && product.available === 'disponible' && (
                   <>
-                    {buySuccess ? (
-                      <div className="w-full bg-green-50 border border-green-200 text-green-700 font-semibold py-3 rounded-xl text-center text-sm">
-                        Solicitud enviada al vendedor
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleBuy}
-                        disabled={buyLoading}
-                        className="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
-                      >
-                        {buyLoading ? 'Procesando...' : 'Comprar'}
-                      </button>
-                    )}
+                    <button
+                      onClick={handleBuy}
+                      disabled={buyLoading}
+                      className="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+                    >
+                      {buyLoading ? 'Procesando...' : 'Comprar'}
+                    </button>
                     {buyError && (
                       <p className="text-xs text-red-500 text-center -mt-1">{buyError}</p>
                     )}
                   </>
                 )}
 
-                {user && user.id !== product.user?.id && product.available === 'reservado' && (
+                {user && user.id !== product.user?.id && !buySuccess && product.available === 'reservado' && (
                   <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
                     Producto reservado
                   </div>
