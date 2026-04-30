@@ -13,12 +13,23 @@ class PurchaseController extends Controller
     {
         $purchases = $request->user()
             ->purchases()
-            ->where('status', 'completado')
+            ->whereIn('status', ['pendiente', 'completado', 'cancelado'])
             ->with(['product.mainImage', 'seller'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        return response()->json($purchases);
+        return response()->json($purchases->map(fn ($order) => [
+            'id'             => $order->id,
+            'status'         => $order->status,
+            'purchase_price' => $order->purchase_price,
+            'updated_at'     => $order->updated_at,
+            'product'        => $order->product ? [
+                'id'         => $order->product->id,
+                'name'       => $order->product->name,
+                'main_image' => $order->product->mainImage,
+            ] : null,
+            'seller'         => $order->seller,
+        ]));
     }
 
     public function store(Request $request)
