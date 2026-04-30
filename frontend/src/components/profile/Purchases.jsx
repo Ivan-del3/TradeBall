@@ -10,6 +10,13 @@ export default function Purchases() {
     client('/purchases')
       .then(data => { setPurchases(data); setLoading(false) })
       .catch(() => setLoading(false))
+
+    const id = setInterval(() => {
+      client('/purchases')
+        .then(data => setPurchases(data))
+        .catch(() => {})
+    }, 15000)
+    return () => clearInterval(id)
   }, [])
 
   if (loading) return <LoadingCard />
@@ -28,6 +35,21 @@ export default function Purchases() {
         </div>
       )}
     </div>
+  )
+}
+
+const STATUS_CONFIG = {
+  pendiente:  { label: 'Reservado',  className: 'bg-yellow-100 text-yellow-700' },
+  completado: { label: 'Completado', className: 'bg-green-100 text-green-700' },
+  cancelado:  { label: 'Cancelado',  className: 'bg-red-100 text-red-600' },
+}
+
+function StatusBadge({ status }) {
+  const config = STATUS_CONFIG[status] ?? { label: status, className: 'bg-gray-100 text-gray-500' }
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${config.className}`}>
+      {config.label}
+    </span>
   )
 }
 
@@ -65,9 +87,7 @@ function PurchaseRow({ order }) {
         <p className="text-xs text-gray-400 mt-0.5">
           {new Date(order.updated_at).toLocaleDateString('es-ES')}
         </p>
-        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">
-          Completado
-        </span>
+        <StatusBadge status={order.status} />
       </div>
     </div>
   )
