@@ -6,27 +6,38 @@ import Profile from './pages/Profile'
 import Sell from './pages/Sell'
 
 function App() {
-  const { loading }     = useAuth()
-  const [page, setPage] = useState({ name: 'home', params: {} })
+  const { loading } = useAuth()
+  const [history, setHistory] = useState([{ name: 'home', params: {} }])
+
+  const page    = history[history.length - 1]
+  const canGoBack = history.length > 1
 
   useEffect(() => {
+    const navigate = (newPage) => setHistory(prev => [...prev, newPage])
+    const goBack   = ()       => setHistory(prev => prev.length > 1 ? prev.slice(0, -1) : prev)
+
     const handlers = {
-      'navigate:product':      (e) => setPage({ name: 'product', params: { id: e.detail?.productId } }),
-      'navigate:profile':      ()  => setPage({ name: 'profile', params: {} }),
-      'navigate:profile:chat': (e) => setPage({ name: 'profile', params: { section: 'chat', orderId: e.detail?.orderId } }),
-      'navigate:sell':         ()  => setPage({ name: 'sell',    params: {} }),
-      'navigate:home':         ()  => setPage({ name: 'home',    params: {} }),
+      'navigate:product': (e) => {
+        const fromSection = e.detail?.fromSection
+        if (fromSection) {
+          setHistory(prev => {
+            const withSection = [...prev]
+            withSection[withSection.length - 1] = { name: 'profile', params: { section: fromSection } }
+            return [...withSection, { name: 'product', params: { id: e.detail?.productId } }]
+          })
+        } else {
+          navigate({ name: 'product', params: { id: e.detail?.productId } })
+        }
+      },
+      'navigate:profile':      ()  => navigate({ name: 'profile', params: {} }),
+      'navigate:profile:chat': (e) => navigate({ name: 'profile', params: { section: 'chat', orderId: e.detail?.orderId } }),
+      'navigate:sell':         ()  => navigate({ name: 'sell',    params: {} }),
+      'navigate:home':         ()  => setHistory([{ name: 'home', params: {} }]), 
+      'navigate:back':         ()  => goBack(),
     }
 
-    Object.entries(handlers).forEach(([event, handler]) => {
-      window.addEventListener(event, handler)
-    })
-
-    return () => {
-      Object.entries(handlers).forEach(([event, handler]) => {
-        window.removeEventListener(event, handler)
-      })
-    }
+    Object.entries(handlers).forEach(([event, handler]) => window.addEventListener(event, handler))
+    return () => Object.entries(handlers).forEach(([event, handler]) => window.removeEventListener(event, handler))
   }, [])
 
   if (loading) {

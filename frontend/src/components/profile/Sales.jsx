@@ -131,7 +131,7 @@ function SaleRow({ product, onOpenPopup }) {
       onOpenPopup(product)
     } else {
       window.dispatchEvent(new CustomEvent('navigate:product', {
-        detail: { productId: product.id }
+        detail: { productId: product.id, fromSection: 'sales' }
       }))
     }
   }

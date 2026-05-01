@@ -151,7 +151,7 @@ export default function ProductDetail({ productId }) {
       <main className="max-w-5xl mx-auto px-4 py-8">
 
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
+          onClick={() => window.dispatchEvent(new CustomEvent('navigate:back'))}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
         >
           ← Volver

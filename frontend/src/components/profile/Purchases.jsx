@@ -58,7 +58,7 @@ function PurchaseRow({ order }) {
 
   const handleClick = () => {
     window.dispatchEvent(new CustomEvent('navigate:product', {
-      detail: { productId: order.product?.id }
+      detail: { productId: order.product?.id, fromSection: 'purchases' }
     }))
   }
 
