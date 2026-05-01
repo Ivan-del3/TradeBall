@@ -26,6 +26,7 @@ export default function ProductDetail({ productId }) {
       .then(data => {
         setProduct(data)
         setLoading(false)
+          console.log("Valor de product available:" + ( data.available))
       })
       .catch(() => setLoading(false))
   }, [productId])
@@ -142,6 +143,7 @@ export default function ProductDetail({ productId }) {
 
   const images    = product.images || []
   const condition = conditionLabel[product.condition]
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -284,7 +286,7 @@ export default function ProductDetail({ productId }) {
                   </button>
                 )}
 
-                {!product.already_purchased && user?.id !== product.user?.id && (
+                {product.available !== 'vendido' && user?.id !== product.user?.id && (
                   <button
                     onClick={handleFavorite}
                     disabled={favoriteLoading}
@@ -331,5 +333,6 @@ export default function ProductDetail({ productId }) {
         </div>
       </main>
     </div>
+    
   )
 }

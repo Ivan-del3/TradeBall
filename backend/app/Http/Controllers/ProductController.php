@@ -47,22 +47,13 @@ class ProductController extends Controller
 
     // GET /api/products/5
     // Devuelvo un producto por su ID al hacer click en él, cargamos todas la imagenes del producto, si no existe 404.
-    public function show(Request $request, $id)
+    public function show($id)
     {
         $product = Product::with(['user', 'images', 'category'])
             ->where('visible', true)
             ->findOrFail($id);
 
-        $alreadyPurchased = false;
-        if ($request->user() && $product->available === 'vendido') {
-            $alreadyPurchased = Order::where('buyer_id', $request->user()->id)
-                ->where('product_id', $product->id)
-                ->exists();
-        }
-
-        return response()->json(array_merge($product->toArray(), [
-            'already_purchased' => $alreadyPurchased,
-        ]));
+        return response()->json($product);
     }
 
     // GET /api/categories
