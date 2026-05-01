@@ -20,9 +20,9 @@ const SECTIONS = [
 ]
 
 
-export default function Profile({ initialSection, initialOrderId }) {
+export default function Profile({ initialSection, initialOrderId}) {
   const { user } = useAuth()
-  const [activeSection, setActiveSection] = useState(initialSection || 'info')
+  const [activeSection, setActiveSection] = useState( initialSection || 'info')
   const [sidebarOpen, setSidebarOpen]     = useState(false)
   const [chatOrderId, setChatOrderId]     = useState(initialOrderId || null)
 
@@ -34,13 +34,16 @@ export default function Profile({ initialSection, initialOrderId }) {
 
   const handleSectionChange = (key) => {
     setActiveSection(key)
+      window.dispatchEvent(new CustomEvent('navigate:profile', {
+      detail: {section: key}}))
     if (key !== 'chat') setChatOrderId(null)
-  }
 
+  }
+ 
   const renderSection = () => {
     switch (activeSection) {
-      case 'info':          return <UserInfo />
-      case 'sales':         return <Sales />
+      case 'info':          return <UserInfo  />
+      case 'sales':         return <Sales  />
       case 'purchases':     return <Purchases />
       case 'chat':          return <Chat initialOrderId={chatOrderId} />
       case 'notifications': return <Notifications />

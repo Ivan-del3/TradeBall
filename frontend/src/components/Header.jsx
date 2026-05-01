@@ -25,9 +25,9 @@ export default function Header() {
     <div>
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold text-yellow-400 tracking-tight">
+          <div onClick={()=> window.dispatchEvent(new CustomEvent('navigate:home'))} className="text-2xl font-bold text-yellow-400 tracking-tight">
             TradeBall
-          </a>
+          </div>
 
           <div className="flex items-center gap-3">
             {user ? (

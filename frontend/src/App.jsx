@@ -7,10 +7,21 @@ import Sell from './pages/Sell'
 
 function App() {
   const { loading } = useAuth()
-  const [history, setHistory] = useState([{ name: 'home', params: {} }])
+  const [history, setHistory] = useState(() => {
+    try {
+      const raw = localStorage.getItem('trb_current_page')
+      if (raw) return [JSON.parse(raw)]
+    } catch {}
+    return [{ name: 'home', params: {} }]
+  })
 
-  const page    = history[history.length - 1]
+  const page     = history[history.length - 1]
   const canGoBack = history.length > 1
+
+  useEffect(() => {
+    console.log(page)
+    localStorage.setItem('trb_current_page', JSON.stringify(page))
+  }, [page])
 
   useEffect(() => {
     const navigate = (newPage) => setHistory(prev => [...prev, newPage])
@@ -29,7 +40,7 @@ function App() {
           navigate({ name: 'product', params: { id: e.detail?.productId } })
         }
       },
-      'navigate:profile':      ()  => navigate({ name: 'profile', params: {} }),
+      'navigate:profile':      (e)  => navigate({ name: 'profile', params: {section: e.detail?.section} }),
       'navigate:profile:chat': (e) => navigate({ name: 'profile', params: { section: 'chat', orderId: e.detail?.orderId } }),
       'navigate:sell':         ()  => navigate({ name: 'sell',    params: {} }),
       'navigate:home':         ()  => setHistory([{ name: 'home', params: {} }]), 

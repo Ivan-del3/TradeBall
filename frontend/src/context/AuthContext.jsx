@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await client('/logout', { method: 'POST' })
     localStorage.removeItem('token')
+    localStorage.removeItem('trb_current_page')
     setUser(null)
   }
 
