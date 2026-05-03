@@ -6,7 +6,7 @@ import Profile from './pages/Profile'
 import Sell from './pages/Sell'
 
 function App() {
-  const { loading } = useAuth()
+  const { loading, user } = useAuth()
   const [history, setHistory] = useState(() => {
     try {
       const rawHistory = localStorage.getItem('trb_history')
@@ -61,6 +61,14 @@ function App() {
     return () => Object.entries(handlers).forEach(([event, handler]) => window.removeEventListener(event, handler))
   }, [])
 
+  // Si la sesión expiró o el token fue invalidado, redirige a home
+  // para no renderizar páginas que requieren usuario autenticado.
+  useEffect(() => {
+    if (!loading && !user && (page.name === 'profile' || page.name === 'sell')) {
+      setHistory([{ name: 'home', params: {} }])
+    }
+  }, [loading, user, page.name])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -69,8 +77,12 @@ function App() {
     )
   }
 
+  if (!user && page.name !== 'home' && page.name !== 'product') {
+    return <Home />
+  }
+
   switch (page.name) {
-    case 'product': return <ProductDetail productId={page.params.id} />
+    case 'product': return <ProductDetail productId={page.params.id} canGoBack={canGoBack} />
     case 'profile': return <Profile initialSection={page.params.section} initialOrderId={page.params.orderId} />
     case 'sell':    return <Sell />
     default:        return <Home />
