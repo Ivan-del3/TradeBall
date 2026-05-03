@@ -11,8 +11,8 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:100',
-            'lastname' => 'required|string|max:100',
+            'name'     => 'required|string|max:20',
+            'lastname' => 'required|string|max:20',
             'avatar'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
