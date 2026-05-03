@@ -16,6 +16,14 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'search'      => 'sometimes|string|max:100',
+            'category_id' => 'sometimes|integer|exists:categories,id',
+            'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
+            'min_price'   => 'sometimes|numeric|min:0|max:99999',
+            'max_price'   => 'sometimes|numeric|min:0|max:99999',
+        ]);
+
         $query = Product::with(['user', 'mainImage', 'category'])
             ->where('visible', true)
             ->where('available', 'disponible');
@@ -70,7 +78,7 @@ class ProductController extends Controller
             'name'        => 'required|string|max:150',
             'price'       => 'required|numeric|min:0|max:99999',
             'condition'   => 'required|in:nuevo,casi_nuevo,usado',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'images'      => 'required|array|min:1|max:5',
             'images.*'    => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
@@ -110,10 +118,16 @@ class ProductController extends Controller
             'name'        => 'sometimes|string|max:150',
             'price'       => 'sometimes|numeric|min:0|max:99999',
             'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:2000',
             'available'   => 'sometimes|in:disponible,reservado,vendido',
             'visible'     => 'sometimes|boolean',
         ]);
+
+        // Impide que el seller cambie manualmente el estado de un producto
+        // reservado, lo que rompería el escrow activo del comprador.
+        if ($product->available === 'reservado' && array_key_exists('available', $validated)) {
+            return response()->json(['message' => 'No puedes cambiar el estado de un producto con una compra en curso.'], 422);
+        }
 
         $product->update($validated);
 
@@ -126,7 +140,12 @@ class ProductController extends Controller
     {
         $product = Product::where('user_id', $request->user()->id)->findOrFail($id);
 
-        
+        // Impide borrar un producto con escrow activo: el comprador
+        // perdería su referencia de compra y el dinero quedaría bloqueado.
+        if ($product->orders()->where('status', 'pendiente')->exists()) {
+            return response()->json(['message' => 'No puedes eliminar un producto con una compra pendiente.'], 422);
+        }
+
         foreach ($product->images as $image) {
             $path = str_replace('/storage/', '', $image->image_url);
             Storage::disk('public')->delete($path);
