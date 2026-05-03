@@ -63,10 +63,10 @@ export default function Profile({ initialSection, initialOrderId}) {
           <aside className="hidden md:flex flex-col w-64 flex-shrink-0">
             <div className="bg-white rounded-2xl p-5 shadow-sm mb-4 flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-2xl font-bold text-black mb-3">
-              {user.avatar_url ? (
+              {user?.avatar_url ? (
                 <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
               ) : (
-                user.name.charAt(0).toUpperCase()
+                user?.name?.charAt(0).toUpperCase() ?? '?'
               )}
               </div>
               <p className="font-semibold text-gray-900">{user.name} {user.lastname}</p>
