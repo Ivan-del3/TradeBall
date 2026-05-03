@@ -179,17 +179,19 @@ class ProductSeeder extends Seeder
             $images = $data['images'];
             unset($data['images']);
 
-            $product = Product::create(array_merge($data, [
-                'available' => 'disponible',
-                'visible'   => true,
-            ]));
+            $product = Product::firstOrCreate(
+                ['name' => $data['name'], 'user_id' => $data['user_id']],
+                array_merge($data, ['available' => 'disponible', 'visible' => true])
+            );
 
-            foreach ($images as $image) {
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image_url'  => $image['url'],
-                    'is_main'    => $image['main'],
-                ]);
+            if ($product->wasRecentlyCreated) {
+                foreach ($images as $image) {
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'image_url'  => $image['url'],
+                        'is_main'    => $image['main'],
+                    ]);
+                }
             }
         }
     }
