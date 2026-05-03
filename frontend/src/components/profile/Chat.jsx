@@ -77,7 +77,14 @@ export default function Chat({ initialOrderId }) {
               }
             })
 
-            return merged
+            // FIX Bug1: elimina duplicados por id que pudieran haberse
+            // colado por race conditions entre carga inicial y polling
+            const seen = new Set()
+            return merged.filter(c => {
+              if (seen.has(c.id)) return false
+              seen.add(c.id)
+              return true
+            })
           })
         })
         .catch(() => {})
@@ -93,16 +100,11 @@ export default function Chat({ initialOrderId }) {
 
     prevMsgCountRef.current = 0
 
-    client(`/chat/conversations/${activeConv.id}/messages`)
-      .then(data => {
-        setMessages(data)
-        setConversations(prev => prev.map(c =>
-          c.id === activeConv.id
-            ? { ...c, unread_count: 0, last_message: data[data.length - 1] ?? c.last_message }
-            : c
-        ))
-      })
-      .catch(() => {})
+    // FIX Bug3: los mensajes WebSocket que lleguen ANTES de que la fetch
+    // inicial complete se acumulan aquí y se mezclan al asentar el estado,
+    // evitando que setMessages(fetchData) los sobreescriba.
+    let fetchSettled = false
+    const wsBuffer  = []
 
     const channel = echo.private(`order.${activeConv.id}`)
 
@@ -110,17 +112,35 @@ export default function Chat({ initialOrderId }) {
       const msg = e.message
       if (!msg) return
 
+      if (!fetchSettled) {
+        wsBuffer.push(msg)
+        return
+      }
+
       setMessages(prev => {
         if (prev.some(m => m.id === msg.id)) return prev
         return [...prev, msg]
       })
-
       setConversations(prev => prev.map(c =>
         c.id === activeConv.id
           ? { ...c, last_message: msg, unread_count: 0 }
           : c
       ))
     })
+
+    client(`/chat/conversations/${activeConv.id}/messages`)
+      .then(data => {
+        fetchSettled = true
+        // FIX Bug3: fusiona mensajes del buffer que no estén ya en la respuesta
+        const extra = wsBuffer.filter(m => !data.some(d => d.id === m.id))
+        setMessages([...data, ...extra])
+        setConversations(prev => prev.map(c =>
+          c.id === activeConv.id
+            ? { ...c, unread_count: 0, last_message: data[data.length - 1] ?? c.last_message }
+            : c
+        ))
+      })
+      .catch(() => { fetchSettled = true })
 
     return () => {
       echo.leave(`order.${activeConv.id}`)
@@ -155,7 +175,8 @@ export default function Chat({ initialOrderId }) {
         method: 'POST',
         body: { message: newMessage.trim() },
       })
-      setMessages(prev => [...prev, data])
+      // FIX Bug1: dedup por si el WebSocket entrega el mismo mensaje al emisor
+      setMessages(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data])
       setNewMessage('')
       setPendingOrderId(null)
       setConversations(prev => prev.map(c =>
