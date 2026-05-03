@@ -85,8 +85,13 @@ export default function UserInfo() {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
+              required
+              maxLength={20}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {name.length >= 15 && (
+              <p className="text-xs text-orange-500 mt-1">{20 - name.length} caracteres restantes</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
@@ -94,8 +99,13 @@ export default function UserInfo() {
               type="text"
               value={lastname}
               onChange={e => setLastname(e.target.value)}
+              required
+              maxLength={20}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {lastname.length >= 15 && (
+              <p className="text-xs text-orange-500 mt-1">{20 - lastname.length} caracteres restantes</p>
+            )}
           </div>
         </div>
 

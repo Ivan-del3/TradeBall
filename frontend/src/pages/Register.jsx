@@ -54,12 +54,12 @@ export default function Register({ onSwitch, onSuccess }) {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                  <input type="text" value={name} onChange={e => setName(e.target.value)} required
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} required maxLength={20}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
-                  <input type="text" value={lastname} onChange={e => setLastname(e.target.value)} required
+                  <input type="text" value={lastname} onChange={e => setLastname(e.target.value)} required maxLength={20}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
@@ -70,8 +70,11 @@ export default function Register({ onSwitch, onSuccess }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                {password.length > 0 && password.length < 8 && (
+                  <p className="text-xs text-red-500 mt-1">Mínimo 8 caracteres</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>

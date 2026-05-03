@@ -307,23 +307,29 @@ export default function Chat({ initialOrderId }) {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-4 py-3 border-t border-gray-100 flex items-end gap-2">
-              <textarea
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Escribe un mensaje..."
-                rows={1}
-                className="flex-1 border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
-                style={{ maxHeight: '120px' }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={sending || !newMessage.trim()}
-                className="bg-yellow-400 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-yellow-300 transition disabled:opacity-40 flex-shrink-0"
-              >
-                →
-              </button>
+            <div className="px-4 py-3 border-t border-gray-100 flex flex-col gap-1">
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Escribe un mensaje..."
+                  rows={1}
+                  maxLength={1000}
+                  className="flex-1 border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+                  style={{ maxHeight: '120px' }}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={sending || !newMessage.trim()}
+                  className="bg-yellow-400 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-yellow-300 transition disabled:opacity-40 flex-shrink-0"
+                >
+                  →
+                </button>
+              </div>
+              {newMessage.length >= 900 && (
+                <p className="text-xs text-orange-500 px-1">{1000 - newMessage.length} caracteres restantes</p>
+              )}
             </div>
           </div>
         ) : (

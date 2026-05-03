@@ -48,9 +48,10 @@ export default function Sell() {
 
   const validate = () => {
     const e = {}
-    if (!form.name.trim())    e.name        = 'El nombre es obligatorio'
-    if (!form.price)          e.price       = 'El precio es obligatorio'
-    if (Number(form.price) < 0) e.price     = 'El precio no puede ser negativo'
+    if (!form.name.trim())              e.name  = 'El nombre es obligatorio'
+    if (!form.price)                    e.price = 'El precio es obligatorio'
+    else if (Number(form.price) < 0)    e.price = 'El precio no puede ser negativo'
+    else if (Number(form.price) > 99999) e.price = 'El precio máximo es 99.999€'
     if (!form.condition)      e.condition   = 'El estado es obligatorio'
     if (!form.category_id)    e.category_id = 'La categoría es obligatoria'
     if (images.length === 0)  e.images      = 'Añade al menos una imagen'
@@ -188,10 +189,14 @@ export default function Sell() {
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
                 placeholder="Ej: Charizard VMAX Rainbow Rare"
+                maxLength={150}
                 className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
                   errors.name ? 'border-red-300' : 'border-gray-200'
                 }`}
               />
+              {form.name.length >= 140 && (
+                <p className="text-xs text-orange-500 mt-1">{150 - form.name.length} caracteres restantes</p>
+              )}
               {errors.name && (
                 <p className="text-xs text-red-500 mt-1">{errors.name}</p>
               )}
@@ -206,8 +211,12 @@ export default function Sell() {
                 onChange={e => update('description', e.target.value)}
                 placeholder="Describe el estado del producto, si tiene caja original, etc."
                 rows={4}
+                maxLength={2000}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
               />
+              {form.description.length >= 1900 && (
+                <p className="text-xs text-orange-500 mt-1">{2000 - form.description.length} caracteres restantes</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -220,6 +229,7 @@ export default function Sell() {
                     onChange={e => update('price', e.target.value)}
                     placeholder="0.00"
                     min="0"
+                    max="99999"
                     step="0.01"
                     className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-8 ${
                       errors.price ? 'border-red-300' : 'border-gray-200'

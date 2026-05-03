@@ -8,6 +8,7 @@ export default function Home() {
   const [products, setProducts]     = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading]       = useState(true)
+  const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters]       = useState({
     search: '', category_id: '', condition: '', min_price: '', max_price: ''
   })
@@ -16,15 +17,27 @@ export default function Home() {
     client('/categories').then(setCategories)
   }, [])
 
+  // Debounce: espera 400ms tras el último teclazo antes de actualizar filters.search
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchInput }))
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  useEffect(() => {
+    let cancelled = false
     setLoading(true)
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params.append(k, v)
     })
     client(`/products?${params.toString()}`)
-      .then(data => setProducts(data.data))
-      .finally(() => setLoading(false))
+      .then(data  => { if (!cancelled) setProducts(data.data ?? []) })
+      .catch(()   => { if (!cancelled) setProducts([]) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [filters])
 
   return (
@@ -37,8 +50,9 @@ export default function Home() {
           name="search"
           type="text"
           placeholder="Buscar productos Pokemon..."
-          value={filters.search}
-          onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
+          maxLength={40}
           aria-label="Buscar productos"
           className="w-full border border-gray-200 rounded-full px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white shadow-sm"
         />

@@ -222,7 +222,7 @@ export default function ProductDetail({ productId, canGoBack }) {
                   <h2 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">
                     Descripcion
                   </h2>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap break-words">
                     {product.description}
                   </p>
                 </div>
