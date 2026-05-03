@@ -7,16 +7,18 @@ import { useAuthModal } from '../context/AuthModalContext'
 import Register from './Register'
 import Home from './Home'
 
-export default function ProductDetail({ productId }) {
+export default function ProductDetail({ productId, canGoBack }) {
   const { user }                              = useAuth()
   const [product, setProduct]                 = useState(null)
   const [loading, setLoading]                 = useState(true)
   const [selectedImage, setSelectedImage]     = useState(0)
   const [isFavorite, setIsFavorite]           = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [walletBalance, setWalletBalance]     = useState(null)
+  const [buyLoading, setBuyLoading]           = useState(false)
+  const [buyError, setBuyError]               = useState('')
+  const [buySuccess, setBuySuccess]           = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
-  const [home, setHome] = useState(false)
-
   useEffect(() => {
     client(`/products/${productId}`)
       .then(data => {
@@ -34,6 +36,14 @@ export default function ProductDetail({ productId }) {
         const isFav = favs.some(f => f.id === product.id)
         setIsFavorite(isFav)
       })
+      .catch(() => {})
+  }, [user, product])
+
+  // Cargar saldo del monedero si el usuario no es el propietario del producto
+  useEffect(() => {
+    if (!user || !product || user.id === product.user?.id) return
+    client('/wallet')
+      .then(data => setWalletBalance(Number(data?.balance || 0)))
       .catch(() => {})
   }, [user, product])
 
@@ -55,6 +65,30 @@ export default function ProductDetail({ productId }) {
       console.error(err)
     } finally {
       setFavoriteLoading(false)
+    }
+  }
+
+  const handleBuy = async () => {
+    if (!user) { openLogin(); return }
+
+    if (walletBalance !== null && walletBalance < product.price) {
+      setBuyError('Saldo insuficiente. Recarga tu monedero antes de comprar.')
+      return
+    }
+
+    setBuyLoading(true)
+    setBuyError('')
+    try {
+      await client('/purchases', {
+        method: 'POST',
+        body: { product_id: product.id },
+      })
+      setBuySuccess(true)
+      setProduct(prev => ({ ...prev, available: 'reservado' }))
+    } catch (err) {
+      setBuyError(err.message || 'Error al realizar la compra.')
+    } finally {
+      setBuyLoading(false)
     }
   }
 
@@ -107,13 +141,14 @@ export default function ProductDetail({ productId }) {
   const images    = product.images || []
   const condition = conditionLabel[product.condition]
 
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-5xl mx-auto px-4 py-8">
 
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
+          onClick={() => window.dispatchEvent(new CustomEvent(canGoBack ? 'navigate:back' : 'navigate:home'))}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
         >
           ← Volver
@@ -212,6 +247,33 @@ export default function ProductDetail({ productId }) {
               )}
 
               <div className="flex flex-col gap-3 mt-auto">
+                {user && user.id !== product.user?.id && buySuccess && (
+                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
+                    Solicitud pendiente — esperando confirmación del vendedor
+                  </div>
+                )}
+
+                {user && user.id !== product.user?.id && !buySuccess && product.available === 'disponible' && (
+                  <>
+                    <button
+                      onClick={handleBuy}
+                      disabled={buyLoading}
+                      className="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
+                    >
+                      {buyLoading ? 'Procesando...' : 'Comprar'}
+                    </button>
+                    {buyError && (
+                      <p className="text-xs text-red-500 text-center -mt-1">{buyError}</p>
+                    )}
+                  </>
+                )}
+
+                {user && user.id !== product.user?.id && !buySuccess && product.available === 'reservado' && (
+                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
+                    Producto reservado
+                  </div>
+                )}
+
                 {user && user.id !== product.user?.id && (
                   <button
                     onClick={handleContact}
@@ -221,25 +283,26 @@ export default function ProductDetail({ productId }) {
                   </button>
                 )}
 
-                <button
-                  onClick={handleFavorite}
-                  disabled={favoriteLoading}
-                  className={`w-full py-3 rounded-xl font-semibold border-2 transition flex items-center justify-center gap-2 ${
-                    isFavorite
-                      ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                  }`}
-                >
-
-                  <span className={isFavorite ? 'text-red-500' : 'text-gray-400'}>
-                    {isFavorite ? '♥' : '♡'}
-                  </span>
-                  {favoriteLoading
-                    ? 'Cargando...'
-                    : isFavorite
-                    ? 'Guardado en favoritos'
-                    : 'Guardar en favoritos'}
-                </button>
+                {product.available !== 'vendido' && user?.id !== product.user?.id && (
+                  <button
+                    onClick={handleFavorite}
+                    disabled={favoriteLoading}
+                    className={`w-full py-3 rounded-xl font-semibold border-2 transition flex items-center justify-center gap-2 ${
+                      isFavorite
+                        ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className={isFavorite ? 'text-red-500' : 'text-gray-400'}>
+                      {isFavorite ? '♥' : '♡'}
+                    </span>
+                    {favoriteLoading
+                      ? 'Cargando...'
+                      : isFavorite
+                      ? 'Guardado en favoritos'
+                      : 'Guardar en favoritos'}
+                  </button>
+                )}
 
                 {modal === 'login' && (
                   <Login
@@ -267,5 +330,6 @@ export default function ProductDetail({ productId }) {
         </div>
       </main>
     </div>
+    
   )
 }

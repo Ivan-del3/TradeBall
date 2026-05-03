@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\FavoriteController; 
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\PurchaseController;
@@ -38,16 +39,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile',        [ProfileController::class, 'update']);
 
     // Ventas
-    Route::get('/sales',          [SalesController::class,    'index']);
+    Route::get('/sales', [SalesController::class, 'index']);
 
     // Compras
-    Route::get('/purchases',      [PurchaseController::class, 'index']);
+    Route::get('/purchases',              [PurchaseController::class, 'index']);
+    Route::post('/purchases',             [PurchaseController::class, 'store']);
+    Route::post('/purchases/{id}/confirm', [PurchaseController::class, 'confirm']);
+    Route::post('/purchases/{id}/reject',  [PurchaseController::class, 'reject']);
 
     // Monedero
-    Route::get('/wallet',         [WalletController::class,   'show']);
+    Route::get('/wallet',          [WalletController::class, 'show']);
+    Route::patch('/wallet/deposit', [WalletController::class, 'deposit']);
+    Route::patch('/wallet/withdraw',[WalletController::class, 'withdraw']);
 
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
+
+    // Broadcasting auth con Sanctum (EventSource no puede enviar headers, pero Echo sí)
+    Route::post('/broadcasting/auth', fn () => Broadcast::auth(request()));
 
     // Chat
     Route::get('/chat/conversations',                        [ChatController::class, 'conversations']);

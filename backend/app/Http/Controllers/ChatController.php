@@ -59,8 +59,14 @@ class ChatController extends Controller
             return response()->json(['message' => 'No puedes contactar contigo mismo'], 422);
         }
 
+        // FIX Bug2: busca solo el order pendiente más reciente para este
+        // comprador+producto. Si el anterior fue rechazado/completado, no se
+        // reutiliza y se crea uno nuevo, evitando abrir el chat de un order
+        // incorrecto cuando el mismo comprador tiene varios pedidos del producto.
         $order = Order::where('buyer_id', $request->user()->id)
             ->where('product_id', $product->id)
+            ->where('status', 'pendiente')
+            ->latest()
             ->first();
 
         if (!$order) {

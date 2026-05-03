@@ -11,12 +11,27 @@ const echo = new Echo({
   wssPort:           import.meta.env.VITE_REVERB_PORT,
   forceTLS:          import.meta.env.VITE_REVERB_SCHEME === 'https',
   enabledTransports: ['ws', 'wss'],
-  authEndpoint:      `${import.meta.env.VITE_API_URL}/broadcasting/auth`,
-  auth: {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
+  // FIX Bug3: authorizer lee el token en el momento de cada suscripción,
+  // no al cargar el módulo, por lo que funciona correctamente cuando el
+  // usuario inicia sesión después de que la app ya está montada.
+  authorizer: (channel) => ({
+    authorize: (socketId, callback) => {
+      fetch(`${import.meta.env.VITE_API_URL}/broadcasting/auth`, {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/x-www-form-urlencoded',
+          Authorization:   `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: new URLSearchParams({
+          socket_id:    socketId,
+          channel_name: channel.name,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => callback(null, data))
+        .catch(err  => callback(err, null))
     },
-  },
+  }),
 })
 
 export default echo

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import client from '../../api/client'
 import { LoadingCard } from './shared'
+import echo from '../../echo'
 
 export default function Chat({ initialOrderId }) {
   const { user }                            = useAuth()
@@ -14,7 +15,6 @@ export default function Chat({ initialOrderId }) {
   const [pendingOrderId, setPendingOrderId] = useState(null)
   const messagesEndRef                      = useRef(null)
   const prevMsgCountRef                     = useRef(0)
-  // Ref para acceder al activeConv actual dentro de closures de polling
   const activeConvRef                       = useRef(null)
   // IDs ocultados manualmente: evita que el poll de lista los restaure por race condition
   const hiddenIdsRef                        = useRef(new Set())
@@ -41,7 +41,7 @@ export default function Chat({ initialOrderId }) {
       .catch(() => setLoading(false))
   }, [initialOrderId])
 
-  // Polling de la lista de conversaciones cada 3s (arranca cuando termina la carga inicial)
+  // Polling de la lista de conversaciones cada 10s
   useEffect(() => {
     if (loading) return
 
@@ -52,12 +52,10 @@ export default function Chat({ initialOrderId }) {
             const prevMap  = new Map(prev.map(c => [c.id, c]))
             const freshMap = new Map(newConvs.map(c => [c.id, c]))
 
-            // Actualizar conversaciones existentes
             const merged = prev.map(c => {
               const fresh = freshMap.get(c.id)
-              if (!fresh) return c  // Puede ser pendingOrderId u otro estado local
+              if (!fresh) return c
 
-              // El poll de mensajes gestiona unread_count para la conv activa
               const isActive = activeConvRef.current?.id === c.id
               return {
                 ...c,
@@ -66,59 +64,87 @@ export default function Chat({ initialOrderId }) {
               }
             })
 
-            // Añadir conversaciones restauradas (chats ocultos que recibieron un mensaje)
             newConvs.forEach(fresh => {
-              if (prevMap.has(fresh.id)) return  // Ya existe, actualizada arriba
+              if (prevMap.has(fresh.id)) return
 
               const wasHiddenManually = hiddenIdsRef.current.has(fresh.id)
 
               if (!wasHiddenManually) {
-                // Conversación nueva visible (no la ocultó este usuario)
                 merged.push(fresh)
               } else if (fresh.last_message) {
-                // El backend la restauró porque el otro usuario envió un mensaje
                 hiddenIdsRef.current.delete(fresh.id)
                 merged.push(fresh)
               }
-              // Si wasHiddenManually && !last_message: ignorar (race condition de ocultado)
             })
 
-            return merged
+            // FIX Bug1: elimina duplicados por id que pudieran haberse
+            // colado por race conditions entre carga inicial y polling
+            const seen = new Set()
+            return merged.filter(c => {
+              if (seen.has(c.id)) return false
+              seen.add(c.id)
+              return true
+            })
           })
         })
         .catch(() => {})
     }
 
-    const intervalId = setInterval(pollList, 3000)
+    const intervalId = setInterval(pollList, 10000)
     return () => clearInterval(intervalId)
   }, [loading])
 
-  // Carga inicial + polling de mensajes de la conversación activa cada 3s
+  // Carga inicial de mensajes + suscripción Reverb al cambiar de conversación
   useEffect(() => {
     if (!activeConv) return
 
     prevMsgCountRef.current = 0
 
-    const load = () => {
-      client(`/chat/conversations/${activeConv.id}/messages`)
-        .then(data => {
-          setMessages(data)
-          setConversations(prev => prev.map(c =>
-            c.id === activeConv.id
-              ? {
-                  ...c,
-                  unread_count: 0,
-                  last_message: data[data.length - 1] ?? c.last_message,
-                }
-              : c
-          ))
-        })
-        .catch(() => {})
-    }
+    // FIX Bug3: los mensajes WebSocket que lleguen ANTES de que la fetch
+    // inicial complete se acumulan aquí y se mezclan al asentar el estado,
+    // evitando que setMessages(fetchData) los sobreescriba.
+    let fetchSettled = false
+    const wsBuffer  = []
 
-    load()
-    const intervalId = setInterval(load, 3000)
-    return () => clearInterval(intervalId)
+    const channel = echo.private(`order.${activeConv.id}`)
+
+    channel.listen('MessageSent', (e) => {
+      const msg = e.message
+      if (!msg) return
+
+      if (!fetchSettled) {
+        wsBuffer.push(msg)
+        return
+      }
+
+      setMessages(prev => {
+        if (prev.some(m => m.id === msg.id)) return prev
+        return [...prev, msg]
+      })
+      setConversations(prev => prev.map(c =>
+        c.id === activeConv.id
+          ? { ...c, last_message: msg, unread_count: 0 }
+          : c
+      ))
+    })
+
+    client(`/chat/conversations/${activeConv.id}/messages`)
+      .then(data => {
+        fetchSettled = true
+        // FIX Bug3: fusiona mensajes del buffer que no estén ya en la respuesta
+        const extra = wsBuffer.filter(m => !data.some(d => d.id === m.id))
+        setMessages([...data, ...extra])
+        setConversations(prev => prev.map(c =>
+          c.id === activeConv.id
+            ? { ...c, unread_count: 0, last_message: data[data.length - 1] ?? c.last_message }
+            : c
+        ))
+      })
+      .catch(() => { fetchSettled = true })
+
+    return () => {
+      echo.leave(`order.${activeConv.id}`)
+    }
   }, [activeConv])
 
   // Scroll al fondo solo cuando llegan mensajes nuevos
@@ -137,7 +163,6 @@ export default function Chat({ initialOrderId }) {
     }
   }, [activeConv, pendingOrderId])
 
-  // Conversaciones visibles: ocultar las sin mensajes salvo la activa
   const visibleConversations = conversations.filter(c =>
     c.last_message !== null || c.id === activeConv?.id
   )
@@ -150,7 +175,8 @@ export default function Chat({ initialOrderId }) {
         method: 'POST',
         body: { message: newMessage.trim() },
       })
-      setMessages(prev => [...prev, data])
+      // FIX Bug1: dedup por si el WebSocket entrega el mismo mensaje al emisor
+      setMessages(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data])
       setNewMessage('')
       setPendingOrderId(null)
       setConversations(prev => prev.map(c =>
@@ -226,7 +252,6 @@ export default function Chat({ initialOrderId }) {
         {activeConv ? (
           <div className="flex-1 flex flex-col min-w-0">
 
-            {/* Header del chat */}
             <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
               <button
                 onClick={() => setActiveConv(null)}
@@ -263,7 +288,6 @@ export default function Chat({ initialOrderId }) {
               </div>
             </div>
 
-            {/* Mensajes */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-2">
@@ -283,7 +307,6 @@ export default function Chat({ initialOrderId }) {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <div className="px-4 py-3 border-t border-gray-100 flex items-end gap-2">
               <textarea
                 value={newMessage}
