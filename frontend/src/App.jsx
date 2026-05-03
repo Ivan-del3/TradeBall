@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './context/AuthContext'
 import Home from './pages/Home'
 import ProductDetail from './pages/ProductDetail'
@@ -9,22 +9,32 @@ function App() {
   const { loading } = useAuth()
   const [history, setHistory] = useState(() => {
     try {
-      const raw = localStorage.getItem('trb_current_page')
-      if (raw) return [JSON.parse(raw)]
+      const rawHistory = localStorage.getItem('trb_history')
+      if (rawHistory) return JSON.parse(rawHistory)
+      const rawPage = localStorage.getItem('trb_current_page')
+      if (rawPage) return [JSON.parse(rawPage)]
     } catch {}
     return [{ name: 'home', params: {} }]
   })
+
+  const historyRef = useRef(history)
+  useEffect(() => { historyRef.current = history }, [history])
 
   const page     = history[history.length - 1]
   const canGoBack = history.length > 1
 
   useEffect(() => {
-    console.log(page)
-    localStorage.setItem('trb_current_page', JSON.stringify(page))
-  }, [page])
+    const handleBeforeUnload = () => {
+      const stack = historyRef.current
+      localStorage.setItem('trb_history', JSON.stringify(stack))
+      localStorage.setItem('trb_current_page', JSON.stringify(stack[stack.length - 1]))
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
 
   useEffect(() => {
-    const navigate = (newPage) => setHistory(prev => [...prev, newPage])
+    const navigate = (newPage) => setHistory(prev => [...prev, newPage].slice(-10))
     const goBack   = ()       => setHistory(prev => prev.length > 1 ? prev.slice(0, -1) : prev)
 
     const handlers = {
@@ -34,7 +44,7 @@ function App() {
           setHistory(prev => {
             const withSection = [...prev]
             withSection[withSection.length - 1] = { name: 'profile', params: { section: fromSection } }
-            return [...withSection, { name: 'product', params: { id: e.detail?.productId } }]
+            return [...withSection, { name: 'product', params: { id: e.detail?.productId } }].slice(-10)
           })
         } else {
           navigate({ name: 'product', params: { id: e.detail?.productId } })

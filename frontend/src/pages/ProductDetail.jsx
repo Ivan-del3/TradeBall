@@ -19,14 +19,29 @@ export default function ProductDetail({ productId }) {
   const [buyError, setBuyError]               = useState('')
   const [buySuccess, setBuySuccess]           = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
-  const [home, setHome] = useState(false)
+  const [hasHistory, setHasHistory]           = useState(true)
+
+  useEffect(() => {
+    const rawHistory = localStorage.getItem('trb_history')
+    const rawPage    = localStorage.getItem('trb_current_page')
+    console.log('[ProductDetail] trb_history raw:', rawHistory)
+    console.log('[ProductDetail] trb_current_page raw:', rawPage)
+    try {
+      const stack = rawHistory ? JSON.parse(rawHistory) : []
+      console.log('[ProductDetail] stack restaurada:', stack)
+      console.log('[ProductDetail] canGoBack:', stack.length > 1)
+      setHasHistory(stack.length > 1)
+    } catch (e) {
+      console.error('[ProductDetail] error al parsear trb_history:', e)
+      setHasHistory(false)
+    }
+  }, [])
 
   useEffect(() => {
     client(`/products/${productId}`)
       .then(data => {
         setProduct(data)
         setLoading(false)
-          console.log("Valor de product available:" + ( data.available))
       })
       .catch(() => setLoading(false))
   }, [productId])
@@ -151,7 +166,7 @@ export default function ProductDetail({ productId }) {
       <main className="max-w-5xl mx-auto px-4 py-8">
 
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate:back'))}
+          onClick={() => window.dispatchEvent(new CustomEvent(hasHistory ? 'navigate:back' : 'navigate:home'))}
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
         >
           ← Volver

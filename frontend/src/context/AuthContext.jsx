@@ -42,6 +42,7 @@ export function AuthProvider({ children }) {
     await client('/logout', { method: 'POST' })
     localStorage.removeItem('token')
     localStorage.removeItem('trb_current_page')
+    localStorage.removeItem('trb_history')
     setUser(null)
   }
 
