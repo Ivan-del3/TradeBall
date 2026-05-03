@@ -13,12 +13,12 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ChatController;
 
 // Públicas
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:20,1');
+Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:10,1');
 
-Route::get('/products',        [ProductController::class, 'index']);
-Route::get('/products/{id}',   [ProductController::class, 'show']);
-Route::get('/categories',      [ProductController::class, 'categories']);
+Route::get('/products',        [ProductController::class, 'index'])->middleware('throttle:60,1');
+Route::get('/products/{id}',   [ProductController::class, 'show'])->middleware('throttle:60,1');
+Route::get('/categories',      [ProductController::class, 'categories'])->middleware('throttle:30,1');
 
 // Protegidas (necesitan el token Bearer en el header)
 Route::middleware('auth:sanctum')->group(function () {
@@ -43,14 +43,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Compras
     Route::get('/purchases',              [PurchaseController::class, 'index']);
-    Route::post('/purchases',             [PurchaseController::class, 'store']);
+    Route::post('/purchases',             [PurchaseController::class, 'store'])->middleware('throttle:10,1');
     Route::post('/purchases/{id}/confirm', [PurchaseController::class, 'confirm']);
     Route::post('/purchases/{id}/reject',  [PurchaseController::class, 'reject']);
 
     // Monedero
-    Route::get('/wallet',          [WalletController::class, 'show']);
-    Route::patch('/wallet/deposit', [WalletController::class, 'deposit']);
-    Route::patch('/wallet/withdraw',[WalletController::class, 'withdraw']);
+    Route::get('/wallet',           [WalletController::class, 'show']);
+    Route::patch('/wallet/deposit',  [WalletController::class, 'deposit'])->middleware('throttle:20,1');
+    Route::patch('/wallet/withdraw', [WalletController::class, 'withdraw'])->middleware('throttle:20,1');
 
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations',                        [ChatController::class, 'conversations']);
     Route::post('/chat/conversations',                       [ChatController::class, 'createConversation']);
     Route::get('/chat/conversations/{orderId}/messages',     [ChatController::class, 'messages']);
-    Route::post('/chat/conversations/{orderId}/messages',    [ChatController::class, 'sendMessage']);
+    Route::post('/chat/conversations/{orderId}/messages',    [ChatController::class, 'sendMessage'])->middleware('throttle:30,1');
     Route::patch('/chat/conversations/{orderId}/hide',       [ChatController::class, 'hideConversation']);
 
 });

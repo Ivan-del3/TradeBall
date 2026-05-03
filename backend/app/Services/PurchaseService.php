@@ -6,8 +6,10 @@ use App\Events\PurchaseConfirmed;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Repositories\PurchaseRepository;
 use App\Repositories\WalletRepository;
+use Illuminate\Support\Facades\DB;
 
 class PurchaseService
 {
@@ -18,32 +20,40 @@ class PurchaseService
 
     public function requestPurchase(User $buyer, int $productId): Order
     {
-        $product = Product::where('visible', true)->findOrFail($productId);
+        return DB::transaction(function () use ($buyer, $productId) {
+            // Lock de fila: impide que dos peticiones simultáneas lean
+            // el mismo producto como 'disponible' y ambas procedan.
+            $product = Product::where('visible', true)
+                ->lockForUpdate()
+                ->findOrFail($productId);
 
-        if ($product->user_id === $buyer->id) {
-            throw new \InvalidArgumentException('No puedes comprar tu propio producto.');
-        }
+            if ($product->user_id === $buyer->id) {
+                throw new \InvalidArgumentException('No puedes comprar tu propio producto.');
+            }
 
-        if ($product->available !== 'disponible') {
-            throw new \InvalidArgumentException('Este producto no está disponible para la compra.');
-        }
+            if ($product->available !== 'disponible') {
+                throw new \InvalidArgumentException('Este producto no está disponible para la compra.');
+            }
 
-        $wallet = $this->walletRepo->findByUser($buyer->id);
+            // Lock de fila sobre el wallet: evita que dos retiros
+            // concurrentes pasen el check de saldo al mismo tiempo.
+            $wallet = Wallet::where('user_id', $buyer->id)->lockForUpdate()->first();
 
-        if (!$wallet || $wallet->balance < $product->price) {
-            throw new \InvalidArgumentException('Saldo insuficiente para realizar la compra.');
-        }
+            if (!$wallet || $wallet->balance < $product->price) {
+                throw new \InvalidArgumentException('Saldo insuficiente para realizar la compra.');
+            }
 
-        $order = $this->purchaseRepo->createOrder(
-            $buyer->id,
-            $product->user_id,
-            $product->id,
-            $product->price,
-        );
+            $order = $this->purchaseRepo->createOrder(
+                $buyer->id,
+                $product->user_id,
+                $product->id,
+                $product->price,
+            );
 
-        $product->update(['available' => 'reservado']);
+            $product->update(['available' => 'reservado']);
 
-        return $order;
+            return $order;
+        });
     }
 
     public function confirmPurchase(User $seller, int $orderId): Order

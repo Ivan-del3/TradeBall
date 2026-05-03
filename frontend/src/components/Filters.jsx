@@ -115,8 +115,14 @@ export default function Filters({ categories, filters, onChange }) {
                     name="min_price"
                     type="number"
                     placeholder="Min"
+                    min="0"
+                    max="99999"
                     value={filters.min_price}
                     onChange={e => update('min_price', e.target.value)}
+                    onBlur={e => {
+                      const v = Number(e.target.value)
+                      if (e.target.value !== '' && (v < 0 || v > 99999)) update('min_price', '')
+                    }}
                     aria-label="Precio mínimo"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
@@ -126,8 +132,14 @@ export default function Filters({ categories, filters, onChange }) {
                     name="max_price"
                     type="number"
                     placeholder="Max"
+                    min="0"
+                    max="99999"
                     value={filters.max_price}
                     onChange={e => update('max_price', e.target.value)}
+                    onBlur={e => {
+                      const v = Number(e.target.value)
+                      if (e.target.value !== '' && (v < 0 || v > 99999)) update('max_price', '')
+                    }}
                     aria-label="Precio máximo"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />

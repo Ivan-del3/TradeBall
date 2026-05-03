@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Repositories\WalletRepository;
+use Illuminate\Support\Facades\DB;
 
 class WalletService
 {
@@ -21,15 +22,18 @@ class WalletService
             throw new \InvalidArgumentException('Importe no válido. El máximo es 99.999€.');
         }
 
-        $wallet = $this->getOrCreate($user);
+        return DB::transaction(function () use ($user, $amount) {
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first()
+                ?? $this->repo->createForUser($user->id);
 
-        if ($wallet->balance + $amount > 99999) {
-            throw new \InvalidArgumentException('El saldo no puede superar los 99.999€.');
-        }
+            if ($wallet->balance + $amount > 99999) {
+                throw new \InvalidArgumentException('El saldo no puede superar los 99.999€.');
+            }
 
-        $this->repo->addBalance($wallet, $amount, 'deposito');
+            $this->repo->addBalance($wallet, $amount, 'deposito');
 
-        return $wallet->fresh(['transactions' => fn($q) => $q->orderBy('created_at', 'desc')->limit(20)]);
+            return $wallet->fresh(['transactions' => fn($q) => $q->orderBy('created_at', 'desc')->limit(20)]);
+        });
     }
 
     public function withdraw(User $user, float $amount): Wallet
@@ -38,14 +42,16 @@ class WalletService
             throw new \InvalidArgumentException('El importe debe ser mayor que cero.');
         }
 
-        $wallet = $this->getOrCreate($user);
+        return DB::transaction(function () use ($user, $amount) {
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
 
-        if ($wallet->balance < $amount) {
-            throw new \InvalidArgumentException('Saldo insuficiente.');
-        }
+            if ($wallet->balance < $amount) {
+                throw new \InvalidArgumentException('Saldo insuficiente.');
+            }
 
-        $this->repo->subtractBalance($wallet, $amount, 'retirada');
+            $this->repo->subtractBalance($wallet, $amount, 'retirada');
 
-        return $wallet->fresh(['transactions' => fn($q) => $q->orderBy('created_at', 'desc')->limit(20)]);
+            return $wallet->fresh(['transactions' => fn($q) => $q->orderBy('created_at', 'desc')->limit(20)]);
+        });
     }
 }

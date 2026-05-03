@@ -22,6 +22,7 @@ class ChatController extends Controller
                           ->where('hidden_by_seller', false);
                 });
             })
+            ->oldest()
             ->with([
                 'product.mainImage',
                 'buyer',
@@ -32,17 +33,25 @@ class ChatController extends Controller
                 $q->where('sender_id', '!=', $userId)
                   ->where('read', false);
             }])
-            ->get()
-            ->map(function ($order) {
-                return [
-                    'id'           => $order->id,
-                    'product'      => $order->product,
-                    'buyer'        => $order->buyer,
-                    'seller'       => $order->seller,
-                    'last_message' => $order->messages->first(),
-                    'unread_count' => $order->unread_count,
-                ];
-            });
+            ->get();
+
+        // Una sola conversación por comprador+producto: se queda la más antigua
+        $seen = [];
+        $orders = $orders->filter(function ($order) use (&$seen) {
+            $key = "{$order->buyer_id}_{$order->product_id}";
+            if (array_key_exists($key, $seen)) return false;
+            $seen[$key] = true;
+            return true;
+        })->values()->map(function ($order) {
+            return [
+                'id'           => $order->id,
+                'product'      => $order->product,
+                'buyer'        => $order->buyer,
+                'seller'       => $order->seller,
+                'last_message' => $order->messages->first(),
+                'unread_count' => $order->unread_count,
+            ];
+        });
 
         return response()->json($orders);
     }
@@ -59,14 +68,11 @@ class ChatController extends Controller
             return response()->json(['message' => 'No puedes contactar contigo mismo'], 422);
         }
 
-        // FIX Bug2: busca solo el order pendiente más reciente para este
-        // comprador+producto. Si el anterior fue rechazado/completado, no se
-        // reutiliza y se crea uno nuevo, evitando abrir el chat de un order
-        // incorrecto cuando el mismo comprador tiene varios pedidos del producto.
+        // Busca la orden más antigua para este comprador+producto, sin importar el estado.
+        // Así siempre se usa el mismo chat aunque haya habido compras rechazadas.
         $order = Order::where('buyer_id', $request->user()->id)
             ->where('product_id', $product->id)
-            ->where('status', 'pendiente')
-            ->latest()
+            ->oldest()
             ->first();
 
         if (!$order) {
@@ -76,10 +82,9 @@ class ChatController extends Controller
                 'product_id'     => $product->id,
                 'status'         => 'pendiente',
                 'purchase_price' => $product->price,
-                'escrow_active'  => true,
+                'escrow_active'  => false,
             ]);
         } else {
-            // Restore visibility if the buyer had hidden it
             if ($order->hidden_by_buyer) {
                 $order->update(['hidden_by_buyer' => false]);
             }
