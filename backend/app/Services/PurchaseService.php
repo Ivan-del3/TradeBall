@@ -81,7 +81,7 @@ class PurchaseService
         return $order;
     }
 
-    // Comprador confirma que ha recibido el producto en buen estado se realiza la transacción
+    // Comprador confirma que ha recibido el producto en buen estado, entonces se realiza la transacción
     public function buyerConfirmReceipt(User $buyer, int $orderId): Order
     {
         $order = Order::where('id', $orderId)
@@ -112,7 +112,7 @@ class PurchaseService
         return $order;
     }
 
-    // Vendedor confirma que ha recibido el producto devuelto → se cancela la orden y el producto vuelve a la venta
+    // Vendedor confirma que ha recibido el producto devuelto, se cancela la orden y el producto vuelve a la venta
     public function sellerConfirmReturn(User $seller, int $orderId): Order
     {
         $order = Order::where('id', $orderId)
