@@ -15,16 +15,15 @@ export default function Sales() {
   const [actionLoading, setAction]  = useState(false)
   const [actionError, setActionErr] = useState('')
 
+  const reload = () =>
+    client('/sales').then(data => setSales(data)).catch(() => {})
+
   useEffect(() => {
     client('/sales')
       .then(data => { setSales(data); setLoading(false) })
       .catch(() => setLoading(false))
 
-    const id = setInterval(() => {
-      client('/sales')
-        .then(data => setSales(data))
-        .catch(() => {})
-    }, 15000)
+    const id = setInterval(reload, 15000)
     return () => clearInterval(id)
   }, [])
 
@@ -40,6 +39,7 @@ export default function Sales() {
     setActionErr('')
   }
 
+  // Vendedor confirma la venta inicial (pendiente → confirmado)
   const handleConfirm = async () => {
     if (!popup?.pending_order) return
     setAction(true)
@@ -48,7 +48,7 @@ export default function Sales() {
       await client(`/purchases/${popup.pending_order.id}/confirm`, { method: 'POST' })
       setSales(prev => prev.map(p =>
         p.id === popup.id
-          ? { ...p, available: 'vendido', pending_order: null }
+          ? { ...p, pending_order: null }
           : p
       ))
       closePopup()
@@ -59,6 +59,7 @@ export default function Sales() {
     }
   }
 
+  // Vendedor rechaza la venta inicial (pendiente → cancelado)
   const handleReject = async () => {
     if (!popup?.pending_order) return
     setAction(true)
@@ -73,6 +74,26 @@ export default function Sales() {
       closePopup()
     } catch (err) {
       setActionErr(err.message || 'Error al rechazar.')
+    } finally {
+      setAction(false)
+    }
+  }
+
+  // Vendedor confirma que ha recibido la devolución (devolucion_solicitada → cancelado)
+  const handleConfirmReturn = async () => {
+    if (!popup?.pending_order) return
+    setAction(true)
+    setActionErr('')
+    try {
+      await client(`/purchases/${popup.pending_order.id}/confirm-return`, { method: 'POST' })
+      setSales(prev => prev.map(p =>
+        p.id === popup.id
+          ? { ...p, available: 'disponible', pending_order: null }
+          : p
+      ))
+      closePopup()
+    } catch (err) {
+      setActionErr(err.message || 'Error al confirmar la devolución.')
     } finally {
       setAction(false)
     }
@@ -108,14 +129,24 @@ export default function Sales() {
       </div>
 
       {popup && (
-        <PurchasePopup
-          product={popup}
-          loading={actionLoading}
-          error={actionError}
-          onConfirm={handleConfirm}
-          onReject={handleReject}
-          onClose={closePopup}
-        />
+        popup.pending_order?.status === 'devolucion_solicitada' ? (
+          <ReturnPopup
+            product={popup}
+            loading={actionLoading}
+            error={actionError}
+            onConfirmReturn={handleConfirmReturn}
+            onClose={closePopup}
+          />
+        ) : (
+          <PurchasePopup
+            product={popup}
+            loading={actionLoading}
+            error={actionError}
+            onConfirm={handleConfirm}
+            onReject={handleReject}
+            onClose={closePopup}
+          />
+        )
       )}
     </>
   )
@@ -125,6 +156,7 @@ function SaleRow({ product, onOpenPopup }) {
   const image   = product.main_image?.image_url
   const status  = STATUS_LABEL[product.available] ?? STATUS_LABEL['disponible']
   const hasPending = !!product.pending_order
+  const isReturn = product.pending_order?.status === 'devolucion_solicitada'
 
   const handleClick = () => {
     if (hasPending) {
@@ -140,7 +172,9 @@ function SaleRow({ product, onOpenPopup }) {
     <div
       onClick={handleClick}
       className={`relative flex items-center gap-4 p-3 border rounded-xl transition cursor-pointer ${
-        hasPending
+        isReturn
+          ? 'border-orange-300 bg-orange-50 hover:border-orange-400'
+          : hasPending
           ? 'border-yellow-300 bg-yellow-50 hover:border-yellow-400'
           : 'border-gray-100 hover:border-gray-200 hover:shadow-sm'
       }`}
@@ -158,11 +192,15 @@ function SaleRow({ product, onOpenPopup }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
         <p className="text-xs text-gray-400 mt-0.5">{product.category?.name}</p>
-        {hasPending && (
+        {isReturn ? (
+          <p className="text-xs text-orange-700 font-medium mt-0.5">
+            {product.pending_order.buyer?.name} {product.pending_order.buyer?.lastname} solicita devolución
+          </p>
+        ) : hasPending ? (
           <p className="text-xs text-yellow-700 font-medium mt-0.5">
             {product.pending_order.buyer?.name} {product.pending_order.buyer?.lastname} quiere comprarlo
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex flex-col items-end gap-1.5">
@@ -171,7 +209,9 @@ function SaleRow({ product, onOpenPopup }) {
           {status.text}
         </span>
         {hasPending && (
-          <span className="bg-yellow-400 text-black text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+          <span className={`text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center ${
+            isReturn ? 'bg-orange-400 text-white' : 'bg-yellow-400 text-black'
+          }`}>
             1
           </span>
         )}
@@ -255,6 +295,68 @@ function PurchasePopup({ product, loading, error, onConfirm, onReject, onClose }
             Rechazar
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function ReturnPopup({ product, loading, error, onConfirmReturn, onClose }) {
+  const order = product.pending_order
+  const image = product.main_image?.image_url
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-base font-bold text-gray-900">Solicitud de devolución</h3>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition text-lg"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 mb-5 p-3 bg-orange-50 rounded-xl border border-orange-100">
+          <div className="w-16 h-16 rounded-lg overflow-hidden bg-white flex-shrink-0 border border-gray-100">
+            {image ? (
+              <img src={image} alt={product.name} className="w-full h-full object-contain p-1" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+                Sin imagen
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
+            <p className="text-lg font-bold text-gray-900 mt-0.5">{Number(product.price).toFixed(2)}€</p>
+          </div>
+        </div>
+
+        <div className="mb-4 p-3 bg-orange-50 rounded-xl border border-orange-100">
+          <p className="text-sm text-orange-800">
+            El comprador <span className="font-semibold">{order?.buyer?.name} {order?.buyer?.lastname}</span> indica
+            que el producto no está en las condiciones esperadas y solicita devolvértelo.
+          </p>
+          <p className="text-xs text-orange-600 mt-2">
+            Cuando recibas el producto de vuelta, confirma la devolución para que se vuelva a poner a la venta.
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-xs text-red-500 mb-4">{error}</p>
+        )}
+
+        <button
+          onClick={onConfirmReturn}
+          disabled={loading}
+          className="w-full bg-orange-500 text-white font-semibold py-2.5 rounded-xl hover:bg-orange-600 transition text-sm disabled:opacity-50"
+        >
+          {loading ? 'Procesando...' : 'He recibido la devolución'}
+        </button>
       </div>
     </div>
   )

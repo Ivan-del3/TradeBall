@@ -42,10 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sales', [SalesController::class, 'index']);
 
     // Compras
-    Route::get('/purchases',              [PurchaseController::class, 'index']);
-    Route::post('/purchases',             [PurchaseController::class, 'store'])->middleware('throttle:10,1');
-    Route::post('/purchases/{id}/confirm', [PurchaseController::class, 'confirm']);
-    Route::post('/purchases/{id}/reject',  [PurchaseController::class, 'reject']);
+    Route::get('/purchases',                          [PurchaseController::class, 'index']);
+    Route::post('/purchases',                         [PurchaseController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('/purchases/{id}/confirm',            [PurchaseController::class, 'confirm']);
+    Route::post('/purchases/{id}/reject',             [PurchaseController::class, 'reject']);
+    Route::post('/purchases/{id}/buyer-confirm',      [PurchaseController::class, 'buyerConfirm']);
+    Route::post('/purchases/{id}/buyer-reject',       [PurchaseController::class, 'buyerReject']);
+    Route::post('/purchases/{id}/confirm-return',     [PurchaseController::class, 'sellerConfirmReturn']);
 
     // Monedero
     Route::get('/wallet',           [WalletController::class, 'show']);

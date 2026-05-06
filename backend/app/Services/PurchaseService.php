@@ -21,8 +21,6 @@ class PurchaseService
     public function requestPurchase(User $buyer, int $productId): Order
     {
         return DB::transaction(function () use ($buyer, $productId) {
-            // Lock de fila: impide que dos peticiones simultáneas lean
-            // el mismo producto como 'disponible' y ambas procedan.
             $product = Product::where('visible', true)
                 ->lockForUpdate()
                 ->findOrFail($productId);
@@ -35,8 +33,6 @@ class PurchaseService
                 throw new \InvalidArgumentException('Este producto no está disponible para la compra.');
             }
 
-            // Lock de fila sobre el wallet: evita que dos retiros
-            // concurrentes pasen el check de saldo al mismo tiempo.
             $wallet = Wallet::where('user_id', $buyer->id)->lockForUpdate()->first();
 
             if (!$wallet || $wallet->balance < $product->price) {
@@ -56,12 +52,42 @@ class PurchaseService
         });
     }
 
+    // Vendedor acepta la solicitud de compra (producto en camino/preparado)
     public function confirmPurchase(User $seller, int $orderId): Order
     {
         $order = Order::where('id', $orderId)
             ->where('seller_id', $seller->id)
             ->where('status', 'pendiente')
             ->with(['product', 'buyer'])
+            ->firstOrFail();
+
+        $order->update(['status' => 'confirmado']);
+
+        return $order;
+    }
+
+    // Vendedor rechaza la solicitud de compra inicial
+    public function rejectPurchase(User $seller, int $orderId): Order
+    {
+        $order = Order::where('id', $orderId)
+            ->where('seller_id', $seller->id)
+            ->where('status', 'pendiente')
+            ->with('product')
+            ->firstOrFail();
+
+        $order->update(['status' => 'cancelado', 'escrow_active' => false]);
+        $order->product->update(['available' => 'disponible']);
+
+        return $order;
+    }
+
+    // Comprador confirma que ha recibido el producto en buen estado, entonces se realiza la transacción
+    public function buyerConfirmReceipt(User $buyer, int $orderId): Order
+    {
+        $order = Order::where('id', $orderId)
+            ->where('buyer_id', $buyer->id)
+            ->where('status', 'confirmado')
+            ->with(['product', 'buyer', 'seller'])
             ->firstOrFail();
 
         $order->update(['status' => 'completado', 'escrow_active' => false]);
@@ -72,11 +98,26 @@ class PurchaseService
         return $order;
     }
 
-    public function rejectPurchase(User $seller, int $orderId): Order
+    // Comprador indica que el producto no está en las condiciones esperadas, solicita devolución
+    public function buyerRejectReceipt(User $buyer, int $orderId): Order
+    {
+        $order = Order::where('id', $orderId)
+            ->where('buyer_id', $buyer->id)
+            ->where('status', 'confirmado')
+            ->with('product')
+            ->firstOrFail();
+
+        $order->update(['status' => 'devolucion_solicitada']);
+
+        return $order;
+    }
+
+    // Vendedor confirma que ha recibido el producto devuelto, se cancela la orden y el producto vuelve a la venta
+    public function sellerConfirmReturn(User $seller, int $orderId): Order
     {
         $order = Order::where('id', $orderId)
             ->where('seller_id', $seller->id)
-            ->where('status', 'pendiente')
+            ->where('status', 'devolucion_solicitada')
             ->with('product')
             ->firstOrFail();
 

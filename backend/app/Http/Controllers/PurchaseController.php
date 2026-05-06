@@ -13,7 +13,7 @@ class PurchaseController extends Controller
     {
         $purchases = $request->user()
             ->purchases()
-            ->whereIn('status', ['pendiente', 'completado', 'cancelado'])
+            ->whereIn('status', ['pendiente', 'confirmado', 'devolucion_solicitada', 'completado', 'cancelado'])
             ->with(['product.mainImage', 'seller'])
             ->orderBy('updated_at', 'desc')
             ->get();
@@ -58,6 +58,36 @@ class PurchaseController extends Controller
     {
         try {
             $order = $this->purchaseService->rejectPurchase($request->user(), $id);
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function buyerConfirm(Request $request, int $id)
+    {
+        try {
+            $order = $this->purchaseService->buyerConfirmReceipt($request->user(), $id);
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function buyerReject(Request $request, int $id)
+    {
+        try {
+            $order = $this->purchaseService->buyerRejectReceipt($request->user(), $id);
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function sellerConfirmReturn(Request $request, int $id)
+    {
+        try {
+            $order = $this->purchaseService->sellerConfirmReturn($request->user(), $id);
             return response()->json($order);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);

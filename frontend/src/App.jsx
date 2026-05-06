@@ -9,9 +9,9 @@ function App() {
   const { loading, user } = useAuth()
   const [history, setHistory] = useState(() => {
     try {
-      const rawHistory = localStorage.getItem('trb_history')
+      const rawHistory = sessionStorage.getItem('trb_history')
       if (rawHistory) return JSON.parse(rawHistory)
-      const rawPage = localStorage.getItem('trb_current_page')
+      const rawPage = sessionStorage.getItem('trb_current_page')
       if (rawPage) return [JSON.parse(rawPage)]
     } catch {}
     return [{ name: 'home', params: {} }]
@@ -26,8 +26,8 @@ function App() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       const stack = historyRef.current
-      localStorage.setItem('trb_history', JSON.stringify(stack))
-      localStorage.setItem('trb_current_page', JSON.stringify(stack[stack.length - 1]))
+      sessionStorage.setItem('trb_history', JSON.stringify(stack))
+      sessionStorage.setItem('trb_current_page', JSON.stringify(stack[stack.length - 1]))
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
