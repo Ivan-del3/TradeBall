@@ -14,7 +14,7 @@ use App\Http\Controllers\ChatController;
 
 // Públicas
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:20,1');
-Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:20,1');
 
 Route::get('/products',        [ProductController::class, 'index'])->middleware('throttle:60,1');
 Route::get('/products/{id}',   [ProductController::class, 'show'])->middleware('throttle:60,1');
@@ -43,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Compras
     Route::get('/purchases',                          [PurchaseController::class, 'index']);
-    Route::post('/purchases',                         [PurchaseController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('/purchases',                         [PurchaseController::class, 'store'])->middleware('throttle:20,1');
     Route::post('/purchases/{id}/confirm',            [PurchaseController::class, 'confirm']);
     Route::post('/purchases/{id}/reject',             [PurchaseController::class, 'reject']);
     Route::post('/purchases/{id}/buyer-confirm',      [PurchaseController::class, 'buyerConfirm']);

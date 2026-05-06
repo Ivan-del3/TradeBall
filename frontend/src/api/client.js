@@ -21,7 +21,14 @@ const client = async (endpoint, { method = 'GET', body, isFormData = false } = {
   const data = await response.json()
 
   if (!response.ok) {
-    throw { status: response.status, errors: data.errors, message: data.message }
+    const retryAfter = response.headers.get('Retry-After')
+    throw {
+      status: response.status,
+      errors: data.errors,
+      message: response.status === 429 && retryAfter
+        ? `Demasiados intentos. Espera ${retryAfter} segundos antes de volver a intentarlo.`
+        : data.message,
+    }
   }
 
   return data
