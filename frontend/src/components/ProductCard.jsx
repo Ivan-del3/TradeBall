@@ -1,13 +1,13 @@
 export default function ProductCard({ product }) {
   const image = product.main_image?.image_url || product.images?.[0]?.image_url
 
-  const conditionLabel = {
-    nuevo:      { text: 'Nuevo',      color: 'bg-green-100 text-green-700' },
-    casi_nuevo: { text: 'Casi nuevo', color: 'bg-blue-100 text-blue-700' },
-    usado:      { text: 'Usado',      color: 'bg-gray-100 text-gray-600' },
+  const conditionBadge = {
+    nuevo:      { text: 'Nuevo',      cls: 'tb-badge tb-badge--nuevo' },
+    casi_nuevo: { text: 'Casi nuevo', cls: 'tb-badge tb-badge--casi-nuevo' },
+    usado:      { text: 'Usado',      cls: 'tb-badge tb-badge--usado' },
   }
 
-  const condition = conditionLabel[product.condition]
+  const condition = conditionBadge[product.condition] ?? { text: product.condition, cls: 'tb-badge' }
 
   const handleClick = () => {
     window.dispatchEvent(new CustomEvent('navigate:product', {
@@ -16,32 +16,21 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div
-      onClick={handleClick}
-      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group cursor-pointer"
-    >
-      <div className="aspect-square bg-gray-100 overflow-hidden">
+    <div onClick={handleClick} className="tb-product-card">
+      <div className="tb-product-card-image">
         {image ? (
-          <img
-            src={image}
-            alt={product.name}
-            className="w-full h-full object-contain p-2 group-hover:scale-105 transition"
-          />
+          <img src={image} alt={product.name} className="tb-product-card-img" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
-            Sin imagen
-          </div>
+          <div className="tb-product-card-no-image">Sin imagen</div>
         )}
       </div>
-      <div className="p-3">
-        <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{product.name}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-gray-900">{Number(product.price).toFixed(2)}€</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.color}`}>
-            {condition.text}
-          </span>
+      <div className="tb-product-card-body">
+        <p className="tb-product-card-name">{product.name}</p>
+        <div className="tb-product-card-footer">
+          <span className="tb-product-card-price">{Number(product.price).toFixed(2)}€</span>
+          <span className={condition.cls}>{condition.text}</span>
         </div>
-        <p className="text-xs text-gray-400 mt-1">{product.category?.name}</p>
+        <p className="tb-product-card-category">{product.category?.name}</p>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
+import Icon from '../Icon'
 
 export default function Reviews() {
   const [reviews, setReviews] = useState([])
@@ -19,14 +20,14 @@ export default function Reviews() {
     : null
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900">Valoraciones</h2>
+    <div className="tb-card">
+      <div className="tb-section-header">
+        <h2 className="tb-section-title">Valoraciones</h2>
         {average && (
-          <div className="flex items-center gap-1.5 bg-yellow-50 px-3 py-1.5 rounded-full">
-            <span className="text-yellow-400">★</span>
-            <span className="text-sm font-bold text-gray-900">{average}</span>
-            <span className="text-xs text-gray-400">({reviews.length})</span>
+          <div className="tb-rating-badge">
+            <Icon name="star-filled" size={16} color="var(--tb-red)" />
+            <span className="tb-rating-score">{average}</span>
+            <span className="tb-rating-count">({reviews.length})</span>
           </div>
         )}
       </div>
@@ -34,7 +35,7 @@ export default function Reviews() {
       {reviews.length === 0 ? (
         <Empty text="No tienes valoraciones todavia" />
       ) : (
-        <div className="space-y-4">
+        <div className="tb-review-list">
           {reviews.map(review => (
             <ReviewRow key={review.id} review={review} />
           ))}
@@ -46,26 +47,29 @@ export default function Reviews() {
 
 function ReviewRow({ review }) {
   return (
-    <div className="border border-gray-100 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center text-xs font-bold text-black">
-            {review.user?.name?.charAt(0).toUpperCase()} 
+    <div className="tb-review-item">
+      <div className="tb-review-header">
+        <div className="tb-reviewer-info">
+          <div className="tb-reviewer-avatar">
+            {review.user?.name?.charAt(0).toUpperCase()}
           </div>
-          <span className="text-sm font-medium text-gray-900">
-            {review.user?.name} 
-          </span>
+          <span className="tb-reviewer-name">{review.user?.name}</span>
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="tb-stars">
           {[1,2,3,4,5].map(star => (
-            <span key={star} className={star <= review.rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
+            <Icon
+              key={star}
+              name={star <= review.rating ? 'star-filled' : 'star'}
+              size={15}
+              color="var(--tb-red)"
+            />
           ))}
         </div>
       </div>
       {review.comment && (
-        <p className="text-sm text-gray-600">{review.comment}</p>
+        <p className="tb-review-comment">{review.comment}</p>
       )}
-      <p className="text-xs text-gray-400 mt-2">
+      <p className="tb-review-date">
         {new Date(review.created_at).toLocaleDateString('es-ES')}
       </p>
     </div>
