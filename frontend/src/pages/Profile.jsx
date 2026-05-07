@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
+import { usePageTitle } from '../hooks/usePageTitle'
 import Icon from '../components/Icon'
 import UserInfo from '../components/profile/UserInfo'
 import Sales from '../components/profile/Sales'
@@ -23,6 +24,7 @@ const SECTIONS = [
 export default function Profile({ initialSection, initialOrderId }) {
   const { user } = useAuth()
   const [activeSection, setActiveSection] = useState(initialSection || 'info')
+  usePageTitle(SECTIONS.find(s => s.key === activeSection)?.label ?? 'Perfil')
   const [sidebarOpen, setSidebarOpen]     = useState(false)
   const [chatOrderId, setChatOrderId]     = useState(initialOrderId || null)
 
