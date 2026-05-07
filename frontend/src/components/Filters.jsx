@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icon from './Icon'
 
 export default function Filters({ categories, filters, onChange }) {
   const [open, setOpen] = useState(false)
@@ -20,34 +21,25 @@ export default function Filters({ categories, filters, onChange }) {
   }))
 
   return (
-    <aside className="w-full">
+    <aside className="tb-filters-aside">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium border-2 transition-colors ${
-          activeFilters > 0
-            ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
-            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-        }`}
+        className={`tb-filter-toggle${activeFilters > 0 ? ' tb-filter-toggle--active' : ''}`}
       >
-        <span className="flex items-center gap-2">
+        <span className="tb-filter-toggle-label">
+          <Icon name="filter" size={18} />
           Filtros
           {activeFilters > 0 && (
-            <span className="bg-yellow-400 text-black text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-              {activeFilters}
-            </span>
+            <span className="tb-filter-badge">{activeFilters}</span>
           )}
         </span>
-
-        <span
+        <Icon
+          name="chevron-down"
+          size={16}
           style={{
-            display: 'inline-block',
-            width: 8,
-            height: 8,
-            borderRight: '2px solid currentColor',
-            borderBottom: '2px solid currentColor',
-            transform: open ? 'rotate(225deg)' : 'rotate(45deg)',
-            transition: 'transform 0.3s ease',
-            marginBottom: open ? '-4px' : '4px',
+            color: 'var(--fg-3)',
+            transform: open ? 'rotate(180deg)' : 'none',
+            transition: 'transform 180ms',
           }}
         />
       </button>
@@ -60,25 +52,21 @@ export default function Filters({ categories, filters, onChange }) {
         }}
       >
         <div style={{ overflow: 'hidden' }}>
-          <div className="mt-3 bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <div className="tb-filter-panel">
             {activeFilters > 0 && (
-              <div className="flex justify-end mb-3">
-                <button onClick={clearAll} className="text-xs text-gray-400 hover:text-gray-600 transition">
-                  Limpiar todo
-                </button>
+              <div className="tb-filter-clear-row">
+                <button onClick={clearAll} className="tb-btn-clear">Limpiar todo</button>
               </div>
             )}
-            <div className="flex flex-col gap-5">
+            <div className="tb-filter-groups">
               <div>
-                <label htmlFor="filter-category" className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
-                  Categoría
-                </label>
+                <label htmlFor="filter-category" className="tb-label-meta">Categoría</label>
                 <select
                   id="filter-category"
                   name="category_id"
                   value={filters.category_id}
                   onChange={e => update('category_id', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white"
+                  className="tb-select"
                 >
                   <option value="">Todas</option>
                   {categories.map(cat => (
@@ -88,15 +76,13 @@ export default function Filters({ categories, filters, onChange }) {
               </div>
 
               <div>
-                <label htmlFor="filter-condition" className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
-                  Estado
-                </label>
+                <label htmlFor="filter-condition" className="tb-label-meta">Estado</label>
                 <select
                   id="filter-condition"
                   name="condition"
                   value={filters.condition}
                   onChange={e => update('condition', e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white"
+                  className="tb-select"
                 >
                   <option value="">Cualquiera</option>
                   <option value="nuevo">Nuevo</option>
@@ -106,10 +92,8 @@ export default function Filters({ categories, filters, onChange }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">
-                  Precio
-                </label>
-                <div className="flex items-center gap-2">
+                <label className="tb-label-meta">Precio</label>
+                <div className="tb-price-range">
                   <input
                     id="filter-min-price"
                     name="min_price"
@@ -124,9 +108,9 @@ export default function Filters({ categories, filters, onChange }) {
                       if (e.target.value !== '' && (v < 0 || v > 99999)) update('min_price', '')
                     }}
                     aria-label="Precio mínimo"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="tb-input"
                   />
-                  <span className="text-gray-300 shrink-0">—</span>
+                  <span className="tb-range-sep">—</span>
                   <input
                     id="filter-max-price"
                     name="max_price"
@@ -141,7 +125,7 @@ export default function Filters({ categories, filters, onChange }) {
                       if (e.target.value !== '' && (v < 0 || v > 99999)) update('max_price', '')
                     }}
                     aria-label="Precio máximo"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="tb-input"
                   />
                 </div>
               </div>

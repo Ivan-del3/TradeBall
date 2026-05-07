@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import client from '../../api/client'
 import { LoadingCard } from './shared'
+import Icon from '../Icon'
 import echo from '../../echo'
 
 export default function Chat({ initialOrderId }) {
@@ -16,20 +17,15 @@ export default function Chat({ initialOrderId }) {
   const messagesEndRef                      = useRef(null)
   const prevMsgCountRef                     = useRef(0)
   const activeConvRef                       = useRef(null)
-  // IDs ocultados manualmente: evita que el poll de lista los restaure por race condition
   const hiddenIdsRef                        = useRef(new Set())
 
-  useEffect(() => {
-    activeConvRef.current = activeConv
-  }, [activeConv])
+  useEffect(() => { activeConvRef.current = activeConv }, [activeConv])
 
-  // Carga inicial de la lista
   useEffect(() => {
     client('/chat/conversations')
       .then(data => {
         setConversations(data)
         setLoading(false)
-
         if (initialOrderId) {
           const conv = data.find(c => c.id === initialOrderId)
           if (conv) {
@@ -41,10 +37,8 @@ export default function Chat({ initialOrderId }) {
       .catch(() => setLoading(false))
   }, [initialOrderId])
 
-  // Polling de la lista de conversaciones cada 10s
   useEffect(() => {
     if (loading) return
-
     const pollList = () => {
       client('/chat/conversations')
         .then(newConvs => {
@@ -55,7 +49,6 @@ export default function Chat({ initialOrderId }) {
             const merged = prev.map(c => {
               const fresh = freshMap.get(c.id)
               if (!fresh) return c
-
               const isActive = activeConvRef.current?.id === c.id
               return {
                 ...c,
@@ -66,9 +59,7 @@ export default function Chat({ initialOrderId }) {
 
             newConvs.forEach(fresh => {
               if (prevMap.has(fresh.id)) return
-
               const wasHiddenManually = hiddenIdsRef.current.has(fresh.id)
-
               if (!wasHiddenManually) {
                 merged.push(fresh)
               } else if (fresh.last_message) {
@@ -77,8 +68,6 @@ export default function Chat({ initialOrderId }) {
               }
             })
 
-            // FIX Bug1: elimina duplicados por id que pudieran haberse
-            // colado por race conditions entre carga inicial y polling
             const seen = new Set()
             return merged.filter(c => {
               if (seen.has(c.id)) return false
@@ -94,15 +83,10 @@ export default function Chat({ initialOrderId }) {
     return () => clearInterval(intervalId)
   }, [loading])
 
-  // Carga inicial de mensajes + suscripción Reverb al cambiar de conversación
   useEffect(() => {
     if (!activeConv) return
 
     prevMsgCountRef.current = 0
-
-    // FIX Bug3: los mensajes WebSocket que lleguen ANTES de que la fetch
-    // inicial complete se acumulan aquí y se mezclan al asentar el estado,
-    // evitando que setMessages(fetchData) los sobreescriba.
     let fetchSettled = false
     const wsBuffer  = []
 
@@ -111,11 +95,7 @@ export default function Chat({ initialOrderId }) {
     channel.listen('MessageSent', (e) => {
       const msg = e.message
       if (!msg) return
-
-      if (!fetchSettled) {
-        wsBuffer.push(msg)
-        return
-      }
+      if (!fetchSettled) { wsBuffer.push(msg); return }
 
       setMessages(prev => {
         if (prev.some(m => m.id === msg.id)) return prev
@@ -131,7 +111,6 @@ export default function Chat({ initialOrderId }) {
     client(`/chat/conversations/${activeConv.id}/messages`)
       .then(data => {
         fetchSettled = true
-        // FIX Bug3: fusiona mensajes del buffer que no estén ya en la respuesta
         const extra = wsBuffer.filter(m => !data.some(d => d.id === m.id))
         setMessages([...data, ...extra])
         setConversations(prev => prev.map(c =>
@@ -142,12 +121,9 @@ export default function Chat({ initialOrderId }) {
       })
       .catch(() => { fetchSettled = true })
 
-    return () => {
-      echo.leave(`order.${activeConv.id}`)
-    }
+    return () => { echo.leave(`order.${activeConv.id}`) }
   }, [activeConv])
 
-  // Scroll al fondo solo cuando llegan mensajes nuevos
   useEffect(() => {
     if (messages.length > prevMsgCountRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -155,7 +131,6 @@ export default function Chat({ initialOrderId }) {
     prevMsgCountRef.current = messages.length
   }, [messages])
 
-  // Limpiar chat pendiente (sin mensajes) cuando el usuario cambia de conversación
   useEffect(() => {
     if (pendingOrderId && activeConv?.id !== pendingOrderId) {
       setConversations(prev => prev.filter(c => c.id !== pendingOrderId))
@@ -175,7 +150,6 @@ export default function Chat({ initialOrderId }) {
         method: 'POST',
         body: { message: newMessage.trim() },
       })
-      // FIX Bug1: dedup por si el WebSocket entrega el mismo mensaje al emisor
       setMessages(prev => prev.some(m => m.id === data.id) ? prev : [...prev, data])
       setNewMessage('')
       setPendingOrderId(null)
@@ -190,10 +164,7 @@ export default function Chat({ initialOrderId }) {
   }
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
   const handleProductClick = (productId) => {
@@ -216,22 +187,20 @@ export default function Chat({ initialOrderId }) {
   if (loading) return <LoadingCard />
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden" style={{ height: '600px' }}>
-      <div className="flex h-full">
+    <div className="tb-chat-wrapper">
+      <div className="tb-chat-inner">
 
         {/* Lista de conversaciones */}
-        <div className={`w-full md:w-72 flex-shrink-0 border-r border-gray-100 flex flex-col ${activeConv ? 'hidden md:flex' : 'flex'}`}>
-          <div className="px-4 py-4 border-b border-gray-100">
-            <h2 className="text-base font-bold text-gray-900">Mensajes</h2>
+        <div className={`tb-chat-list${activeConv ? ' tb-chat-list--hidden-mobile' : ''}`}>
+          <div className="tb-chat-list-header">
+            <h2 className="tb-chat-list-title">Mensajes</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="tb-chat-list-body">
             {visibleConversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 p-6">
-                <p className="text-3xl">💬</p>
-                <p className="text-gray-400 text-sm text-center">
-                  No tienes conversaciones todavia
-                </p>
+              <div className="tb-chat-empty-conv">
+                <Icon name="chat" size={32} style={{ color: 'var(--fg-4)' }} />
+                <p className="tb-chat-empty-text">No tienes conversaciones todavia</p>
               </div>
             ) : (
               visibleConversations.map(conv => (
@@ -250,36 +219,32 @@ export default function Chat({ initialOrderId }) {
 
         {/* Ventana de chat */}
         {activeConv ? (
-          <div className="flex-1 flex flex-col min-w-0">
-
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+          <div className="tb-chat-window">
+            <div className="tb-chat-header">
               <button
                 onClick={() => setActiveConv(null)}
-                className="md:hidden text-gray-400 hover:text-gray-600"
+                className="tb-btn-back-mobile"
               >
-                ←
+                <Icon name="arrow-left" size={20} />
               </button>
 
               <div
                 onClick={() => handleProductClick(activeConv.product?.id)}
-                className="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition"
+                className="tb-chat-header-link"
               >
-                <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                <div className="tb-chat-product-thumb">
                   {activeConv.product?.main_image?.image_url ? (
                     <img
                       src={activeConv.product.main_image.image_url}
                       alt={activeConv.product.name}
-                      className="w-full h-full object-contain p-0.5"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200" />
+                    <div className="tb-chat-product-thumb-empty" />
                   )}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {activeConv.product?.name}
-                  </p>
-                  <p className="text-xs text-gray-400">
+                <div className="tb-chat-product-info">
+                  <p className="tb-chat-product-name">{activeConv.product?.name}</p>
+                  <p className="tb-chat-product-meta">
                     {Number(activeConv.product?.price).toFixed(2)}€
                     {' · '}
                     {getOtherUser(activeConv, user).name}
@@ -288,10 +253,10 @@ export default function Chat({ initialOrderId }) {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="tb-messages">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <p className="text-gray-400 text-sm">
+                <div className="tb-messages-empty">
+                  <p className="tb-messages-empty-text">
                     Inicia la conversación sobre este producto
                   </p>
                 </div>
@@ -307,8 +272,8 @@ export default function Chat({ initialOrderId }) {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-4 py-3 border-t border-gray-100 flex flex-col gap-1">
-              <div className="flex items-end gap-2">
+            <div className="tb-chat-input-area">
+              <div className="tb-chat-input-row">
                 <textarea
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
@@ -316,26 +281,25 @@ export default function Chat({ initialOrderId }) {
                   placeholder="Escribe un mensaje..."
                   rows={1}
                   maxLength={1000}
-                  className="flex-1 border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
-                  style={{ maxHeight: '120px' }}
+                  className="tb-chat-textarea"
                 />
                 <button
                   onClick={handleSend}
                   disabled={sending || !newMessage.trim()}
-                  className="bg-yellow-400 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-yellow-300 transition disabled:opacity-40 flex-shrink-0"
+                  className="tb-chat-send"
                 >
-                  →
+                  <Icon name="send" size={18} />
                 </button>
               </div>
               {newMessage.length >= 900 && (
-                <p className="text-xs text-orange-500 px-1">{1000 - newMessage.length} caracteres restantes</p>
+                <p className="tb-chat-counter">{1000 - newMessage.length} caracteres restantes</p>
               )}
             </div>
           </div>
         ) : (
-          <div className="hidden md:flex flex-1 items-center justify-center flex-col gap-3">
-            <p className="text-4xl">💬</p>
-            <p className="text-gray-400 text-sm">Selecciona una conversación</p>
+          <div className="tb-chat-desktop-empty">
+            <Icon name="chat" size={40} style={{ color: 'var(--fg-4)' }} />
+            <p className="tb-chat-desktop-empty-text">Selecciona una conversación</p>
           </div>
         )}
       </div>
@@ -349,41 +313,31 @@ function ConversationRow({ conv, user, isActive, onClick, onHide }) {
   const hasUnread = conv.unread_count > 0
 
   return (
-    <div className={`group relative flex items-center border-b border-gray-50 transition ${isActive ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
-      <button
-        onClick={onClick}
-        className="flex-1 flex items-center gap-3 px-4 py-3 text-left pr-8"
-      >
-        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+    <div className={`tb-conv-row-wrap${isActive ? ' tb-conv-row-wrap--active' : ''}`}>
+      <button onClick={onClick} className="tb-conv-btn">
+        <div className="tb-conv-thumb">
           {conv.product?.main_image?.image_url ? (
             <img
               src={conv.product.main_image.image_url}
               alt={conv.product.name}
-              className="w-full h-full object-contain p-0.5"
             />
           ) : (
-            <div className="w-full h-full bg-gray-200" />
+            <div className="tb-conv-thumb-empty" />
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-0.5">
-            <p className={`text-sm truncate ${hasUnread ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}`}>
+        <div className="tb-conv-info">
+          <div className="tb-conv-info-top">
+            <p className={`tb-conv-name${hasUnread ? ' tb-conv-name--unread' : ''}`}>
               {other.name}
             </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-400 truncate">
-              {conv.product?.name}
-            </p>
             {hasUnread && (
-              <span className="bg-yellow-400 text-black text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
-                {conv.unread_count}
-              </span>
+              <span className="tb-conv-unread">{conv.unread_count}</span>
             )}
           </div>
+          <p className="tb-conv-product">{conv.product?.name}</p>
           {lastMsg && (
-            <p className="text-xs text-gray-400 truncate mt-0.5">
+            <p className="tb-conv-last-msg">
               {lastMsg.sender_id === user.id ? 'Tú: ' : ''}{lastMsg.message}
             </p>
           )}
@@ -393,9 +347,9 @@ function ConversationRow({ conv, user, isActive, onClick, onHide }) {
       <button
         onClick={(e) => { e.stopPropagation(); onHide(conv.id) }}
         title="Eliminar conversación"
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 transition opacity-0 group-hover:opacity-100"
+        className="tb-conv-hide"
       >
-        ×
+        <Icon name="x" size={14} />
       </button>
     </div>
   )
@@ -405,15 +359,11 @@ function MessageBubble({ message, isOwn }) {
   const senderName = message.sender?.name ?? ''
 
   return (
-    <div className={`flex flex-col gap-0.5 ${isOwn ? 'items-end' : 'items-start'}`}>
-      <p className="text-xs text-gray-400 px-1">{senderName}</p>
-      <div className={`max-w-xs lg:max-w-sm px-4 py-2.5 rounded-2xl text-sm
-        ${isOwn ? 'bg-yellow-400 text-black rounded-br-sm' : 'bg-gray-100 text-gray-900 rounded-bl-sm'}`}
-      >
-        <p className="leading-relaxed">{message.message}</p>
-        <p className={`text-xs mt-1 ${isOwn ? 'text-yellow-800' : 'text-gray-400'}`}>
-          {formatTime(message.created_at)}
-        </p>
+    <div className={`tb-message${isOwn ? ' tb-message--own' : ' tb-message--other'}`}>
+      <p className="tb-message-sender">{senderName}</p>
+      <div className={`tb-bubble${isOwn ? ' tb-bubble--own' : ' tb-bubble--other'}`}>
+        <p className="tb-bubble-text">{message.message}</p>
+        <p className="tb-bubble-time">{formatTime(message.created_at)}</p>
       </div>
     </div>
   )

@@ -1,0 +1,541 @@
+/* ============================================================
+   TRADEBALL · Buttons — /DesignGood spec
+   ============================================================ */
+
+/* Shared base */
+.tb-btn-primary,
+.tb-btn-secondary,
+.tb-btn-ghost,
+.tb-btn-dark,
+.tb-btn-success,
+.tb-btn-danger-outline,
+.tb-btn-danger-solid,
+.tb-btn-icon,
+.tb-btn-back,
+.tb-btn-sell,
+.tb-btn-favorites,
+.tb-btn-profile-nav,
+.tb-btn-register,
+.tb-btn-text,
+.tb-btn-buy,
+.tb-btn-contact,
+.tb-btn-confirm,
+.tb-btn-reject,
+.tb-btn-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast);
+}
+.tb-btn-primary:disabled,
+.tb-btn-secondary:disabled,
+.tb-btn-dark:disabled,
+.tb-btn-success:disabled,
+.tb-btn-danger-outline:disabled,
+.tb-btn-danger-solid:disabled,
+.tb-btn-buy:disabled,
+.tb-btn-confirm:disabled,
+.tb-btn-reject:disabled,
+.tb-btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Primary — red CTA (full-width form button) */
+.tb-btn-primary {
+  background: var(--tb-red);
+  color: #fff;
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-body);
+  width: 100%;
+}
+.tb-btn-primary:hover:not(:disabled)  { background: var(--tb-red-hot); }
+.tb-btn-primary:active:not(:disabled) { background: var(--tb-red-deep); }
+
+/* ── Secondary — outline pill */
+.tb-btn-secondary {
+  background: #fff;
+  color: var(--fg-1);
+  box-shadow: inset 0 0 0 1.5px var(--border-2);
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+}
+.tb-btn-secondary:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
+}
+
+/* ── Dark — black fill (Registrarse / Comprar / Cerrar sesión) */
+.tb-btn-dark {
+  background: var(--bg-inv);
+  color: var(--fg-inv);
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+}
+.tb-btn-dark:hover:not(:disabled) { background: #2A2A2E; }
+
+/* ── Ghost */
+.tb-btn-ghost {
+  background: transparent;
+  color: var(--fg-1);
+  border-radius: var(--r-sm);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+.tb-btn-ghost:hover:not(:disabled) { background: var(--bg-3); }
+
+/* ── Text (login link in header) */
+.tb-btn-text {
+  background: transparent;
+  color: var(--fg-1);
+  border: none;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.tb-btn-text:hover { background: var(--bg-3); }
+
+/* ── Sell (header pill — red) */
+.tb-btn-sell {
+  background: var(--tb-red);
+  color: #fff;
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+.tb-btn-sell:hover { background: var(--tb-red-hot); }
+
+/* ── Favorites (header pill — gray) */
+.tb-btn-favorites {
+  background: var(--bg-3);
+  color: var(--fg-1);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  gap: var(--sp-1);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.tb-btn-favorites:hover { background: #EBEBED; }
+
+/* ── Profile nav (header pill — gray) */
+.tb-btn-profile-nav {
+  background: var(--bg-3);
+  color: var(--fg-1);
+  border-radius: var(--r-pill);
+  padding: 5px 14px 5px 5px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  gap: var(--sp-2);
+  cursor: pointer;
+  font-family: var(--font-body);
+  border: none;
+}
+.tb-btn-profile-nav:hover { background: #EBEBED; }
+
+/* ── Register (header pill — black) */
+.tb-btn-register {
+  background: var(--bg-inv);
+  color: var(--fg-inv);
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-register:hover { background: #2A2A2E; }
+
+/* ── Back link */
+.tb-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  background: transparent;
+  color: var(--fg-1);
+  border: none;
+  padding: var(--sp-1) 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  margin-bottom: var(--sp-5);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.tb-btn-back:hover { opacity: 0.7; }
+
+/* ── Logout (header text) */
+.tb-btn-logout {
+  background: transparent;
+  color: var(--fg-1);
+  border: none;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  font-family: var(--font-body);
+}
+.tb-btn-logout:hover { background: var(--bg-3); }
+
+/* ── Buy — black full-width */
+.tb-btn-buy {
+  background: var(--bg-inv);
+  color: var(--fg-inv);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-body);
+  width: 100%;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-buy:hover:not(:disabled) { background: #2A2A2E; }
+
+/* ── Contact — red full-width */
+.tb-btn-contact {
+  background: var(--tb-red);
+  color: #fff;
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-body);
+  width: 100%;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.tb-btn-contact:hover { background: var(--tb-red-hot); }
+
+/* ── Favorite toggle (outline) */
+.tb-btn-favorite {
+  background: #fff;
+  color: var(--fg-1);
+  box-shadow: inset 0 0 0 1.5px var(--border-2);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: none;
+  font-family: var(--font-body);
+  transition: box-shadow var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
+}
+.tb-btn-favorite:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--border-strong); }
+.tb-btn-favorite--active {
+  background: var(--badge-red-bg);
+  box-shadow: inset 0 0 0 1.5px var(--tb-red);
+  color: var(--tb-red);
+}
+.tb-btn-favorite--active:hover:not(:disabled) { background: #FAD5D5; }
+
+/* ── Confirm / reject in orders */
+.tb-btn-confirm {
+  background: var(--badge-green-fg);
+  color: #fff;
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-confirm:hover:not(:disabled) { background: #178A55; }
+
+.tb-btn-reject {
+  background: #fff;
+  color: var(--tb-red);
+  box-shadow: inset 0 0 0 1.5px var(--tb-red);
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-reject:hover:not(:disabled) { background: var(--badge-red-bg); }
+
+/* ── Danger solid (confirm return) */
+.tb-btn-danger-solid {
+  background: var(--badge-orange-fg);
+  color: #fff;
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-danger-solid:hover:not(:disabled) { background: #9A4D0B; }
+
+/* ── Danger outline */
+.tb-btn-danger-outline {
+  background: #fff;
+  color: var(--tb-red);
+  box-shadow: inset 0 0 0 1.5px var(--tb-red);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-danger-outline:hover:not(:disabled) { background: var(--badge-red-bg); }
+
+/* ── Icon circular button */
+.tb-btn-icon {
+  background: var(--bg-3);
+  color: var(--fg-1);
+  border-radius: var(--r-pill);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+}
+.tb-btn-icon:hover { background: #EBEBED; }
+
+/* ── Clear filters */
+.tb-btn-clear {
+  background: transparent;
+  color: var(--tb-red);
+  border: none;
+  padding: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.tb-btn-clear:hover { color: var(--tb-red-hot); }
+
+/* ── Chat send button (red circle) */
+.tb-chat-send {
+  background: var(--tb-red);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-pill);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--fs-body);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--dur-fast) var(--ease-out), opacity var(--dur-fast);
+}
+.tb-chat-send:hover:not(:disabled) { background: var(--tb-red-hot); }
+.tb-chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Mobile back (chat) */
+.tb-btn-back-mobile {
+  background: transparent;
+  color: var(--fg-1);
+  border: none;
+  padding: var(--sp-1);
+  cursor: pointer;
+  font-size: var(--fs-h3);
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-sm);
+  font-family: var(--font-body);
+}
+.tb-btn-back-mobile:hover { background: var(--bg-3); }
+@media (min-width: 481px) { .tb-btn-back-mobile { display: none; } }
+
+/* ── Hide conversation */
+.tb-conv-hide {
+  position: absolute;
+  right: var(--sp-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: transparent;
+  border: none;
+  color: var(--fg-4);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--dur-base), color var(--dur-base), background var(--dur-base);
+  font-family: var(--font-body);
+}
+.tb-conv-hide:hover { color: var(--tb-red); background: var(--badge-red-bg); }
+
+/* ── Avatar upload button */
+.tb-avatar-upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--bg-inv);
+  border: 3px solid #fff;
+  border-radius: var(--r-pill);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: var(--fs-body);
+}
+.tb-avatar-upload-btn:hover { background: #2A2A2E; }
+
+/* ── Remove image (sell page) */
+.tb-upload-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--bg-inv);
+  border: 2px solid #fff;
+  border-radius: var(--r-pill);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: var(--shadow-1);
+}
+.tb-upload-remove:hover { background: var(--tb-red); }
+
+/* ── Modal close */
+.tb-modal-close {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  background: transparent;
+  border: none;
+  color: var(--fg-3);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  transition: color var(--dur-base), background var(--dur-base);
+  font-family: var(--font-body);
+}
+.tb-modal-close:hover { color: var(--fg-1); background: var(--bg-3); }
+
+/* ── Popup close */
+.tb-popup-close {
+  background: transparent;
+  border: none;
+  color: var(--fg-3);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-size: var(--fs-h3);
+  transition: color var(--dur-base), background var(--dur-base);
+  font-family: var(--font-body);
+}
+.tb-popup-close:hover { color: var(--fg-1); background: var(--bg-3); }
+
+/* ── Drawer close (favorites) */
+.tb-drawer-close {
+  background: transparent;
+  border: none;
+  color: var(--fg-1);
+  font-size: var(--fs-h3);
+  cursor: pointer;
+  padding: var(--sp-1);
+  border-radius: var(--r-sm);
+  transition: background var(--dur-base);
+  line-height: 1;
+  font-family: var(--font-body);
+}
+.tb-drawer-close:hover { background: var(--bg-3); }
+
+/* ── Wallet action buttons */
+.tb-btn-wallet {
+  flex: 1;
+  background: var(--tb-red);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast);
+}
+.tb-btn-wallet:hover { background: var(--tb-red-hot); }
+
+.tb-btn-wallet-outline {
+  flex: 1;
+  background: #fff;
+  color: var(--fg-1);
+  box-shadow: inset 0 0 0 1.5px var(--border-2);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: box-shadow var(--dur-fast);
+}
+.tb-btn-wallet-outline:hover { box-shadow: inset 0 0 0 1.5px var(--border-strong); }
+
+/* ── Header buttons — responsive scale ── */
+@media (max-width: 479px) {
+  .tb-btn-sell       { padding: 7px 10px; font-size: 12px; }
+  .tb-btn-favorites  { padding: 7px 8px;  font-size: 12px; }
+  .tb-btn-profile-nav{ padding: 3px 8px 3px 3px; font-size: 12px; }
+  .tb-btn-register   { padding: 7px 10px; font-size: 12px; }
+  .tb-btn-text       { padding: 4px 6px;  font-size: 12px; }
+  .tb-btn-logout     { padding: 4px 6px;  font-size: 12px; }
+}
+@media (min-width: 480px) and (max-width: 767px) {
+  .tb-btn-sell       { padding: 8px 13px; }
+  .tb-btn-favorites  { padding: 8px 13px; }
+  .tb-btn-profile-nav{ padding: 4px 12px 4px 4px; }
+  .tb-btn-register   { padding: 8px 13px; }
+}

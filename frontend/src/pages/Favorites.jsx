@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import client from '../api/client'
 import ProductCard from '../components/ProductCard'
+import Icon from '../components/Icon'
 
 export default function Favorites({ onClose }) {
   const [favorites, setFavorites] = useState([])
@@ -8,39 +9,30 @@ export default function Favorites({ onClose }) {
 
   useEffect(() => {
     client('/favorites')
-      .then(data => {
-        setFavorites(data)
-        setLoading(false)
-      })
+      .then(data => { setFavorites(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div className="bg-white w-full max-w-md h-full flex flex-col shadow-xl">
-
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Mis favoritos</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition text-xl font-light"
-          >
-            X
-          </button>
+    <div className="tb-overlay tb-overlay--right">
+      <div className="tb-drawer">
+        <div className="tb-drawer-header">
+          <h2 className="tb-drawer-title">Mis favoritos</h2>
+          <button onClick={onClose} className="tb-drawer-close"><Icon name="x" size={20} /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="tb-drawer-body">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <p className="text-gray-400 text-sm">Cargando favoritos...</p>
+            <div className="tb-loading-state">
+              <p className="tb-text-muted">Cargando favoritos...</p>
             </div>
           ) : favorites.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <p className="text-4xl">♡</p>
-              <p className="text-gray-400 text-sm">No tienes favoritos todavia</p>
+            <div className="tb-empty-center">
+              <Icon name="heart" size={40} style={{ color: 'var(--fg-4)' }} />
+              <p className="tb-text-muted">No tienes favoritos todavia</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="tb-favs-grid">
               {favorites.map(product => (
                 <div key={product.id} onClick={onClose}>
                   <ProductCard product={product} />
@@ -49,7 +41,6 @@ export default function Favorites({ onClose }) {
             </div>
           )}
         </div>
-
       </div>
     </div>
   )

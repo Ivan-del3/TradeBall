@@ -3,13 +3,15 @@ import client from '../api/client'
 import Header from '../components/Header'
 import ProductCard from '../components/ProductCard'
 import Filters from '../components/Filters'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Home() {
-  const [products, setProducts]     = useState([])
-  const [categories, setCategories] = useState([])
-  const [loading, setLoading]       = useState(true)
+  usePageTitle(null)
+  const [products, setProducts]       = useState([])
+  const [categories, setCategories]   = useState([])
+  const [loading, setLoading]         = useState(true)
   const [searchInput, setSearchInput] = useState('')
-  const [filters, setFilters]       = useState({
+  const [filters, setFilters]         = useState({
     search: '', category_id: '', condition: '', min_price: '', max_price: ''
   })
 
@@ -17,7 +19,6 @@ export default function Home() {
     client('/categories').then(setCategories)
   }, [])
 
-  // Debounce: espera 400ms tras el último teclazo antes de actualizar filters.search
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilters(prev => ({ ...prev, search: searchInput }))
@@ -41,39 +42,39 @@ export default function Home() {
   }, [filters])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="tb-page">
       <Header />
-      <main className="px-[5%] py-8">
-        <div className="mb-6">
-        <input
-          id="search-products"
-          name="search"
-          type="text"
-          placeholder="Buscar productos Pokemon..."
-          value={searchInput}
-          onChange={e => setSearchInput(e.target.value)}
-          maxLength={40}
-          aria-label="Buscar productos"
-          className="w-full border border-gray-200 rounded-full px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white shadow-sm"
-        />
+      <main className="tb-home-main">
+        <div className="tb-search-wrapper">
+          <input
+            id="search-products"
+            name="search"
+            type="text"
+            placeholder="Buscar productos Pokemon..."
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            maxLength={40}
+            aria-label="Buscar productos"
+            className="tb-search-bar"
+          />
         </div>
 
-        <div className="flex">
-          <div className="w-[20%] pr-6">
+        <div className="tb-home-layout">
+          <div className="tb-sidebar-col">
             <Filters categories={categories} filters={filters} onChange={setFilters} />
           </div>
 
-          <div className="w-[80%]">
+          <div className="tb-content-col">
             {loading ? (
-              <div className="flex justify-center py-20">
-                <p className="text-gray-400">Cargando productos...</p>
+              <div className="tb-loading-state">
+                <p className="tb-text-muted">Cargando productos...</p>
               </div>
             ) : products.length === 0 ? (
-              <div className="flex justify-center py-20">
-                <p className="text-gray-400">No se encontraron productos</p>
+              <div className="tb-loading-state">
+                <p className="tb-text-muted">No se encontraron productos</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="tb-product-grid">
                 {products.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}

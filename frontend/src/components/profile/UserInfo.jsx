@@ -47,90 +47,82 @@ export default function UserInfo() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6">
-      <h2 className="text-lg font-bold text-gray-900 mb-6">Mi perfil</h2>
+    <div className="tb-card">
+      <h2 className="tb-card-title">Mi perfil</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-yellow-400 flex items-center justify-center">
+      <form onSubmit={handleSubmit} className="tb-form-stack-lg">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-5)' }}>
+          <div className="tb-profile-avatar-edit">
+            <div className="tb-profile-avatar-preview">
               {preview ? (
-                <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={preview} alt="Avatar" className="tb-img-cover" />
               ) : (
-                <span className="text-3xl font-bold text-black">
+                <span className="tb-profile-avatar-placeholder">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
-            <label className="absolute bottom-0 right-0 bg-white border border-gray-200 rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition shadow-sm">
-              <span className="text-xs">+</span>
+            <label className="tb-avatar-upload-btn">
+              <span style={{ fontSize: 'var(--fs-small)' }}>+</span>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleAvatar}
-                className="hidden"
+                style={{ display: 'none' }}
               />
             </label>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">{user?.name} {user?.lastname}</p>
-            <p className="text-xs text-gray-400">{user?.email}</p>
+            <p className="tb-profile-user-name">{user?.name} {user?.lastname}</p>
+            <p className="tb-profile-user-email">{user?.email}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+        <div className="tb-form-pair">
+          <div className="tb-form-group">
+            <label className="tb-form-label">Nombre</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               required
               maxLength={20}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="tb-input"
             />
             {name.length >= 15 && (
-              <p className="text-xs text-orange-500 mt-1">{20 - name.length} caracteres restantes</p>
+              <p className="tb-hint-warn">{20 - name.length} caracteres restantes</p>
             )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+          <div className="tb-form-group">
+            <label className="tb-form-label">Apellido</label>
             <input
               type="text"
               value={lastname}
               onChange={e => setLastname(e.target.value)}
               required
               maxLength={20}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="tb-input"
             />
             {lastname.length >= 15 && (
-              <p className="text-xs text-orange-500 mt-1">{20 - lastname.length} caracteres restantes</p>
+              <p className="tb-hint-warn">{20 - lastname.length} caracteres restantes</p>
             )}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <div className="tb-form-group">
+          <label className="tb-form-label">Email</label>
           <input
             type="email"
             value={user?.email}
             disabled
-            className="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed"
+            className="tb-input tb-input--disabled"
           />
         </div>
 
-        {error && (
-          <p className="text-sm text-red-500 bg-red-50 px-4 py-2 rounded-xl">{error}</p>
-        )}
-        {success && (
-          <p className="text-sm text-green-600 bg-green-50 px-4 py-2 rounded-xl">Perfil actualizado correctamente</p>
-        )}
+        {error   && <p className="tb-msg-error">{error}</p>}
+        {success && <p className="tb-msg-success">Perfil actualizado correctamente</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-yellow-400 text-black font-semibold px-6 py-2.5 rounded-xl hover:bg-yellow-300 transition disabled:opacity-50 text-sm"
-        >
+        <button type="submit" disabled={loading} className="tb-btn-primary" style={{ width: 'auto', alignSelf: 'flex-start' }}>
           {loading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </form>

@@ -1,0 +1,295 @@
+/* ============================================================
+   TRADEBALL · Product Detail & Sell Page — /DesignGood spec
+   ============================================================ */
+
+/* ─── Product Detail ─── */
+.tb-product-main-image {
+  aspect-ratio: 1 / 1;
+  background: #fff;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-1);
+}
+@media (min-width: 481px) and (max-width: 767px) {
+  .tb-product-main-image { width: 70%; margin-left: auto; margin-right: auto; }
+}
+.tb-img-contain {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--sp-4);
+}
+.tb-img-contain-sm {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--sp-1);
+}
+.tb-img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tb-img-cover-circle {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--r-pill);
+}
+.tb-no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-4);
+  font-size: var(--fs-small);
+}
+
+/* Thumbnail strip */
+.tb-product-thumbs {
+  display: flex;
+  gap: var(--sp-3);
+  overflow-x: auto;
+  padding-bottom: var(--sp-1);
+}
+.tb-product-thumb {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--r-thumb);
+  overflow: hidden;
+  border: 1px solid var(--border-2);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color var(--dur-fast);
+  padding: 0;
+}
+.tb-product-thumb:hover { border-color: var(--border-strong); }
+.tb-product-thumb--active { border: 2px solid var(--tb-red); }
+
+/* Product info text */
+.tb-product-category {
+  font-size: var(--fs-tag);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin: 0;
+}
+.tb-product-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  color: var(--fg-1);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0;
+}
+@media (max-width: 480px) { .tb-product-title { font-size: var(--fs-h2); } }
+
+.tb-product-price {
+  font-family: var(--font-body);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+  margin: 0;
+}
+@media (max-width: 480px) { .tb-product-price { font-size: var(--fs-h2); } }
+
+.tb-condition-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.tb-product-desc-section { }
+.tb-product-desc-label {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0 0 var(--sp-2);
+}
+.tb-product-desc-text {
+  font-size: var(--fs-small);
+  color: var(--fg-1);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-words;
+  margin: 0;
+}
+
+/* Seller card in detail */
+.tb-seller-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 14px;
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+.tb-seller-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--tb-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: var(--fs-body);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.tb-seller-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-pill); }
+.tb-seller-name { font-size: var(--fs-body); font-weight: 700; color: var(--fg-1); margin: 0; }
+.tb-seller-role { font-size: var(--fs-meta); color: var(--fg-3); }
+
+/* ─── Sell Page ─── */
+.tb-upload-preview {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+.tb-upload-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--r-thumb);
+  border: 1px solid var(--border-2);
+}
+.tb-upload-img--primary { border: 2px solid var(--tb-red); }
+.tb-upload-badge-primary {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  background: var(--tb-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+}
+.tb-upload-add {
+  width: 96px;
+  height: 96px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-thumb);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: #fff;
+  color: var(--fg-3);
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.tb-upload-add:hover { border-color: var(--tb-red); background: var(--badge-red-bg); }
+.tb-upload-add-icon  { font-size: var(--fs-h2); color: var(--fg-3); }
+.tb-upload-add-label { font-size: var(--fs-meta); color: var(--fg-3); }
+
+/* Sell success */
+.tb-sell-success {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px var(--sp-6);
+  gap: var(--sp-4);
+  text-align: center;
+}
+.tb-sell-success-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--badge-green-bg);
+  border-radius: var(--r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-h2);
+  color: var(--badge-green-fg);
+}
+.tb-sell-success-title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+
+/* Loading state in detail */
+.tb-state-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 128px var(--sp-6);
+}
+
+/* ─── Filters sidebar — white card, sticky top 88px ─── */
+.tb-filters-aside {
+  width: 100%;
+}
+
+/* The filter toggle button */
+.tb-filter-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.tb-filter-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--fg-1);
+  flex: 1;
+}
+.tb-filter-badge {
+  background: var(--tb-red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+
+/* Filter panel (inside the aside card) */
+.tb-filters-aside {
+  background: #fff;
+  border-radius: var(--r-md);
+  padding: var(--sp-1);
+  box-shadow: var(--shadow-1);
+  position: sticky;
+  top: 30px;
+}
+.tb-filter-panel {
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.tb-filter-clear-row {
+  display: flex;
+  justify-content: flex-start;
+}
+.tb-filter-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}

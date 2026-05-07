@@ -1,0 +1,164 @@
+/* ============================================================
+   TRADEBALL · Design Tokens — /DesignGood light theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  /* --------- Brand Core --------- */
+  --tb-red:        #E53535;
+  --tb-red-hot:    #CC2B2B;
+  --tb-red-deep:   #B71C1C;
+  --tb-black:      #0E0E10;
+  --tb-white:      #fff;
+
+  /* --------- Surfaces (light) --------- */
+  --bg-0:   #fff;       /* page */
+  --bg-1:   #fff;       /* card / panel */
+  --bg-2:   #fff;       /* input / secondary */
+  --bg-3:   #F9F9F9;    /* hover / subtle */
+  --bg-inv: #0E0E10;    /* dark / inverted */
+
+  /* --------- Foreground --------- */
+  --fg-1:   #0E0E10;    /* primary text */
+  --fg-2:   #5C5C66;    /* secondary */
+  --fg-3:   #8A8A95;    /* muted */
+  --fg-4:   #B7B7BF;    /* very muted */
+  --fg-inv: #fff;       /* on dark */
+
+  /* --------- Borders --------- */
+  --border-1:      #F1F1F3;
+  --border-2:      #E5E5EA;
+  --border-strong: #C8C8CF;
+
+  /* --------- Semantic --------- */
+  --success: #1FA968;
+  --warn:    #A77A00;
+  --danger:  #E53535;
+  --info:    #2D7FF9;
+
+  /* --------- Badge colour pairs (bg / fg) --------- */
+  --badge-green-bg:  #E4F5EC;
+  --badge-green-fg:  #1FA968;
+  --badge-blue-bg:   #E5EFFE;
+  --badge-blue-fg:   #2D7FF9;
+  --badge-yellow-bg: #FFF6DC;
+  --badge-yellow-fg: #A77A00;
+  --badge-orange-bg: #FCEBDA;
+  --badge-orange-fg: #B85F0E;
+  --badge-gray-bg:   #EFEFF1;
+  --badge-gray-fg:   #5C5C66;
+  --badge-red-bg:    #FDECEC;
+  --badge-red-fg:    #E53535;
+
+  /* --------- Condition shorthand --------- */
+  --cond-mint: #1FA968;
+  --cond-near: #2D7FF9;
+  --cond-good: #A77A00;
+  --cond-fair: #B85F0E;
+  --cond-used: #5C5C66;
+
+  /* --------- Fonts --------- */
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* --------- Type scale --------- */
+  --fs-display: 48px;   /* wallet balance */
+  --fs-h1:      32px;   /* product title */
+  --fs-h2:      24px;   /* modal/section title */
+  --fs-h2b:     22px;   /* section headers (ventas, compras…) */
+  --fs-h3:      20px;   /* sub-section */
+  --fs-title:   17px;
+  --fs-body:    15px;   /* body / CTA buttons */
+  --fs-small:   14px;   /* nav items, body copy */
+  --fs-label:   13px;   /* form labels */
+  --fs-meta:    12px;   /* badges, timestamps, hints */
+  --fs-tag:     11px;   /* uppercase category tags */
+
+  --lh-tight: 1.05;
+  --lh-snug:  1.2;
+  --lh-body:  1.5;
+
+  --tracking-tight: -0.02em;
+  --tracking-flat:   0em;
+  --tracking-wide:  0.08em;
+
+  /* --------- Spacing (4px base) --------- */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-7:  32px;
+  --sp-8:  40px;
+  --sp-9:  56px;
+
+  /* --------- Radii --------- */
+  --r-xs:    4px;
+  --r-sm:    8px;
+  --r-md:    12px;    /* inputs, thumbnails, buttons-full */
+  --r-thumb: 14px;    /* sell-page photo previews */
+  --r-lg:    20px;    /* cards */
+  --r-modal: 24px;    /* modals */
+  --r-pill:  999px;
+
+  /* --------- Elevation (light theme) --------- */
+  --shadow-1:   0 1px 2px rgba(14,14,16,.04), 0 4px 16px rgba(14,14,16,.04);
+  --shadow-2:   0 2px 6px rgba(14,14,16,.06), 0 12px 28px rgba(14,14,16,.08);
+  --shadow-3:   0 8px 24px rgba(14,14,16,.10), 0 24px 60px rgba(14,14,16,.18);
+  --shadow-red: 0 8px 28px rgba(229,53,53,.20);
+
+  /* --------- Motion --------- */
+  --ease-out:  cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:  120ms;
+  --dur-base:  200ms;
+  --dur-slow:  320ms;
+
+  /* --------- Breakpoints (reference only — use px values in @media) --------- */
+  --tb-bp-mobile:  480px;
+  --tb-bp-tablet:  768px;
+  --tb-bp-lg:      991px;
+  --tb-bp-desktop: 1280px;
+}
+
+/* ── Base reset ── */
+html {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+*, *::before, *::after { box-sizing: inherit; margin: 0; padding: 0; }
+
+#root {
+  width: 100%;
+  height: auto;
+  min-height: 100dvh;
+}
+
+body {
+  width: 100%;
+  height: auto;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-3);   /* #F9F9F9 page background, matching DesignGood index.html */
+  color: var(--fg-1);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Remove default focus ring; show red ring on keyboard navigation */
+button:focus          { outline: none; }
+button:focus-visible  { box-shadow: 0 0 0 3px rgba(229,53,53,.22); }
+a:focus               { outline: none; }
+a:focus-visible       { box-shadow: 0 0 0 3px rgba(229,53,53,.22); border-radius: 4px; }
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes spin   { to { transform: rotate(360deg) } }
