@@ -63,14 +63,12 @@
   height: 80px;
   border-radius: var(--r-thumb);
   overflow: hidden;
-  border: 1px solid var(--border-2);
+  border: 2px solid var(--border-2);
   background: #fff;
   cursor: pointer;
-  transition: border-color var(--dur-fast);
   padding: 0;
 }
-.tb-product-thumb:hover { border-color: var(--border-strong); }
-.tb-product-thumb--active { border: 2px solid var(--tb-red); }
+.tb-product-thumb--active { border-color: var(--tb-red); }
 
 /* Product info text */
 .tb-product-category {
