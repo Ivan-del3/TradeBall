@@ -5,9 +5,7 @@ import Favorites from '../pages/Favorites'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import LogoutModal from '../components/LogoutModal'
-
-// Componente auxiliar para el fondo del modal
-
+import Icon from './Icon'
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -23,38 +21,43 @@ export default function Header() {
 
   return (
     <div>
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div onClick={()=> window.dispatchEvent(new CustomEvent('navigate:home'))} className="text-2xl font-bold text-yellow-400 tracking-tight">
+      <header className="tb-header">
+        <div className="tb-header-inner">
+          <div
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
+            className="tb-logo"
+          >
+            <img src="/logo.png" width="50" height="50" alt="Tradeball" />
             TradeBall
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Acciones visibles solo ≥ 684px */}
+          <div className="tb-header-actions tb-header-actions--desktop">
             {user ? (
-              <div className="flex items-center gap-3">
-
+              <div className="tb-header-actions">
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('navigate:sell'))}
-                  className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
+                  className="tb-btn-sell"
                 >
-                  + Vender
-                </button> 
+                  <Icon name="plus" size={16} />
+                  Vender
+                </button>
 
                 <button
                   onClick={() => setShowFavorites(true)}
-                  className="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                  className="tb-btn-favorites"
                 >
-                  <span className="text-red-400">♥</span>
-                  <span className="hidden sm:inline">Favoritos</span>
+                  <Icon name="heart" size={16} />
+                  <span className="tb-favorites-label">Favoritos</span>
                 </button>
-                
+
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('navigate:profile'))}
-                  className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition"
+                  className="tb-btn-profile-nav"
                 >
-                  <div className="w-7 h-7 bg-yellow-400 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-black">
+                  <div className="tb-avatar-xs">
                     {user.avatar_url ? (
-                      <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
                     ) : (
                       user.name.charAt(0).toUpperCase()
                     )}
@@ -62,57 +65,92 @@ export default function Header() {
                   {user.name}
                 </button>
 
-                <button
-                  onClick={() => setShowLogout(true)}
-                  className="text-sm text-gray-500 hover:text-gray-800 transition"
-                >
+                <button onClick={() => setShowLogout(true)} className="tb-btn-logout">
                   Salir
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={openLogin}
-                  className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition"
-                >
-                  + Vender
+              <div className="tb-header-actions">
+                <button onClick={openLogin} className="tb-btn-sell">
+                  <Icon name="plus" size={16} />
+                  Vender
                 </button>
-                <button
-                  onClick={openLogin}
-                  className="text-sm font-medium text-gray-700 hover:text-black transition"
-                >
-                  Iniciar sesión
-                </button>
-                <button
-                  onClick={openRegister}
-                  className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition"
-                >
-                  Registrarse
-                </button>
+                <button onClick={openLogin} className="tb-btn-text">Iniciar sesión</button>
+                <button onClick={openRegister} className="tb-btn-register">Registrarse</button>
               </div>
             )}
           </div>
         </div>
       </header>
-      
+
+      {/* Barra de navegación inferior — solo < 684px */}
+      <nav className="tb-bottom-nav">
+        {user ? (
+          <>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('navigate:sell'))}
+              className="tb-bottom-nav-item"
+            >
+              <Icon name="plus" size={20} />
+              <span>Vender</span>
+            </button>
+
+            <button
+              onClick={() => setShowFavorites(true)}
+              className="tb-bottom-nav-item"
+            >
+              <Icon name="heart" size={20} />
+              <span>Favoritos</span>
+            </button>
+
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('navigate:profile'))}
+              className="tb-bottom-nav-item"
+            >
+              <div className="tb-avatar-xs">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )}
+              </div>
+              <span>Perfil</span>
+            </button>
+
+            <button
+              onClick={() => setShowLogout(true)}
+              className="tb-bottom-nav-item"
+            >
+              <Icon name="logout" size={20} />
+              <span>Salir</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button onClick={openLogin} className="tb-bottom-nav-item">
+              <Icon name="plus" size={20} />
+              <span>Vender</span>
+            </button>
+            <button onClick={openLogin} className="tb-bottom-nav-item">
+              <Icon name="user" size={20} />
+              <span>Iniciar sesión</span>
+            </button>
+            <button onClick={openRegister} className="tb-bottom-nav-item tb-bottom-nav-item--accent">
+              <Icon name="user" size={20} />
+              <span>Registrarse</span>
+            </button>
+          </>
+        )}
+      </nav>
+
       {modal === 'login' && (
-        <Login
-          onSwitch={() => openRegister()}
-          onSuccess={closeModal}
-          onClose={closeModal}
-        />
+        <Login onSwitch={() => openRegister()} onSuccess={closeModal} onClose={closeModal} />
       )}
       {modal === 'register' && (
-        <Register
-          onSwitch={() => openLogin()}
-          onSuccess={closeModal}
-          onClose={closeModal}
-        />
+        <Register onSwitch={() => openLogin()} onSuccess={closeModal} onClose={closeModal} />
       )}
 
-      {showFavorites && (
-        <Favorites onClose={() => setShowFavorites(false)} />
-      )}
+      {showFavorites && <Favorites onClose={() => setShowFavorites(false)} />}
 
       {showLogout && (
         <LogoutModal
