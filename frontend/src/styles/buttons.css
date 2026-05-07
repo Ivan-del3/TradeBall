@@ -372,7 +372,7 @@
   font-family: var(--font-body);
 }
 .tb-btn-back-mobile:hover { background: var(--bg-3); }
-@media (min-width: 481px) { .tb-btn-back-mobile { display: none; } }
+@media (min-width: 681px) { .tb-btn-back-mobile { display: none; } }
 
 /* ── Hide conversation */
 .tb-conv-hide {
