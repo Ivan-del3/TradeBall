@@ -1,0 +1,315 @@
+/* ============================================================
+   TRADEBALL · Navigation & Header — /DesignGood spec
+   ============================================================ */
+
+/* ─── Header — 64px tall, white, sticky ─── */
+.tb-header {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid var(--border-1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 64px;
+}
+
+.tb-header-inner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1280px;
+  height: 64px;
+  margin: 0 auto;
+  padding: 0 var(--sp-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+@media (min-width: 480px) {
+  .tb-header-inner { padding: 0 var(--sp-5); }
+}
+@media (min-width: 768px) {
+  .tb-header-inner { padding: 0 var(--sp-6); }
+}
+@media (min-width: 1280px) {
+  .tb-header-inner { padding: 0 var(--sp-7); }
+}
+
+
+/* Logo — pokeball image + wordmark */
+.tb-logo {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--tb-red);
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tb-logo img { flex-shrink: 0; display: block; width: 36px; height: 36px; }
+@media (min-width: 480px) {
+  .tb-logo { font-size: 18px; gap: 8px; }
+  .tb-logo img { width: 42px; height: 42px; }
+}
+@media (min-width: 768px) {
+  .tb-logo { font-size: 21px; gap: 10px; }
+  .tb-logo img { width: 50px; height: 50px; }
+}
+.tb-logo:hover { color: var(--tb-red-hot); }
+
+/* Header actions group */
+.tb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+@media (min-width: 768px) {
+  .tb-header-actions { gap: var(--sp-3); }
+}
+
+/* Ocultar acciones del header en móvil; mostrar bottom nav */
+.tb-header-actions--desktop { display: none; }
+@media (min-width: 684px) {
+  .tb-header-actions--desktop { display: flex; }
+}
+
+/* ─── Bottom Nav — fija en la parte inferior, solo < 684px ─── */
+.tb-bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 70px;
+  background: #fff;
+  border-top: 1px solid var(--border-1);
+  box-shadow: var(--shadow-2);
+  z-index: 50;
+  padding: 0 var(--sp-2) 10px;
+  box-sizing: border-box;
+}
+@media (min-width: 684px) {
+  .tb-bottom-nav { display: none; }
+}
+
+.tb-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-3);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: color var(--dur-fast);
+  padding: 0;
+}
+.tb-bottom-nav-item:hover { color: var(--fg-1); }
+.tb-bottom-nav-item--accent { color: var(--tb-red); }
+.tb-bottom-nav-item--accent:hover { color: var(--tb-red-hot); }
+
+/* Avatar in header (28px circle) */
+.tb-avatar-xs {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--tb-red);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.tb-avatar-xs img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ─── Profile Sidebar Card ─── */
+.tb-profile-card {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sp-2);
+}
+
+/* Large avatar (64px) */
+.tb-profile-avatar-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-pill);
+  background: var(--tb-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.tb-profile-avatar-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--r-pill);
+}
+
+.tb-profile-name {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+.tb-profile-email {
+  font-size: var(--fs-label);
+  color: var(--fg-3);
+  margin: 0;
+}
+
+/* ─── Sidebar Nav ─── */
+.tb-sidebar-nav {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  padding: var(--sp-2);
+}
+
+.tb-sidebar-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 11px 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--fg-1);
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  position: relative;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.tb-sidebar-nav-item:hover { background: var(--bg-3); }
+
+/* Active: red-tinted bg, red text, left accent bar */
+.tb-sidebar-nav-item--active {
+  background: var(--badge-red-bg);
+  color: var(--tb-red);
+}
+.tb-sidebar-nav-item--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--tb-red);
+  border-radius: 3px;
+}
+.tb-sidebar-nav-item--active:hover { background: #FAD5D5; }
+
+/* ─── Mobile Nav ─── */
+.tb-mobile-nav {
+  width: 100%;
+  margin-bottom: var(--sp-4);
+}
+@media (min-width: 481px) { .tb-mobile-nav { display: none; } }
+
+.tb-mobile-nav-toggle {
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--sp-3) var(--sp-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--fg-1);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast);
+}
+.tb-mobile-nav-toggle:hover { background: var(--bg-3); }
+
+.tb-mobile-nav-current { display: flex; align-items: center; gap: var(--sp-2); }
+.tb-mobile-nav-chevron { color: var(--fg-3); font-size: var(--fs-meta); }
+
+.tb-mobile-nav-dropdown {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  margin-top: var(--sp-2);
+  overflow: hidden;
+  padding: var(--sp-2);
+}
+.tb-mobile-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 11px 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--fg-1);
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.tb-mobile-nav-item:hover { background: var(--bg-3); }
+.tb-mobile-nav-item--active { background: var(--badge-red-bg); color: var(--tb-red); }
+.tb-mobile-nav-item--active:hover { background: #FAD5D5; }
+
+/* ─── Profile Edit Avatar ─── */
+.tb-profile-avatar-edit { position: relative; display: inline-block; }
+
+.tb-profile-avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--r-pill);
+  background: var(--tb-red);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-profile-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.tb-profile-avatar-placeholder {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  color: #fff;
+}
+.tb-profile-user-name { font-size: var(--fs-small); font-weight: 700; color: var(--fg-1); margin: 0; }
+.tb-profile-user-email { font-size: var(--fs-meta); color: var(--fg-3); margin: 0; }

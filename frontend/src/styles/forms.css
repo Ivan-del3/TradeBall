@@ -1,0 +1,208 @@
+/* ============================================================
+   TRADEBALL · Forms — /DesignGood spec
+   ============================================================ */
+
+/* Input base */
+.tb-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--fg-1);
+  outline: none;
+  transition: border-color var(--dur-fast);
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+}
+.tb-input::placeholder { color: var(--fg-3); }
+.tb-input:focus { border-color: var(--fg-1); }
+.tb-input--error { border-color: rgba(229,53,53,0.5); }
+.tb-input--error:focus { border-color: var(--danger); }
+.tb-input--disabled {
+  background: var(--bg-3);
+  color: var(--fg-2);
+  cursor: not-allowed;
+  border-color: var(--border-1);
+}
+
+/* Textarea */
+.tb-textarea {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--fg-1);
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--dur-fast);
+  box-sizing: border-box;
+}
+.tb-textarea::placeholder { color: var(--fg-3); }
+.tb-textarea:focus { border-color: var(--fg-1); }
+
+/* Select */
+.tb-select {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 12px 36px 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--fg-1);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  box-sizing: border-box;
+  transition: border-color var(--dur-fast);
+}
+.tb-select:focus { border-color: var(--fg-1); }
+.tb-select option { background: #fff; color: var(--fg-1); }
+.tb-select--error { border-color: rgba(229,53,53,0.5); }
+
+/* Form label */
+.tb-form-label {
+  display: block;
+  font-size: var(--fs-label);
+  font-weight: 500;
+  color: var(--fg-2);
+  margin-bottom: 6px;
+}
+
+/* Form group */
+.tb-form-group { display: flex; flex-direction: column; }
+
+/* Pair of fields in grid */
+.tb-form-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-4);
+}
+@media (min-width: 481px) { .tb-form-pair { grid-template-columns: 1fr 1fr; } }
+
+/* 2-column row (price + condition) */
+.tb-form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+
+/* Input with suffix (€) */
+.tb-input-suffix-wrap { position: relative; }
+.tb-input-suffix {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fg-3);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Form messages */
+.tb-msg-error {
+  font-size: var(--fs-small);
+  color: var(--danger);
+  background: var(--badge-red-bg);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-md);
+}
+.tb-msg-success {
+  font-size: var(--fs-small);
+  color: var(--success);
+  background: var(--badge-green-bg);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-md);
+}
+
+/* Error alert block */
+.tb-alert-error {
+  background: var(--badge-red-bg);
+  border: 1px solid rgba(229,53,53,0.2);
+  color: var(--danger);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-small);
+  margin-bottom: var(--sp-4);
+}
+
+/* Form stacks */
+.tb-form-stack    { display: flex; flex-direction: column; gap: var(--sp-4); }
+.tb-form-stack-lg { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+/* Price range (min — max) */
+.tb-price-range { display: flex; align-items: center; gap: var(--sp-2); }
+.tb-range-sep   { color: var(--fg-4); flex-shrink: 0; font-size: var(--fs-small); }
+
+/* Search bar — pill shape per DesignGood */
+.tb-search-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: var(--r-md);
+  padding: 14px 22px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--fg-1);
+  outline: none;
+  border: none;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--dur-fast);
+  box-sizing: border-box;
+}
+.tb-search-bar::placeholder { color: var(--fg-3); }
+.tb-search-bar:focus { box-shadow: var(--shadow-2); }
+
+/* Chat textarea */
+.tb-chat-textarea {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-thumb);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--fg-1);
+  outline: none;
+  resize: none;
+  max-height: 120px;
+  line-height: var(--lh-body);
+  transition: border-color var(--dur-fast);
+}
+.tb-chat-textarea::placeholder { color: var(--fg-3); }
+.tb-chat-textarea:focus { border-color: var(--fg-1); }
+
+/* Wallet input with suffix */
+.tb-wallet-input-wrap { position: relative; }
+.tb-wallet-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 12px 36px 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--fg-1);
+  outline: none;
+  transition: border-color var(--dur-fast);
+  box-sizing: border-box;
+}
+.tb-wallet-input::placeholder { color: var(--fg-3); }
+.tb-wallet-input:focus { border-color: var(--fg-1); }
+
+/* Form footer link */
+.tb-form-footer {
+  margin-top: var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-small);
+  color: var(--fg-2);
+}

@@ -1,0 +1,237 @@
+/* ============================================================
+   TRADEBALL · Modals, Overlays & Drawers — /DesignGood spec
+   ============================================================ */
+
+/* Overlay background */
+.tb-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14,14,16,.6);
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-5);
+}
+
+/* Right-side overlay (favorites drawer) */
+.tb-overlay--right {
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+  place-items: unset;
+}
+
+/* Standard modal — 480px, 24px radius */
+.tb-modal {
+  position: relative;
+  background: #fff;
+  border-radius: var(--r-modal);
+  box-shadow: var(--shadow-3);
+  padding: var(--sp-8);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (max-width: 480px) {
+  .tb-modal {
+    max-width: 100%;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--sp-6);
+  }
+  .tb-overlay { place-items: unset; align-items: flex-end; padding: 0; }
+}
+
+/* Auth modal (min-height) */
+.tb-modal-auth {
+  min-height: 480px;
+  justify-content: center;
+}
+
+/* Logout modal */
+.tb-modal-logout {
+  width: 480px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+}
+@media (max-width: 480px) {
+  .tb-modal-logout {
+    width: 100%;
+    min-height: auto;
+  }
+}
+
+/* Popup (purchase / return request) */
+.tb-popup {
+  position: relative;
+  background: #fff;
+  border-radius: var(--r-modal);
+  box-shadow: var(--shadow-3);
+  padding: var(--sp-8);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (max-width: 480px) {
+  .tb-popup { max-width: 100%; padding: var(--sp-6); }
+}
+
+/* Modal header row */
+.tb-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Modal titles */
+.tb-modal-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+.tb-modal-title--sm {
+  font-family: var(--font-body);
+  font-size: var(--fs-h2b);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+.tb-modal-subtitle { font-size: var(--fs-small); color: var(--fg-2); margin: 0; }
+.tb-modal-emoji    { font-size: 48px; line-height: 1; text-align: center; }
+
+/* Modal success / welcome state */
+.tb-modal-success {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--sp-4);
+}
+
+/* Form title inside modal */
+.tb-form-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+
+/* Popup product preview row */
+.tb-popup-product {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-3);
+  border-radius: var(--r-thumb);
+}
+.tb-popup-product--return {
+  background: var(--badge-orange-bg);
+  border: 1px solid rgba(184,95,14,0.15);
+}
+.tb-popup-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-popup-thumb img { width: 100%; height: 100%; object-fit: contain; padding: var(--sp-1); }
+.tb-popup-thumb-empty { font-size: var(--fs-meta); color: var(--fg-4); }
+.tb-popup-info { min-width: 0; flex: 1; }
+.tb-popup-product-name {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--fg-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.tb-popup-product-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+/* Buyer row in popup */
+.tb-buyer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--tb-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.tb-buyer-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.tb-buyer-name  { font-size: var(--fs-small); font-weight: 700; color: var(--fg-1); margin: 0; }
+.tb-buyer-email { font-size: var(--fs-meta); color: var(--fg-3); }
+
+/* Return notice text */
+.tb-return-text {
+  font-size: var(--fs-small);
+  color: var(--badge-orange-fg);
+  line-height: var(--lh-body);
+  margin: 0;
+}
+.tb-return-note { font-size: var(--fs-meta); color: var(--fg-3); margin-top: var(--sp-2); }
+
+/* ─── Favorites Drawer ─── */
+.tb-drawer {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-3);
+  transform: translateX(0);
+  transition: transform 240ms cubic-bezier(.2,.7,.2,1);
+}
+.tb-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-5);
+  border-bottom: 1px solid var(--border-1);
+}
+.tb-drawer-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0;
+}
+.tb-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+}
