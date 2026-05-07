@@ -53,7 +53,7 @@ function App() {
       'navigate:profile':      (e)  => navigate({ name: 'profile', params: {section: e.detail?.section} }),
       'navigate:profile:chat': (e) => navigate({ name: 'profile', params: { section: 'chat', orderId: e.detail?.orderId } }),
       'navigate:sell':         ()  => navigate({ name: 'sell',    params: {} }),
-      'navigate:home':         ()  => setHistory([{ name: 'home', params: {} }]), 
+      'navigate:home':         ()  => setHistory([{ name: 'home', params: {} }]),
       'navigate:back':         ()  => goBack(),
     }
 
@@ -61,8 +61,6 @@ function App() {
     return () => Object.entries(handlers).forEach(([event, handler]) => window.removeEventListener(event, handler))
   }, [])
 
-  // Si la sesión expiró o el token fue invalidado, redirige a home
-  // para no renderizar páginas que requieren usuario autenticado.
   useEffect(() => {
     if (!loading && !user && (page.name === 'profile' || page.name === 'sell')) {
       setHistory([{ name: 'home', params: {} }])
@@ -71,8 +69,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400">Cargando...</p>
+      <div className="tb-loading-screen">
+        <p className="tb-text-muted">Cargando...</p>
       </div>
     )
   }
