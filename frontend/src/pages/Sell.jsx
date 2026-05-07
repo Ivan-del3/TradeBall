@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import client from '../api/client'
 import Header from '../components/Header'
 import Icon from '../components/Icon'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Sell() {
+  usePageTitle('Vender')
   const [categories, setCategories] = useState([])
   const [images, setImages]         = useState([])
   const [previews, setPreviews]     = useState([])

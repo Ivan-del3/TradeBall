@@ -6,6 +6,7 @@ import Icon from '../components/Icon'
 import Login from './Login'
 import { useAuthModal } from '../context/AuthModalContext'
 import Register from './Register'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function ProductDetail({ productId, canGoBack }) {
   const { user }                              = useAuth()
@@ -19,6 +20,7 @@ export default function ProductDetail({ productId, canGoBack }) {
   const [buyError, setBuyError]               = useState('')
   const [buySuccess, setBuySuccess]           = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
+  usePageTitle(product?.name ?? null)
 
   useEffect(() => {
     client(`/products/${productId}`)

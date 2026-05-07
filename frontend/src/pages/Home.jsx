@@ -3,8 +3,10 @@ import client from '../api/client'
 import Header from '../components/Header'
 import ProductCard from '../components/ProductCard'
 import Filters from '../components/Filters'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Home() {
+  usePageTitle(null)
   const [products, setProducts]       = useState([])
   const [categories, setCategories]   = useState([])
   const [loading, setLoading]         = useState(true)
