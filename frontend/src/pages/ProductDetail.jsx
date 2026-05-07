@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 import Header from '../components/Header'
+import Icon from '../components/Icon'
 import Login from './Login'
 import { useAuthModal } from '../context/AuthModalContext'
 import Register from './Register'
-import Home from './Home'
 
 export default function ProductDetail({ productId, canGoBack }) {
   const { user }                              = useAuth()
@@ -19,27 +19,20 @@ export default function ProductDetail({ productId, canGoBack }) {
   const [buyError, setBuyError]               = useState('')
   const [buySuccess, setBuySuccess]           = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
+
   useEffect(() => {
     client(`/products/${productId}`)
-      .then(data => {
-        setProduct(data)
-        setLoading(false)
-      })
+      .then(data => { setProduct(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [productId])
 
-  // Comprobar si ya es favorito
   useEffect(() => {
     if (!user || !product) return
     client('/favorites')
-      .then(favs => {
-        const isFav = favs.some(f => f.id === product.id)
-        setIsFavorite(isFav)
-      })
+      .then(favs => setIsFavorite(favs.some(f => f.id === product.id)))
       .catch(() => {})
   }, [user, product])
 
-  // Cargar saldo del monedero si el usuario no es el propietario del producto
   useEffect(() => {
     if (!user || !product || user.id === product.user?.id) return
     client('/wallet')
@@ -48,10 +41,7 @@ export default function ProductDetail({ productId, canGoBack }) {
   }, [user, product])
 
   const handleFavorite = async () => {
-    if (!user) {
-      openLogin()
-      return
-    }
+    if (!user) { openLogin(); return }
     setFavoriteLoading(true)
     try {
       if (isFavorite) {
@@ -70,19 +60,14 @@ export default function ProductDetail({ productId, canGoBack }) {
 
   const handleBuy = async () => {
     if (!user) { openLogin(); return }
-
     if (walletBalance !== null && walletBalance < product.price) {
       setBuyError('Saldo insuficiente. Recarga tu monedero antes de comprar.')
       return
     }
-
     setBuyLoading(true)
     setBuyError('')
     try {
-      await client('/purchases', {
-        method: 'POST',
-        body: { product_id: product.id },
-      })
+      await client('/purchases', { method: 'POST', body: { product_id: product.id } })
       setBuySuccess(true)
       setProduct(prev => ({ ...prev, available: 'reservado' }))
     } catch (err) {
@@ -93,10 +78,7 @@ export default function ProductDetail({ productId, canGoBack }) {
   }
 
   const handleContact = async () => {
-    if (!user) {
-      openLogin()
-      return
-    }
+    if (!user) { openLogin(); return }
     try {
       const order = await client('/chat/conversations', {
         method: 'POST',
@@ -110,18 +92,23 @@ export default function ProductDetail({ productId, canGoBack }) {
     }
   }
 
+  const conditionBadge = {
+    nuevo:      'tb-condition-badge--nuevo',
+    casi_nuevo: 'tb-condition-badge--casi_nuevo',
+    usado:      'tb-condition-badge--usado',
+  }
   const conditionLabel = {
-    nuevo:      { text: 'Nuevo',      color: 'bg-green-100 text-green-700 border-green-200' },
-    casi_nuevo: { text: 'Casi nuevo', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    usado:      { text: 'Usado',      color: 'bg-gray-100 text-gray-600 border-gray-200' },
+    nuevo:      'Nuevo',
+    casi_nuevo: 'Casi nuevo',
+    usado:      'Usado',
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="tb-page">
         <Header />
-        <div className="flex justify-center items-center py-32">
-          <p className="text-gray-400">Cargando producto...</p>
+        <div className="tb-state-loading">
+          <p className="tb-text-muted">Cargando producto...</p>
         </div>
       </div>
     )
@@ -129,66 +116,57 @@ export default function ProductDetail({ productId, canGoBack }) {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="tb-page">
         <Header />
-        <div className="flex justify-center items-center py-32">
-          <p className="text-gray-400">Producto no encontrado</p>
+        <div className="tb-state-loading">
+          <p className="tb-text-muted">Producto no encontrado</p>
         </div>
       </div>
     )
   }
 
-  const images    = product.images || []
-  const condition = conditionLabel[product.condition]
-
+  const images = product.images || []
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="tb-page">
       <Header />
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="tb-container-narrow">
 
         <button
           onClick={() => window.dispatchEvent(new CustomEvent(canGoBack ? 'navigate:back' : 'navigate:home'))}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6 transition"
+          className="tb-btn-back"
         >
-          ← Volver
+          <Icon name="arrow-left" size={16} /> Volver
         </button>
 
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div className="tb-card" style={{ padding: 0 }}>
+          <div className="tb-product-detail-grid">
 
-            
-            <div className="p-6 border-r border-gray-100">
-              <div className="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3">
+            <div className="tb-product-gallery">
+              <div className="tb-product-main-image">
                 {images.length > 0 ? (
                   <img
                     src={images[selectedImage]?.image_url}
                     alt={product.name}
-                    className="w-full h-full object-contain p-4"
+                    className="tb-img-contain"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-300">
-                    Sin imagen
-                  </div>
+                  <div className="tb-no-image">Sin imagen</div>
                 )}
               </div>
 
               {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="tb-product-thumbs">
                   {images.map((img, index) => (
                     <button
                       key={img.id}
                       onClick={() => setSelectedImage(index)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${
-                        selectedImage === index
-                          ? 'border-yellow-400'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`tb-product-thumb${selectedImage === index ? ' tb-product-thumb--active' : ''}`}
                     >
                       <img
                         src={img.image_url}
                         alt={`${product.name} ${index + 1}`}
-                        className="w-full h-full object-contain p-1"
+                        className="tb-img-contain-sm"
                       />
                     </button>
                   ))}
@@ -196,89 +174,68 @@ export default function ProductDetail({ productId, canGoBack }) {
               )}
             </div>
 
-            <div className="p-6 flex flex-col">
+            <div className="tb-product-info-panel">
               {product.category && (
-                <span className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-                  {product.category.name}
-                </span>
+                <p className="tb-product-category">{product.category.name}</p>
               )}
 
-              <h1 className="text-2xl font-bold text-gray-900 mb-3">
-                {product.name}
-              </h1>
+              <h1 className="tb-product-title">{product.name}</h1>
 
-              <p className="text-3xl font-bold text-gray-900 mb-4">
-                {Number(product.price).toFixed(2)}€
-              </p>
+              <p className="tb-product-price">{Number(product.price).toFixed(2)}€</p>
 
-              <div className="flex items-center gap-3 mb-6">
-                <span className={`text-sm px-3 py-1 rounded-full border font-medium ${condition.color}`}>
-                  {condition.text}
+              <div className="tb-condition-row">
+                <span className={`tb-condition-badge ${conditionBadge[product.condition] ?? ''}`}>
+                  {conditionLabel[product.condition] ?? product.condition}
                 </span>
               </div>
 
               {product.description && (
-                <div className="mb-6">
-                  <h2 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wider">
-                    Descripcion
-                  </h2>
-                  <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap break-words">
-                    {product.description}
-                  </p>
+                <div className="tb-product-desc-section">
+                  <p className="tb-product-desc-label">Descripción</p>
+                  <p className="tb-product-desc-text">{product.description}</p>
                 </div>
               )}
 
               {product.user && (
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-6">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-black">
-                  {product.user.avatar_url ? (
-                    <img src={product.user.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    product.user.name.charAt(0).toUpperCase()
-                  )}
+                <div className="tb-seller-card">
+                  <div className="tb-seller-avatar">
+                    {product.user.avatar_url ? (
+                      <img src={product.user.avatar_url} alt="Avatar" className="tb-img-cover-circle" />
+                    ) : (
+                      product.user.name.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="tb-seller-name">
                       {product.user.name} {product.user.lastname}
                     </p>
-                    <p className="text-xs text-gray-400">Vendedor</p>
+                    <p className="tb-seller-role">Vendedor</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-col gap-3 mt-auto">
+              <div className="tb-product-actions">
                 {user && user.id !== product.user?.id && buySuccess && (
-                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
+                  <div className="tb-notice">
                     Solicitud pendiente — esperando confirmación del vendedor
                   </div>
                 )}
 
                 {user && user.id !== product.user?.id && !buySuccess && product.available === 'disponible' && (
                   <>
-                    <button
-                      onClick={handleBuy}
-                      disabled={buyLoading}
-                      className="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50"
-                    >
+                    <button onClick={handleBuy} disabled={buyLoading} className="tb-btn-buy">
                       {buyLoading ? 'Procesando...' : 'Comprar'}
                     </button>
-                    {buyError && (
-                      <p className="text-xs text-red-500 text-center -mt-1">{buyError}</p>
-                    )}
+                    {buyError && <p className="tb-hint-error" style={{ textAlign: 'center' }}>{buyError}</p>}
                   </>
                 )}
 
                 {user && user.id !== product.user?.id && !buySuccess && product.available === 'reservado' && (
-                  <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-semibold py-3 rounded-xl text-center text-sm">
-                    Producto reservado
-                  </div>
+                  <div className="tb-notice">Producto reservado</div>
                 )}
 
                 {user && user.id !== product.user?.id && (
-                  <button
-                    onClick={handleContact}
-                    className="w-full bg-yellow-400 text-black font-semibold py-3 rounded-xl hover:bg-yellow-300 transition"
-                  >
+                  <button onClick={handleContact} className="tb-btn-contact">
                     Contactar con el vendedor
                   </button>
                 )}
@@ -287,15 +244,9 @@ export default function ProductDetail({ productId, canGoBack }) {
                   <button
                     onClick={handleFavorite}
                     disabled={favoriteLoading}
-                    className={`w-full py-3 rounded-xl font-semibold border-2 transition flex items-center justify-center gap-2 ${
-                      isFavorite
-                        ? 'bg-red-50 border-red-200 text-red-500 hover:bg-red-100'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
+                    className={`tb-btn-favorite${isFavorite ? ' tb-btn-favorite--active' : ''}`}
                   >
-                    <span className={isFavorite ? 'text-red-500' : 'text-gray-400'}>
-                      {isFavorite ? '♥' : '♡'}
-                    </span>
+                    <Icon name={isFavorite ? 'heart-filled' : 'heart'} size={18} />
                     {favoriteLoading
                       ? 'Cargando...'
                       : isFavorite
@@ -305,22 +256,14 @@ export default function ProductDetail({ productId, canGoBack }) {
                 )}
 
                 {modal === 'login' && (
-                  <Login
-                    onSwitch={() => openRegister()}
-                    onSuccess={closeModal}
-                    onClose={closeModal}
-                  />
+                  <Login onSwitch={() => openRegister()} onSuccess={closeModal} onClose={closeModal} />
                 )}
                 {modal === 'register' && (
-                  <Register
-                    onSwitch={() => openLogin()}
-                    onSuccess={closeModal}
-                    onClose={closeModal}
-                  />
+                  <Register onSwitch={() => openLogin()} onSuccess={closeModal} onClose={closeModal} />
                 )}
 
                 {!user && (
-                  <p className="text-center text-xs text-gray-400">
+                  <p className="tb-hint-text">
                     Inicia sesion para contactar o guardar favoritos
                   </p>
                 )}
@@ -330,6 +273,5 @@ export default function ProductDetail({ productId, canGoBack }) {
         </div>
       </main>
     </div>
-    
   )
 }

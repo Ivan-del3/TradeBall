@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login({ onSwitch, onSuccess }) {
-  const { user, login }               = useAuth()
+  const { user, login }         = useAuth()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState(null)
@@ -22,47 +22,51 @@ export default function Login({ onSwitch, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onMouseDown={(e) => { if (e.target === e.currentTarget) onSuccess?.() }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[480px] h-[480px] relative flex flex-col justify-center p-10">
-
-        <button onClick={onSuccess} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    <div className="tb-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onSuccess?.() }}>
+      <div className="tb-modal tb-modal-auth">
+        <button onClick={onSuccess} className="tb-modal-close">&times;</button>
 
         {user ? (
-          <div className="flex flex-col items-center justify-center text-center gap-4">
-            <div className="text-5xl">👋</div>
-            <h2 className="text-2xl font-bold text-gray-800">¡Bienvenido, {user.name}!</h2>
-            <p className="text-gray-500">Has iniciado sesión correctamente.</p>
+          <div className="tb-modal-success">
+            <div className="tb-modal-emoji">👋</div>
+            <h2 className="tb-modal-title">¡Bienvenido, {user.name}!</h2>
+            <p className="tb-modal-subtitle">Has iniciado sesión correctamente.</p>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold mb-6 text-center">Iniciar sesión</h1>
+            <h1 className="tb-form-title">Iniciar sesión</h1>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
+            {error && <div className="tb-alert-error">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <form onSubmit={handleSubmit} className="tb-form-stack">
+              <div className="tb-form-group">
+                <label className="tb-form-label">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="tb-input"
+                />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div className="tb-form-group">
+                <label className="tb-form-label">Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="tb-input"
+                />
               </div>
-              <button type="submit" disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 transition">
+              <button type="submit" disabled={loading} className="tb-btn-primary">
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>
             </form>
 
-            <p className="mt-4 text-center text-sm text-gray-600">
+            <p className="tb-form-footer">
               ¿No tienes cuenta?{' '}
-              <button onClick={onSwitch} className="text-blue-600 hover:underline">Regístrate</button>
+              <button onClick={onSwitch} className="tb-form-link">Regístrate</button>
             </p>
           </>
         )}
