@@ -295,6 +295,17 @@
 .tb-mobile-nav-item--active { background: var(--badge-red-bg); color: var(--tb-red); }
 .tb-mobile-nav-item--active:hover { background: #FAD5D5; }
 
+@media (max-width: 680px) {
+  .tb-profile-layout--chat .tb-mobile-nav {
+    position: sticky;
+    top: 80px;
+    z-index: 20;
+    background: var(--bg-0);
+    padding-bottom: var(--sp-2);
+    margin-bottom: 0;
+  }
+}
+
 /* ─── Profile Edit Avatar ─── */
 .tb-profile-avatar-edit { position: relative; display: inline-block; }
 

@@ -57,7 +57,7 @@ export default function Profile({ initialSection, initialOrderId }) {
       <Header />
 
       <div className="tb-main-container">
-        <div className="tb-profile-layout">
+        <div className={`tb-profile-layout${activeSection === 'chat' ? ' tb-profile-layout--chat' : ''}`}>
 
           {/* Sidebar escritorio */}
           <aside className="tb-profile-sidebar">

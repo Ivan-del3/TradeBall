@@ -143,14 +143,8 @@
 }
 @media (max-width: 680px) {
   .tb-chat-wrapper {
-    margin-top: var(--sp-3);
+    height: calc(100svh - 220px);
     margin-bottom: calc(-1 * var(--sp-9));
-  }
-  .tb-chat-header {
-    position: sticky;
-    top: 80px;
-    z-index: 2;
-    background: var(--bg-1);
   }
 }
 
