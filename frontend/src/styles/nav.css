@@ -2,7 +2,7 @@
    TRADEBALL · Navigation & Header — /DesignGood spec
    ============================================================ */
 
-/* ─── Header — 64px tall, white, sticky ─── */
+/* ─── Header — 80px tall, white, sticky ─── */
 .tb-header {
   width: 100%;
   background: #fff;
@@ -10,14 +10,16 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 64px;
+  height: 80px;
+  display: flex;
+  align-items: center;
 }
 
 .tb-header-inner {
   box-sizing: border-box;
   width: 100%;
   max-width: 1280px;
-  height: 64px;
+  height: 80px;
   margin: 0 auto;
   padding: 0 var(--sp-4);
   display: flex;
@@ -94,7 +96,6 @@
   border-top: 1px solid var(--border-1);
   box-shadow: var(--shadow-2);
   z-index: 50;
-  padding: 0 var(--sp-2) 10px;
   box-sizing: border-box;
 }
 @media (min-width: 684px) {
