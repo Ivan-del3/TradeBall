@@ -243,7 +243,7 @@
   width: 100%;
   margin-bottom: var(--sp-4);
 }
-@media (min-width: var(--tb-bp-lg)) { .tb-mobile-nav { display: none; } }
+@media (min-width: 991px ) { .tb-mobile-nav { display: none; } }
 
 .tb-mobile-nav-toggle {
   width: 100%;
