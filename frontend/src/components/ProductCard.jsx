@@ -28,9 +28,10 @@ export default function ProductCard({ product }) {
         <p className="tb-product-card-name">{product.name}</p>
         <div className="tb-product-card-footer">
           <span className="tb-product-card-price">{Number(product.price).toFixed(2)}€</span>
-          <span className={condition.cls}>{condition.text}</span>
+          <span className={`${condition.cls} tb-badge--in-footer`}>{condition.text}</span>
         </div>
         <p className="tb-product-card-category">{product.category?.name}</p>
+        <span className={`${condition.cls} tb-badge--below-cat`}>{condition.text}</span>
       </div>
     </div>
   )

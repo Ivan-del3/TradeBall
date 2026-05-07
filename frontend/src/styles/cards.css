@@ -117,6 +117,11 @@
   font-weight: 600;
   white-space: nowrap;
 }
+.tb-badge--below-cat { display: none; }
+@media (max-width: 479px) {
+  .tb-badge--in-footer { display: none; }
+  .tb-badge--below-cat { display: inline-flex; margin-top: var(--sp-1); }
+}
 .tb-badge--nuevo     { background: var(--badge-green-bg);  color: var(--badge-green-fg);  }
 .tb-badge--casi-nuevo { background: var(--badge-blue-bg);   color: var(--badge-blue-fg);   }
 .tb-badge--usado     { background: var(--badge-gray-bg);   color: var(--badge-gray-fg);   }
