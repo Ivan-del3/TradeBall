@@ -47,7 +47,7 @@ export default function Header() {
                   onClick={() => setShowFavorites(true)}
                   className="tb-btn-favorites"
                 >
-                  <Icon name="heart" size={16} />
+                  <Icon name="heart-filled" size={16} color="var(--tb-red)" />
                   <span className="tb-favorites-label">Favoritos</span>
                 </button>
 
@@ -66,7 +66,8 @@ export default function Header() {
                 </button>
 
                 <button onClick={() => setShowLogout(true)} className="tb-btn-logout">
-                  Salir
+                  <Icon name="logout" size={15} />
+                  Cerrar sesión
                 </button>
               </div>
             ) : (
@@ -122,7 +123,7 @@ export default function Header() {
               className="tb-bottom-nav-item"
             >
               <Icon name="logout" size={20} />
-              <span>Salir</span>
+              <span>Cerrar sesión</span>
             </button>
           </>
         ) : (
