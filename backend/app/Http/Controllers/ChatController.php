@@ -152,7 +152,11 @@ class ChatController extends Controller
             }
         }
 
-        broadcast(new MessageSent($message))->toOthers();
+        try {
+            broadcast(new MessageSent($message))->toOthers();
+        } catch (\Exception $e) {
+            // Reverb unreachable — message persisted, real-time push skipped
+        }
 
         return response()->json($message);
     }
