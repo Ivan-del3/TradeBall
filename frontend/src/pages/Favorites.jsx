@@ -14,8 +14,8 @@ export default function Favorites({ onClose }) {
   }, [])
 
   return (
-    <div className="tb-overlay tb-overlay--right">
-      <div className="tb-drawer">
+    <div className="tb-overlay tb-overlay--right" onClick={onClose}>
+      <div className="tb-drawer" onClick={e => e.stopPropagation()}>
         <div className="tb-drawer-header">
           <h2 className="tb-drawer-title">Mis favoritos</h2>
           <button onClick={onClose} className="tb-drawer-close"><Icon name="x" size={20} /></button>
