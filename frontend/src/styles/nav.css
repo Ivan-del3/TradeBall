@@ -35,6 +35,9 @@
 @media (min-width: 1280px) {
   .tb-header-inner { padding: 0 var(--sp-7); }
 }
+@media (min-width: 1450px) {
+  .tb-header-inner { max-width: 1600px; padding: 0 var(--sp-8); }
+}
 
 
 /* Logo — pokeball image + wordmark */
