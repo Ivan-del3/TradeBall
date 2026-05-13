@@ -76,7 +76,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric|min:0|max:99999',
+            'price'       => 'required|numeric|min:0.5|max:99999',
             'condition'   => 'required|in:nuevo,casi_nuevo,usado',
             'description' => 'nullable|string|max:2000',
             'images'      => 'required|array|min:1|max:5',
@@ -116,7 +116,7 @@ class ProductController extends Controller
 
         $validated = $request->validate([
             'name'        => 'sometimes|string|max:150',
-            'price'       => 'sometimes|numeric|min:0|max:99999',
+            'price'       => 'sometimes|numeric|min:0.5|max:99999',
             'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
             'description' => 'nullable|string|max:2000',
             'available'   => 'sometimes|in:disponible,reservado,vendido',

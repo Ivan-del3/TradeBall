@@ -46,9 +46,9 @@ export default function Sell() {
   const validate = () => {
     const e = {}
     if (!form.name.trim())               e.name        = 'El nombre es obligatorio'
-    if (!form.price)                     e.price       = 'El precio es obligatorio'
-    else if (Number(form.price) < 0)     e.price       = 'El precio no puede ser negativo'
-    else if (Number(form.price) > 99999) e.price       = 'El precio máximo es 99.999€'
+    if (!form.price)                       e.price = 'El precio es obligatorio'
+    else if (Number(form.price) < 0.5)   e.price = 'El precio mínimo es 0,50€'
+    else if (Number(form.price) > 99999) e.price = 'El precio máximo es 99.999€'
     if (!form.condition)                 e.condition   = 'El estado es obligatorio'
     if (!form.category_id)               e.category_id = 'La categoría es obligatoria'
     if (images.length === 0)             e.images      = 'Añade al menos una imagen'
@@ -198,7 +198,7 @@ export default function Sell() {
                     value={form.price}
                     onChange={e => update('price', e.target.value)}
                     placeholder="0.00"
-                    min="0"
+                    min="0.5"
                     max="99999"
                     step="0.01"
                     className={`tb-input${errors.price ? ' tb-input--error' : ''}`}
