@@ -48,7 +48,7 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(12);
+        $products = $query->orderBy('created_at', 'desc')->paginate(15);
 
         return response()->json($products);
     }
