@@ -24,7 +24,9 @@ export default function Wallet() {
 
   useEffect(() => { loadWallet() }, [])
 
-  const balance = Number(wallet?.balance || 0)
+  const balance        = Number(wallet?.balance || 0)
+  const pendingAmount  = Number(wallet?.pending_amount || 0)
+  const availableBalance = Math.max(0, balance - pendingAmount)
 
   const openForm = (type) => { setView(type); setAmount(''); setError('') }
   const closeForm = ()    => { setView(null); setAmount(''); setError('') }
@@ -36,7 +38,7 @@ export default function Wallet() {
       if (val > 99999)           return 'El importe máximo es 99.999€.'
       if (balance + val > 99999) return `Solo puedes ingresar hasta ${(99999 - balance).toFixed(2)}€.`
     }
-    if (view === 'withdraw' && val > balance) return 'Saldo insuficiente.'
+    if (view === 'withdraw' && val > availableBalance) return 'Saldo insuficiente.'
     return ''
   }
 
@@ -70,8 +72,13 @@ export default function Wallet() {
         <h2 className="tb-card-title">Monedero</h2>
 
         <div className="tb-wallet-balance-card">
-          <p className="tb-wallet-balance-label">Saldo disponible</p>
+          <p className="tb-wallet-balance-label">Saldo total</p>
           <p className="tb-wallet-balance-amount">{balance.toFixed(2)}€</p>
+          {pendingAmount > 0 && (
+            <p className="tb-text-muted" style={{ fontSize: 'var(--fs-meta)', marginTop: '0.25rem' }}>
+              Reservado en compras pendientes: {pendingAmount.toFixed(2)}€ · Disponible para retirar: {availableBalance.toFixed(2)}€
+            </p>
+          )}
         </div>
 
         {view === null && (
@@ -97,7 +104,7 @@ export default function Wallet() {
                 onChange={e => { setAmount(e.target.value); setError('') }}
                 placeholder="0.00"
                 min="0.01"
-                max={view === 'deposit' ? 99999 : balance}
+                max={view === 'deposit' ? 99999 : availableBalance}
                 step="0.01"
                 className="tb-wallet-input"
               />
@@ -105,7 +112,8 @@ export default function Wallet() {
             </div>
             {view === 'withdraw' && (
               <p className="tb-text-muted" style={{ fontSize: 'var(--fs-meta)' }}>
-                Máximo disponible: {balance.toFixed(2)}€
+                Máximo disponible: {availableBalance.toFixed(2)}€
+                {pendingAmount > 0 && ` (${pendingAmount.toFixed(2)}€ reservados en compras pendientes)`}
               </p>
             )}
             {error && <p className="tb-hint-error">{error}</p>}

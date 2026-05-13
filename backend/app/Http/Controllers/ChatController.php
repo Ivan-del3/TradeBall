@@ -76,6 +76,13 @@ class ChatController extends Controller
             ->first();
 
         if (!$order) {
+            // Solo se puede crear una orden-chat si el producto sigue disponible.
+            // Si ya está reservado o vendido por otra persona, no creamos una orden
+            // falsa que el vendedor podría confundir con una compra real.
+            if ($product->available !== 'disponible') {
+                return response()->json(['message' => 'Este producto ya no está disponible.'], 422);
+            }
+
             $order = Order::create([
                 'buyer_id'       => $request->user()->id,
                 'seller_id'      => $product->user_id,

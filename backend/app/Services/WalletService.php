@@ -45,8 +45,17 @@ class WalletService
         return DB::transaction(function () use ($user, $amount) {
             $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
 
-            if ($wallet->balance < $amount) {
-                throw new \InvalidArgumentException('Saldo insuficiente.');
+            $pendingReserved = $user->purchases()
+                ->where('status', 'pendiente')
+                ->where('escrow_active', true)
+                ->sum('purchase_price');
+
+            $available = $wallet->balance - $pendingReserved;
+
+            if ($available < $amount) {
+                throw new \InvalidArgumentException(
+                    'Saldo insuficiente. Tienes compras pendientes de aceptación que reservan parte de tu saldo.'
+                );
             }
 
             $this->repo->subtractBalance($wallet, $amount, 'retirada');

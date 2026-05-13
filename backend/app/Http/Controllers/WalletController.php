@@ -11,12 +11,21 @@ class WalletController extends Controller
 
     public function show(Request $request)
     {
-        $wallet = $request->user()
-            ->wallet()
+        $user = $request->user();
+
+        $wallet = $user->wallet()
             ->with(['transactions' => fn($q) => $q->orderBy('created_at', 'desc')->limit(20)])
             ->first();
 
-        return response()->json($wallet);
+        $pendingAmount = (float) $user->purchases()
+            ->where('status', 'pendiente')
+            ->where('escrow_active', true)
+            ->sum('purchase_price');
+
+        $data = $wallet->toArray();
+        $data['pending_amount'] = $pendingAmount;
+
+        return response()->json($data);
     }
 
     public function deposit(Request $request)

@@ -142,7 +142,7 @@ class ProductController extends Controller
 
         // Impide borrar un producto con escrow activo: el comprador
         // perdería su referencia de compra y el dinero quedaría bloqueado.
-        if ($product->orders()->where('status', 'pendiente')->exists()) {
+        if ($product->orders()->where('status', 'pendiente')->where('escrow_active', true)->exists()) {
             return response()->json(['message' => 'No puedes eliminar un producto con una compra pendiente.'], 422);
         }
 

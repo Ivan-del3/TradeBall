@@ -39,6 +39,19 @@ class PurchaseService
                 throw new \InvalidArgumentException('Saldo insuficiente para realizar la compra.');
             }
 
+            $pendingReserved = (float) $buyer->purchases()
+                ->where('status', 'pendiente')
+                ->where('escrow_active', true)
+                ->sum('purchase_price');
+
+            if ($wallet->balance - $pendingReserved < $product->price) {
+                throw new \InvalidArgumentException(
+                    'Saldo insuficiente. Tienes compras pendientes de aceptación por ' .
+                    number_format($pendingReserved, 2, ',', '.') .
+                    '€ que, si se aceptan, no dejarían saldo suficiente para esta compra.'
+                );
+            }
+
             $order = $this->purchaseRepo->createOrder(
                 $buyer->id,
                 $product->user_id,
@@ -58,6 +71,7 @@ class PurchaseService
         $order = Order::where('id', $orderId)
             ->where('seller_id', $seller->id)
             ->where('status', 'pendiente')
+            ->where('escrow_active', true)
             ->with(['product', 'buyer'])
             ->firstOrFail();
 
@@ -72,6 +86,7 @@ class PurchaseService
         $order = Order::where('id', $orderId)
             ->where('seller_id', $seller->id)
             ->where('status', 'pendiente')
+            ->where('escrow_active', true)
             ->with('product')
             ->firstOrFail();
 

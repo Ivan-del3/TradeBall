@@ -42,6 +42,9 @@ class Product extends Model
     }
 
     public function pendingOrder() {
-        return $this->hasOne(Order::class)->whereIn('status', ['pendiente', 'devolucion_solicitada'])->latestOfMany('updated_at');
+        return $this->hasOne(Order::class)
+            ->whereIn('status', ['pendiente', 'devolucion_solicitada'])
+            ->where('escrow_active', true)
+            ->latestOfMany('updated_at');
     }
 }

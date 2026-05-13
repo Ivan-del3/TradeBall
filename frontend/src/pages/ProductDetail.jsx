@@ -19,6 +19,7 @@ export default function ProductDetail({ productId, canGoBack }) {
   const [buyLoading, setBuyLoading]           = useState(false)
   const [buyError, setBuyError]               = useState('')
   const [buySuccess, setBuySuccess]           = useState(false)
+  const [contactError, setContactError]       = useState('')
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
   usePageTitle(product?.name ?? null)
 
@@ -81,6 +82,7 @@ export default function ProductDetail({ productId, canGoBack }) {
 
   const handleContact = async () => {
     if (!user) { openLogin(); return }
+    setContactError('')
     try {
       const order = await client('/chat/conversations', {
         method: 'POST',
@@ -90,7 +92,7 @@ export default function ProductDetail({ productId, canGoBack }) {
         detail: { orderId: order.id }
       }))
     } catch (err) {
-      console.error(err)
+      setContactError(err.message || 'No se pudo iniciar la conversación.')
     }
   }
 
@@ -237,9 +239,12 @@ export default function ProductDetail({ productId, canGoBack }) {
                 )}
 
                 {user && user.id !== product.user?.id && (
-                  <button onClick={handleContact} className="tb-btn-contact">
-                    Contactar con el vendedor
-                  </button>
+                  <>
+                    <button onClick={handleContact} className="tb-btn-contact">
+                      Contactar con el vendedor
+                    </button>
+                    {contactError && <p className="tb-hint-error" style={{ textAlign: 'center' }}>{contactError}</p>}
+                  </>
                 )}
 
                 {product.available !== 'vendido' && user?.id !== product.user?.id && (
