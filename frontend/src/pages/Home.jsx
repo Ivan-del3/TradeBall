@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import client from '../api/client'
 import Header from '../components/Header'
 import ProductCard from '../components/ProductCard'
@@ -10,10 +10,14 @@ export default function Home() {
   const [products, setProducts]       = useState([])
   const [categories, setCategories]   = useState([])
   const [loading, setLoading]         = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore]         = useState(false)
+  const [page, setPage]               = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters]         = useState({
     search: '', category_id: '', condition: '', min_price: '', max_price: ''
   })
+  const isFirstLoad = useRef(true)
 
   useEffect(() => {
     client('/categories').then(setCategories)
@@ -26,20 +30,51 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [searchInput])
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false
+      return
+    }
+    setPage(1)
+    setProducts([])
+  }, [filters])
+
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    const isLoadMore = page > 1
+
+    if (isLoadMore) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+    }
+
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params.append(k, v)
     })
+    params.append('page', page)
+
     client(`/products?${params.toString()}`)
-      .then(data  => { if (!cancelled) setProducts(data.data ?? []) })
-      .catch(()   => { if (!cancelled) setProducts([]) })
-      .finally(() => { if (!cancelled) setLoading(false) })
+      .then(data => {
+        if (cancelled) return
+        const newProducts = data.data ?? []
+        setProducts(prev => isLoadMore ? [...prev, ...newProducts] : newProducts)
+        setHasMore(data.current_page < data.last_page)
+      })
+      .catch(() => {
+        if (!cancelled) setProducts(prev => isLoadMore ? prev : [])
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false)
+          setLoadingMore(false)
+        }
+      })
 
     return () => { cancelled = true }
-  }, [filters])
+  }, [filters, page])
 
   return (
     <div className="tb-page">
@@ -74,11 +109,25 @@ export default function Home() {
                 <p className="tb-text-muted">No se encontraron productos</p>
               </div>
             ) : (
-              <div className="tb-product-grid">
-                {products.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="tb-product-grid">
+                  {products.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <div className="tb-load-more-wrapper">
+                    <button
+                      className="tb-load-more-btn"
+                      onClick={() => setPage(prev => prev + 1)}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? 'Cargando...' : <>Cargar más <span aria-hidden="true">↓</span></>}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
