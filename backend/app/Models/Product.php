@@ -8,11 +8,14 @@ class Product extends Model
 {
     protected $fillable = [
         'user_id', 'category_id', 'name', 'price',
-        'condition', 'description', 'available', 'visible',
+        'condition', 'description', 'available', 'visible', 'is_deleted',
     ];
 
     protected function casts(): array {
-        return ['visible' => 'boolean'];
+        return [
+            'visible'    => 'boolean',
+            'is_deleted' => 'boolean',
+        ];
     }
 
     public function user() {
