@@ -14,7 +14,7 @@ class PurchaseController extends Controller
         $purchases = $request->user()
             ->purchases()
             ->whereIn('status', ['pendiente', 'confirmado', 'devolucion_solicitada', 'completado', 'cancelado'])
-            ->with(['product.mainImage', 'seller'])
+            ->with(['product.mainImage', 'seller', 'reviews'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -29,6 +29,7 @@ class PurchaseController extends Controller
                 'main_image' => $order->product->mainImage,
             ] : null,
             'seller'         => $order->seller,
+            'has_review'     => $order->reviews->where('user_id', $request->user()->id)->isNotEmpty(),
         ]));
     }
 

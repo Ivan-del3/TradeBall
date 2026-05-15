@@ -19,6 +19,7 @@ Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle
 Route::get('/products',        [ProductController::class, 'index'])->middleware('throttle:60,1');
 Route::get('/products/{id}',   [ProductController::class, 'show'])->middleware('throttle:60,1');
 Route::get('/categories',      [ProductController::class, 'categories'])->middleware('throttle:30,1');
+Route::get('/users/{id}/reviews', [ReviewController::class, 'userReviews'])->middleware('throttle:60,1');
 
 // Protegidas (necesitan el token Bearer en el header)
 Route::middleware('auth:sanctum')->group(function () {
@@ -58,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
+    Route::post('/reviews',       [ReviewController::class,   'store']);
 
     // Broadcasting auth con Sanctum (EventSource no puede enviar headers, pero Echo sí)
     Route::post('/broadcasting/auth', fn () => Broadcast::auth(request()));

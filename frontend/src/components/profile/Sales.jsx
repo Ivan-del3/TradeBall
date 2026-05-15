@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 import Icon from '../Icon'
+import { useAuth } from '../../context/AuthContext'
+import ReviewPopup from './ReviewPopup'
 
 const STATUS_LABEL = {
   disponible: { text: 'A la venta',  cls: 'tb-status-badge--disponible' },
@@ -11,6 +13,7 @@ const STATUS_LABEL = {
 }
 
 export default function Sales() {
+  const { user }                    = useAuth()
   const [sales, setSales]           = useState([])
   const [loading, setLoading]       = useState(true)
   const [popup, setPopup]           = useState(null)
@@ -113,7 +116,7 @@ export default function Sales() {
         ) : (
           <div className="tb-order-list">
             {sales.map(product => (
-              <SaleRow key={product.id} product={product} onOpenPopup={openPopup} onToggleVisibility={handleToggleVisibility} onDelete={handleDelete} />
+              <SaleRow key={product.id} product={product} userId={user?.id} onOpenPopup={openPopup} onToggleVisibility={handleToggleVisibility} onDelete={handleDelete} />
             ))}
           </div>
         )}
@@ -143,8 +146,12 @@ export default function Sales() {
   )
 }
 
-function SaleRow({ product, onOpenPopup, onToggleVisibility, onDelete }) {
+function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [reviewing, setReviewing]               = useState(false)
+  const [reviewed, setReviewed]                 = useState(
+    product.completed_order?.reviews?.some(r => r.user_id === userId) ?? false
+  )
 
   const image      = product.main_image?.image_url
   const statusKey  = product.available === 'disponible' && !product.visible ? 'pausado' : product.available
@@ -245,7 +252,24 @@ function SaleRow({ product, onOpenPopup, onToggleVisibility, onDelete }) {
             )}
           </>
         )}
+        {product.available === 'vendido' && product.completed_order && !reviewed && (
+          <button
+            className="tb-sale-edit-btn"
+            title="Valorar comprador"
+            onClick={e => { e.stopPropagation(); setReviewing(true) }}
+          >
+            <Icon name="star" size={14} />
+          </button>
+        )}
       </div>
+
+      {reviewing && (
+        <ReviewPopup
+          orderId={product.completed_order.id}
+          reviewedName={`${product.completed_order.buyer?.name} ${product.completed_order.buyer?.lastname}`}
+          onDone={(submitted) => { setReviewing(false); if (submitted) setReviewed(true) }}
+        />
+      )}
     </div>
   )
 }

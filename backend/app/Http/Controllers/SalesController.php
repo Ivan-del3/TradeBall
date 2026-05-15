@@ -11,7 +11,7 @@ class SalesController extends Controller
         $sales = $request->user()
             ->products()
             ->where('is_deleted', false)
-            ->with(['mainImage', 'category', 'pendingOrder.buyer'])
+            ->with(['mainImage', 'category', 'pendingOrder.buyer', 'completedOrder.buyer', 'completedOrder.reviews'])
             ->orderBy('created_at', 'desc')
             ->get();
 

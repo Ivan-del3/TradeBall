@@ -50,4 +50,10 @@ class Product extends Model
             ->where('escrow_active', true)
             ->latestOfMany('updated_at');
     }
+
+    public function completedOrder() {
+        return $this->hasOne(Order::class)
+            ->where('status', 'completado')
+            ->latestOfMany();
+    }
 }
