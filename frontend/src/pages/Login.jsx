@@ -46,6 +46,7 @@ export default function Login({ onSwitch, onSuccess }) {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   className="tb-input"
                 />
               </div>
@@ -56,6 +57,7 @@ export default function Login({ onSwitch, onSuccess }) {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   className="tb-input"
                 />
               </div>
