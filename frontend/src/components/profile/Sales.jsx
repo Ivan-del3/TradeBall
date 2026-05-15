@@ -5,6 +5,7 @@ import Icon from '../Icon'
 
 const STATUS_LABEL = {
   disponible: { text: 'A la venta',  cls: 'tb-status-badge--disponible' },
+  pausado:    { text: 'Pausado',     cls: 'tb-status-badge--vendido' },
   reservado:  { text: 'En curso',    cls: 'tb-status-badge--reservado' },
   vendido:    { text: 'Finalizado',  cls: 'tb-status-badge--vendido' },
 }
@@ -32,6 +33,20 @@ export default function Sales() {
 
   const openPopup  = (product) => { setPopup(product); setActionErr('') }
   const closePopup = ()        => { setPopup(null);    setActionErr('') }
+
+  const handleToggleVisibility = async (productId) => {
+    try {
+      const updated = await client(`/products/${productId}/toggle-visibility`, { method: 'PATCH' })
+      setSales(prev => prev.map(p => p.id === productId ? { ...p, visible: updated.visible } : p))
+    } catch {}
+  }
+
+  const handleDelete = async (productId) => {
+    try {
+      await client(`/products/${productId}`, { method: 'DELETE' })
+      setSales(prev => prev.filter(p => p.id !== productId))
+    } catch {}
+  }
 
   const handleConfirm = async () => {
     if (!popup?.pending_order) return
@@ -98,7 +113,7 @@ export default function Sales() {
         ) : (
           <div className="tb-order-list">
             {sales.map(product => (
-              <SaleRow key={product.id} product={product} onOpenPopup={openPopup} />
+              <SaleRow key={product.id} product={product} onOpenPopup={openPopup} onToggleVisibility={handleToggleVisibility} onDelete={handleDelete} />
             ))}
           </div>
         )}
@@ -128,9 +143,12 @@ export default function Sales() {
   )
 }
 
-function SaleRow({ product, onOpenPopup }) {
+function SaleRow({ product, onOpenPopup, onToggleVisibility, onDelete }) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
   const image      = product.main_image?.image_url
-  const status     = STATUS_LABEL[product.available] ?? STATUS_LABEL['disponible']
+  const statusKey  = product.available === 'disponible' && !product.visible ? 'pausado' : product.available
+  const status     = STATUS_LABEL[statusKey] ?? STATUS_LABEL['disponible']
   const hasPending = !!product.pending_order
   const isReturn   = product.pending_order?.status === 'devolucion_solicitada'
 
@@ -179,6 +197,54 @@ function SaleRow({ product, onOpenPopup }) {
             1
           </span>
         )}
+        {!hasPending && product.available === 'disponible' && (
+          <>
+            {confirmingDelete ? (
+              <>
+                <button
+                  className="tb-sale-edit-btn tb-sale-edit-btn--danger"
+                  title="Confirmar eliminación"
+                  onClick={e => { e.stopPropagation(); onDelete(product.id) }}
+                >
+                  <Icon name="check" size={14} />
+                </button>
+                <button
+                  className="tb-sale-edit-btn"
+                  title="Cancelar"
+                  onClick={e => { e.stopPropagation(); setConfirmingDelete(false) }}
+                >
+                  <Icon name="x" size={14} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="tb-sale-edit-btn"
+                  onClick={e => {
+                    e.stopPropagation()
+                    window.dispatchEvent(new CustomEvent('navigate:sell', { detail: { productId: product.id } }))
+                  }}
+                >
+                  <Icon name="edit" size={14} />
+                </button>
+                <button
+                  className="tb-sale-edit-btn"
+                  title={product.visible ? 'Pausar anuncio' : 'Reactivar anuncio'}
+                  onClick={e => { e.stopPropagation(); onToggleVisibility(product.id) }}
+                >
+                  <Icon name={product.visible ? 'eye' : 'eye-off'} size={14} />
+                </button>
+                <button
+                  className="tb-sale-edit-btn tb-sale-edit-btn--danger"
+                  title="Eliminar producto"
+                  onClick={e => { e.stopPropagation(); setConfirmingDelete(true) }}
+                >
+                  <Icon name="trash" size={14} />
+                </button>
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
@@ -206,7 +272,7 @@ function PurchasePopup({ product, loading, error, onConfirm, onReject, onClose }
           </div>
           <div className="tb-popup-info">
             <p className="tb-popup-product-name">{product.name}</p>
-            <p className="tb-popup-product-price">{Number(product.price).toFixed(2)}€</p>
+            <p className="tb-popup-product-price">{Number(order.purchase_price).toFixed(2)}€</p>
           </div>
         </div>
 
