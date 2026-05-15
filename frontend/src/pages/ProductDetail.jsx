@@ -20,6 +20,7 @@ export default function ProductDetail({ productId, canGoBack }) {
   const [buyError, setBuyError]               = useState('')
   const [buySuccess, setBuySuccess]           = useState(false)
   const [contactError, setContactError]       = useState('')
+  const [gone, setGone]                       = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
   usePageTitle(product?.name ?? null)
 
@@ -74,7 +75,11 @@ export default function ProductDetail({ productId, canGoBack }) {
       setBuySuccess(true)
       setProduct(prev => ({ ...prev, available: 'reservado' }))
     } catch (err) {
-      setBuyError(err.message || 'Error al realizar la compra.')
+      if (err.message === 'Este producto ya no está disponible.') {
+        setGone(true)
+      } else {
+        setBuyError(err.message || 'Error al realizar la compra.')
+      }
     } finally {
       setBuyLoading(false)
     }
@@ -92,7 +97,11 @@ export default function ProductDetail({ productId, canGoBack }) {
         detail: { orderId: order.id }
       }))
     } catch (err) {
-      setContactError(err.message || 'No se pudo iniciar la conversación.')
+      if (err.message === 'Este producto ya no está disponible.') {
+        setGone(true)
+      } else {
+        setContactError(err.message || 'No se pudo iniciar la conversación.')
+      }
     }
   }
 
@@ -219,13 +228,19 @@ export default function ProductDetail({ productId, canGoBack }) {
               )}
 
               <div className="tb-product-actions">
-                {user && user.id !== product.user?.id && buySuccess && (
+                {gone && (
+                  <div className="tb-notice">
+                    Este producto ya no está disponible.
+                  </div>
+                )}
+
+                {!gone && user && user.id !== product.user?.id && buySuccess && (
                   <div className="tb-notice">
                     Solicitud pendiente — esperando confirmación del vendedor
                   </div>
                 )}
 
-                {user && user.id !== product.user?.id && !buySuccess && product.available === 'disponible' && (
+                {!gone && user && user.id !== product.user?.id && !buySuccess && product.available === 'disponible' && (
                   <>
                     <button onClick={handleBuy} disabled={buyLoading} className="tb-btn-buy">
                       {buyLoading ? 'Procesando...' : 'Comprar'}
@@ -234,11 +249,11 @@ export default function ProductDetail({ productId, canGoBack }) {
                   </>
                 )}
 
-                {user && user.id !== product.user?.id && !buySuccess && product.available === 'reservado' && (
+                {!gone && user && user.id !== product.user?.id && !buySuccess && product.available === 'reservado' && (
                   <div className="tb-notice">Producto reservado</div>
                 )}
 
-                {user && user.id !== product.user?.id && (
+                {!gone && user && user.id !== product.user?.id && product.available !== 'vendido' && (
                   <>
                     <button onClick={handleContact} className="tb-btn-contact">
                       Contactar con el vendedor
@@ -247,7 +262,7 @@ export default function ProductDetail({ productId, canGoBack }) {
                   </>
                 )}
 
-                {product.available !== 'vendido' && user?.id !== product.user?.id && (
+                {!gone && product.available !== 'vendido' && user?.id !== product.user?.id && (
                   <button
                     onClick={handleFavorite}
                     disabled={favoriteLoading}
@@ -269,7 +284,16 @@ export default function ProductDetail({ productId, canGoBack }) {
                   <Register onSwitch={() => openLogin()} onSuccess={closeModal} onClose={closeModal} />
                 )}
 
-                {!user && (
+                {user && user.id === product.user?.id && product.available === 'disponible' && (
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('navigate:sell', { detail: { productId: product.id } }))}
+                    className="tb-btn-secondary"
+                  >
+                    <Icon name="edit" size={15} /> Editar producto
+                  </button>
+                )}
+
+                {!user && product.available !== 'vendido' && (
                   <p className="tb-hint-text">
                     Inicia sesion para contactar o guardar favoritos
                   </p>
