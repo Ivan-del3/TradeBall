@@ -226,7 +226,7 @@ export default function ProductDetail({ productId, canGoBack }) {
                 return (
                   <div
                     className="tb-seller-card tb-seller-card--clickable"
-                    onClick={() => setReviewsModalOpen(true)}
+                    onClick={() => setReviewsModalOpen(o => !o)}
                   >
                     <div className="tb-seller-card-row">
                       <div className="tb-seller-avatar">
@@ -255,7 +255,12 @@ export default function ProductDetail({ productId, canGoBack }) {
                         )}
                       </div>
                       <div className="tb-seller-card-end">
-                        <Icon name="chevron-down" size={16} color="var(--fg-3)" style={{ transform: 'rotate(-90deg)' }} />
+                        <Icon
+                          name="chevron-down"
+                          size={16}
+                          color="var(--fg-3)"
+                          style={{ transform: reviewsModalOpen ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -337,15 +342,14 @@ export default function ProductDetail({ productId, canGoBack }) {
             </div>
           </div>
         </div>
-      </main>
 
-      {reviewsModalOpen && (
-        <SellerReviewsModal
-          seller={product.user}
-          reviews={sellerReviews}
-          onClose={() => setReviewsModalOpen(false)}
-        />
-      )}
+        {reviewsModalOpen && (
+          <SellerReviewsModal
+            seller={product.user}
+            reviews={sellerReviews}
+          />
+        )}
+      </main>
     </div>
   )
 }

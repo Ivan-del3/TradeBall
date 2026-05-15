@@ -161,15 +161,16 @@
   color: var(--fg-3);
 }
 
-/* Seller reviews modal — SellerReviewsModal.jsx */
-.tb-popup--lg {
-  width: min(560px, 94vw);
-  max-height: 82vh;
-  display: flex;
-  flex-direction: column;
-}
+/* Seller reviews inline section — SellerReviewsModal.jsx */
+.tb-smr-card { margin-top: var(--sp-4); }
 
-/* Header summary stars */
+.tb-smr-header { margin-bottom: var(--sp-4); }
+.tb-smr-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--fg-1);
+  margin: 0 0 var(--sp-1);
+}
 .tb-smr-summary {
   display: flex;
   align-items: center;
@@ -179,21 +180,18 @@
 .tb-smr-avg   { font-size: var(--fs-small); font-weight: 700; color: var(--fg-1); margin-left: 2px; }
 .tb-smr-count { font-size: var(--fs-small); color: var(--fg-3); }
 
-/* Scrollable list */
 .tb-smr-list {
-  overflow-y: auto;
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
 .tb-smr-empty {
   color: var(--fg-3);
   font-size: var(--fs-small);
-  padding: var(--sp-5) 0;
+  padding: var(--sp-3) 0;
   margin: 0;
 }
 
-/* Review item — divider between items, no nested cards */
+/* Review item — divider between items */
 .tb-smr-item {
   display: flex;
   flex-direction: column;
