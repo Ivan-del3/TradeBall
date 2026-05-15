@@ -68,18 +68,13 @@ class ChatController extends Controller
             return response()->json(['message' => 'No puedes contactar contigo mismo'], 422);
         }
 
-        // Busca la orden más antigua para este comprador+producto, sin importar el estado.
-        // Así siempre se usa el mismo chat aunque haya habido compras rechazadas.
         $order = Order::where('buyer_id', $request->user()->id)
             ->where('product_id', $product->id)
             ->oldest()
             ->first();
 
         if (!$order) {
-            // Solo se puede crear una orden-chat si el producto sigue disponible.
-            // Si ya está reservado o vendido por otra persona, no creamos una orden
-            // falsa que el vendedor podría confundir con una compra real.
-            if ($product->available !== 'disponible') {
+            if (!$product->visible || $product->available !== 'disponible') {
                 return response()->json(['message' => 'Este producto ya no está disponible.'], 422);
             }
 
