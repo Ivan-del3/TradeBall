@@ -125,13 +125,92 @@
 /* Seller card in detail */
 .tb-seller-card {
   display: flex;
-  align-items: center;
-  gap: var(--sp-3);
+  flex-direction: column;
+  gap: 0;
   padding: 14px;
   background: #fff;
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-1);
 }
+.tb-seller-card--clickable {
+  cursor: pointer;
+  transition: background var(--dur-fast);
+  user-select: none;
+}
+.tb-seller-card--clickable:hover { background: var(--bg-2); }
+.tb-seller-card-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.tb-seller-text { flex: 1; min-width: 0; }
+.tb-seller-card-end {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+.tb-seller-card-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: 4px;
+}
+.tb-seller-card-rating-text {
+  font-size: var(--fs-meta);
+  color: var(--fg-3);
+}
+
+/* Seller reviews modal — SellerReviewsModal.jsx */
+.tb-popup--lg {
+  width: min(560px, 94vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header summary stars */
+.tb-smr-summary {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: var(--sp-1);
+}
+.tb-smr-avg   { font-size: var(--fs-small); font-weight: 700; color: var(--fg-1); margin-left: 2px; }
+.tb-smr-count { font-size: var(--fs-small); color: var(--fg-3); }
+
+/* Scrollable list */
+.tb-smr-list {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.tb-smr-empty {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  padding: var(--sp-5) 0;
+  margin: 0;
+}
+
+/* Review item — divider between items, no nested cards */
+.tb-smr-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+}
+.tb-smr-item + .tb-smr-item {
+  border-top: 1px solid var(--border-1);
+}
+.tb-smr-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+
 .tb-seller-avatar {
   width: 40px;
   height: 40px;

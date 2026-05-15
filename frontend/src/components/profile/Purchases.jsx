@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
+import Icon from '../Icon'
+import ReviewPopup from './ReviewPopup'
 
 export default function Purchases() {
   const [purchases, setPurchases] = useState([])
@@ -55,6 +57,8 @@ function StatusBadge({ status }) {
 function PurchaseRow({ order, onReload }) {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
+  const [reviewing, setReviewing] = useState(false)
+  const [reviewed, setReviewed]   = useState(order.has_review ?? false)
   const image       = order.product?.main_image?.image_url
   const needsAction = order.status === 'confirmado'
 
@@ -109,6 +113,14 @@ function PurchaseRow({ order, onReload }) {
             {new Date(order.updated_at).toLocaleDateString('es-ES')}
           </p>
           <StatusBadge status={order.status} />
+          {order.status === 'completado' && !reviewed && (
+            <button
+              onClick={e => { e.stopPropagation(); setReviewing(true) }}
+              className="tb-btn-review"
+            >
+              <Icon name="star" size={14} /> Valorar
+            </button>
+          )}
         </div>
       </div>
 
@@ -132,6 +144,14 @@ function PurchaseRow({ order, onReload }) {
             </button>
           </div>
         </div>
+      )}
+
+      {reviewing && (
+        <ReviewPopup
+          orderId={order.id}
+          reviewedName={`${order.seller?.name} ${order.seller?.lastname}`}
+          onDone={(submitted) => { setReviewing(false); if (submitted) setReviewed(true) }}
+        />
       )}
     </div>
   )

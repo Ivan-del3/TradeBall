@@ -7,6 +7,7 @@ import Login from './Login'
 import { useAuthModal } from '../context/AuthModalContext'
 import Register from './Register'
 import { usePageTitle } from '../hooks/usePageTitle'
+import SellerReviewsModal from '../components/SellerReviewsModal'
 
 export default function ProductDetail({ productId, canGoBack }) {
   const { user }                              = useAuth()
@@ -21,6 +22,8 @@ export default function ProductDetail({ productId, canGoBack }) {
   const [buySuccess, setBuySuccess]           = useState(false)
   const [contactError, setContactError]       = useState('')
   const [gone, setGone]                       = useState(false)
+  const [sellerReviews, setSellerReviews]     = useState(null)
+  const [reviewsModalOpen, setReviewsModalOpen] = useState(false)
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
   usePageTitle(product?.name ?? null)
 
@@ -43,6 +46,13 @@ export default function ProductDetail({ productId, canGoBack }) {
       .then(data => setWalletBalance(Number(data?.balance || 0)))
       .catch(() => {})
   }, [user, product])
+
+  useEffect(() => {
+    if (!product?.user?.id) return
+    client(`/users/${product.user.id}/reviews`)
+      .then(data => setSellerReviews(data))
+      .catch(() => setSellerReviews([]))
+  }, [product?.user?.id])
 
   const handleFavorite = async () => {
     if (!user) { openLogin(); return }
@@ -209,23 +219,48 @@ export default function ProductDetail({ productId, canGoBack }) {
                 </div>
               )}
 
-              {product.user && (
-                <div className="tb-seller-card">
-                  <div className="tb-seller-avatar">
-                    {product.user.avatar_url ? (
-                      <img src={product.user.avatar_url} alt="Avatar" className="tb-img-cover-circle" />
-                    ) : (
-                      product.user.name.charAt(0).toUpperCase()
-                    )}
+              {product.user && (() => {
+                const avg = sellerReviews?.length
+                  ? (sellerReviews.reduce((s, r) => s + r.rating, 0) / sellerReviews.length)
+                  : null
+                return (
+                  <div
+                    className="tb-seller-card tb-seller-card--clickable"
+                    onClick={() => setReviewsModalOpen(true)}
+                  >
+                    <div className="tb-seller-card-row">
+                      <div className="tb-seller-avatar">
+                        {product.user.avatar_url ? (
+                          <img src={product.user.avatar_url} alt="Avatar" className="tb-img-cover-circle" />
+                        ) : (
+                          product.user.name.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div className="tb-seller-text">
+                        <p className="tb-seller-name">
+                          {product.user.name} {product.user.lastname}
+                        </p>
+                        <p className="tb-seller-role">Vendedor</p>
+                        {avg !== null && (
+                          <div className="tb-seller-card-rating">
+                            <div className="tb-stars">
+                              {[1,2,3,4,5].map(s => (
+                                <Icon key={s} name={s <= Math.round(avg) ? 'star-filled' : 'star'} size={12} color="var(--tb-red)" />
+                              ))}
+                            </div>
+                            <span className="tb-seller-card-rating-text">
+                              {avg.toFixed(1)} · {sellerReviews.length} valoracion{sellerReviews.length !== 1 ? 'es' : ''}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="tb-seller-card-end">
+                        <Icon name="chevron-down" size={16} color="var(--fg-3)" style={{ transform: 'rotate(-90deg)' }} />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="tb-seller-name">
-                      {product.user.name} {product.user.lastname}
-                    </p>
-                    <p className="tb-seller-role">Vendedor</p>
-                  </div>
-                </div>
-              )}
+                )
+              })()}
 
               <div className="tb-product-actions">
                 {gone && (
@@ -303,6 +338,15 @@ export default function ProductDetail({ productId, canGoBack }) {
           </div>
         </div>
       </main>
+
+      {reviewsModalOpen && (
+        <SellerReviewsModal
+          seller={product.user}
+          reviews={sellerReviews}
+          onClose={() => setReviewsModalOpen(false)}
+        />
+      )}
     </div>
   )
 }
+
