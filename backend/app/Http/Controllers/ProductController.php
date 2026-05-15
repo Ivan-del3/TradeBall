@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
@@ -57,9 +56,11 @@ class ProductController extends Controller
     // Devuelvo un producto por su ID al hacer click en él, cargamos todas la imagenes del producto, si no existe 404.
     public function show($id)
     {
-        $product = Product::with(['user', 'images', 'category'])
-            ->where('visible', true)
-            ->findOrFail($id);
+        $product = Product::with(['user', 'images', 'category'])->findOrFail($id);
+
+        if (!$product->visible && $product->user_id !== auth('sanctum')->user()?->id) {
+            abort(404);
+        }
 
         return response()->json($product);
     }
@@ -112,46 +113,87 @@ class ProductController extends Controller
     // Al tener el token, puedo asegurarme de que el ususario que va a realizar la acción es dueño de ese producto.
     public function update(Request $request, $id)
     {
-        $product = Product::where('user_id', $request->user()->id)->findOrFail($id); // findOrFail id Producto, si no, 404
+        $product = Product::where('user_id', $request->user()->id)->findOrFail($id);
 
-        $validated = $request->validate([
-            'name'        => 'sometimes|string|max:150',
-            'price'       => 'sometimes|numeric|min:0.5|max:99999',
-            'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
-            'description' => 'nullable|string|max:2000',
-            'available'   => 'sometimes|in:disponible,reservado,vendido',
-            'visible'     => 'sometimes|boolean',
-        ]);
-
-        // Impide que el seller cambie manualmente el estado de un producto
-        // reservado, lo que rompería el escrow activo del comprador.
-        if ($product->available === 'reservado' && array_key_exists('available', $validated)) {
-            return response()->json(['message' => 'No puedes cambiar el estado de un producto con una compra en curso.'], 422);
+        if ($product->is_deleted) {
+            return response()->json(['message' => 'Este producto no existe.'], 404);
         }
 
-        $product->update($validated);
+        $validated = $request->validate([
+            'name'               => 'sometimes|string|max:150',
+            'price'              => 'sometimes|numeric|min:0.5|max:99999',
+            'condition'          => 'sometimes|in:nuevo,casi_nuevo,usado',
+            'description'        => 'nullable|string|max:2000',
+            'remove_image_ids'   => 'sometimes|array',
+            'remove_image_ids.*' => 'integer',
+            'images'             => 'sometimes|array',
+            'images.*'           => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        // Eliminar imágenes marcadas (solo las de este producto)
+        if (!empty($validated['remove_image_ids'])) {
+            $toRemove = $product->images()->whereIn('id', $validated['remove_image_ids'])->get();
+            foreach ($toRemove as $image) {
+                $path = str_replace(config('app.url') . '/storage/', '', $image->image_url);
+                Storage::disk('public')->delete($path);
+                $image->delete();
+            }
+            // Si se eliminó la imagen principal, promover la siguiente
+            if (!$product->images()->where('is_main', true)->exists()) {
+                $product->images()->first()?->update(['is_main' => true]);
+            }
+        }
+
+        // Añadir nuevas imágenes
+        if ($request->hasFile('images')) {
+            $remaining = $product->images()->count();
+            $newFiles  = $request->file('images');
+            if ($remaining + count($newFiles) > 5) {
+                return response()->json(['message' => 'No puedes tener más de 5 imágenes.'], 422);
+            }
+            $hasMain = $product->images()->where('is_main', true)->exists();
+            foreach ($newFiles as $index => $image) {
+                $path = $image->store('products', 'public');
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_url'  => config('app.url') . '/storage/' . $path,
+                    'is_main'    => !$hasMain && $index === 0,
+                ]);
+                if (!$hasMain && $index === 0) $hasMain = true;
+            }
+        }
+
+        $product->update(array_intersect_key($validated, array_flip([
+            'name', 'price', 'condition', 'description'
+        ])));
+
+        return response()->json($product->load(['images', 'category']));
+    }
+
+    // PATCH /api/products/5/toggle-visibility
+    public function toggleVisibility(Request $request, $id)
+    {
+        $product = Product::where('user_id', $request->user()->id)->findOrFail($id);
+
+        if ($product->available !== 'disponible' || $product->is_deleted) {
+            return response()->json(['message' => 'Solo puedes pausar productos disponibles.'], 422);
+        }
+
+        $product->update(['visible' => !$product->visible]);
 
         return response()->json($product->load(['images', 'category']));
     }
 
     // DELETE /api/products/5
-    // Borro la imágenes del servidor y después el registro de la base de datos
     public function destroy(Request $request, $id)
     {
         $product = Product::where('user_id', $request->user()->id)->findOrFail($id);
 
-        // Impide borrar un producto con escrow activo: el comprador
-        // perdería su referencia de compra y el dinero quedaría bloqueado.
-        if ($product->orders()->where('status', 'pendiente')->where('escrow_active', true)->exists()) {
-            return response()->json(['message' => 'No puedes eliminar un producto con una compra pendiente.'], 422);
+        if ($product->available !== 'disponible') {
+            return response()->json(['message' => 'No puedes eliminar un producto con una compra en curso.'], 422);
         }
 
-        foreach ($product->images as $image) {
-            $path = str_replace('/storage/', '', $image->image_url);
-            Storage::disk('public')->delete($path);
-        }
-
-        $product->delete();
+        $product->update(['visible' => false, 'is_deleted' => true]);
 
         return response()->json(['message' => 'Producto eliminado']);
     }
