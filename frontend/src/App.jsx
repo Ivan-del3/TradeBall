@@ -116,7 +116,7 @@ function App() {
       },
       'navigate:profile':      (e) => push({ name: 'profile', params: { section: e.detail?.section } }),
       'navigate:profile:chat': (e) => push({ name: 'profile', params: { section: 'chat', orderId: e.detail?.orderId } }),
-      'navigate:sell':         ()  => push({ name: 'sell', params: {} }),
+      'navigate:sell':         (e) => push({ name: 'sell', params: { productId: e.detail?.productId ?? null } }),
       'navigate:home':         ()  => {
         dispatch({ type: 'RESET' })
         browserIdxRef.current = 0
@@ -159,7 +159,7 @@ function App() {
   switch (page.name) {
     case 'product': return <ProductDetail productId={page.params.id} canGoBack={canGoBack} canGoForward={canGoForward} />
     case 'profile': return <Profile initialSection={page.params.section} initialOrderId={page.params.orderId} canGoForward={canGoForward} />
-    case 'sell':    return <Sell canGoForward={canGoForward} />
+    case 'sell':    return <Sell productId={page.params?.productId} canGoBack={canGoBack} canGoForward={canGoForward} />
     default:        return <Home canGoForward={canGoForward} />
   }
 }

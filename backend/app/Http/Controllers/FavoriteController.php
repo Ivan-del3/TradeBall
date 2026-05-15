@@ -12,6 +12,7 @@ class FavoriteController extends Controller
     {
         $favorites = $request->user()
             ->favorites()
+            ->where('visible', true)
             ->with(['mainImage', 'category'])
             ->get();
 
@@ -21,7 +22,7 @@ class FavoriteController extends Controller
     // POST /favorites/{productId}
     public function store(Request $request, $productId)
     {
-        $product = Product::findOrFail($productId);
+        $product = Product::where('visible', true)->findOrFail($productId);
         $request->user()->favorites()->syncWithoutDetaching([$product->id]);
         return response()->json(['message' => 'Añadido a favoritos']);
     }

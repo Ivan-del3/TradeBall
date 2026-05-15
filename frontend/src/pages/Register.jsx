@@ -88,6 +88,7 @@ export default function Register({ onSwitch, onSuccess }) {
                   onChange={e => setPassword(e.target.value)}
                   required
                   minLength={8}
+                  autoComplete="new-password"
                   className="tb-input"
                 />
                 {password.length > 0 && password.length < 8 && (
@@ -101,6 +102,7 @@ export default function Register({ onSwitch, onSuccess }) {
                   value={passwordConfirm}
                   onChange={e => setPasswordConfirm(e.target.value)}
                   required
+                  autoComplete="new-password"
                   className="tb-input"
                 />
               </div>

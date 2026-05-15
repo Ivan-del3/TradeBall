@@ -319,6 +319,22 @@
 }
 .tb-sale-badge-dot--pending { background: var(--tb-red); color: #fff; }
 .tb-sale-badge-dot--return  { background: var(--badge-orange-fg); color: #fff; }
+.tb-sale-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  border: none;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.tb-sale-edit-btn:hover { background: var(--bg-3); color: var(--fg-1); }
+.tb-sale-edit-btn--danger:hover { background: var(--badge-red-bg); color: var(--tb-red); }
 
 /* Pending count badge in Sales header */
 .tb-pending-count {
