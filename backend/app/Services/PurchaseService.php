@@ -21,16 +21,14 @@ class PurchaseService
     public function requestPurchase(User $buyer, int $productId): Order
     {
         return DB::transaction(function () use ($buyer, $productId) {
-            $product = Product::where('visible', true)
-                ->lockForUpdate()
-                ->findOrFail($productId);
+            $product = Product::lockForUpdate()->findOrFail($productId);
 
             if ($product->user_id === $buyer->id) {
                 throw new \InvalidArgumentException('No puedes comprar tu propio producto.');
             }
 
-            if ($product->available !== 'disponible') {
-                throw new \InvalidArgumentException('Este producto no está disponible para la compra.');
+            if (!$product->visible || $product->available !== 'disponible') {
+                throw new \InvalidArgumentException('Este producto ya no está disponible.');
             }
 
             $wallet = Wallet::where('user_id', $buyer->id)->lockForUpdate()->first();
