@@ -4,56 +4,97 @@ import Header from '../components/Header'
 import Icon from '../components/Icon'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-export default function Sell() {
-  usePageTitle('Vender')
-  const [categories, setCategories] = useState([])
-  const [images, setImages]         = useState([])
-  const [previews, setPreviews]     = useState([])
-  const [loading, setLoading]       = useState(false)
-  const [errors, setErrors]         = useState({})
-  const [success, setSuccess]       = useState(false)
-  const fileInputRef                = useRef(null)
+export default function Sell({ productId, canGoBack }) {
+  const isEdit = !!productId
+
+  usePageTitle(isEdit ? 'Editar producto' : 'Vender')
+
+  const [categories, setCategories]     = useState([])
+  const [loadingProduct, setLoadingProduct] = useState(isEdit)
+  const [loading, setLoading]           = useState(false)
+  const [errors, setErrors]             = useState({})
+  const [success, setSuccess]           = useState(false)
+  const fileInputRef                    = useRef(null)
 
   const [form, setForm] = useState({
     name: '', description: '', price: '', condition: '', category_id: '',
   })
 
+  // Existing server images (edit mode)
+  const [existingImages, setExistingImages] = useState([])
+  const [removedIds, setRemovedIds]         = useState([])
+
+  // New File objects to upload
+  const [newImages, setNewImages]     = useState([])
+  const [newPreviews, setNewPreviews] = useState([])
+
   useEffect(() => {
     client('/categories').then(setCategories).catch(() => {})
   }, [])
+
+  // Fetch product data in edit mode and pre-fill form
+  useEffect(() => {
+    if (!productId) return
+    setLoadingProduct(true)
+    client(`/products/${productId}`)
+      .then(data => {
+        setForm({
+          name:        data.name        ?? '',
+          description: data.description ?? '',
+          price:       data.price       ?? '',
+          condition:   data.condition   ?? '',
+          category_id: data.category_id ?? data.category?.id ?? '',
+        })
+        setExistingImages(data.images ?? [])
+      })
+      .catch(() => {})
+      .finally(() => setLoadingProduct(false))
+  }, [productId])
 
   const update = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }))
     setErrors(prev => ({ ...prev, [key]: null }))
   }
 
+  const activeExisting = existingImages.filter(img => !removedIds.includes(img.id))
+  const totalImages    = activeExisting.length + newImages.length
+
   const handleImages = (e) => {
     const files = Array.from(e.target.files)
-    if (images.length + files.length > 5) {
+    if (totalImages + files.length > 5) {
       setErrors(prev => ({ ...prev, images: 'Máximo 5 imágenes' }))
       return
     }
-    setImages([...images, ...files])
-    setPreviews([...previews, ...files.map(f => URL.createObjectURL(f))])
+    setNewImages(prev => [...prev, ...files])
+    setNewPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))])
+    setErrors(prev => ({ ...prev, images: null }))
+    e.target.value = ''
+  }
+
+  const removeExisting = (id) => {
+    setRemovedIds(prev => [...prev, id])
     setErrors(prev => ({ ...prev, images: null }))
   }
 
-  const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index))
-    setPreviews(prev => prev.filter((_, i) => i !== index))
+  const removeNew = (index) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index))
+    setNewPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   const validate = () => {
     const e = {}
     if (!form.name.trim())               e.name        = 'El nombre es obligatorio'
-    if (!form.price)                       e.price = 'El precio es obligatorio'
-    else if (Number(form.price) < 0.5)   e.price = 'El precio mínimo es 0,50€'
-    else if (Number(form.price) > 99999) e.price = 'El precio máximo es 99.999€'
+    if (!form.price)                     e.price       = 'El precio es obligatorio'
+    else if (Number(form.price) < 0.5)   e.price       = 'El precio mínimo es 0,50€'
+    else if (Number(form.price) > 99999) e.price       = 'El precio máximo es 99.999€'
     if (!form.condition)                 e.condition   = 'El estado es obligatorio'
     if (!form.category_id)               e.category_id = 'La categoría es obligatoria'
-    if (images.length === 0)             e.images      = 'Añade al menos una imagen'
+    if (totalImages === 0)               e.images      = 'Añade al menos una imagen'
     return e
   }
+
+  const goBack = () =>
+    window.dispatchEvent(new CustomEvent(canGoBack ? 'navigate:back' : 'navigate:home'))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -63,16 +104,21 @@ export default function Sell() {
     setLoading(true)
     try {
       const formData = new FormData()
-      Object.entries(form).forEach(([key, value]) => formData.append(key, value))
-      images.forEach(img => formData.append('images[]', img))
+      if (isEdit) formData.append('_method', 'PUT')
+      Object.entries(form).forEach(([key, value]) => {
+        if (value !== '') formData.append(key, value)
+      })
+      newImages.forEach(img => formData.append('images[]', img))
+      if (isEdit) removedIds.forEach(id => formData.append('remove_image_ids[]', id))
 
-      await client('/products', { method: 'POST', body: formData, isFormData: true })
+      const endpoint = isEdit ? `/products/${productId}` : '/products'
+      await client(endpoint, { method: 'POST', body: formData, isFormData: true })
 
       setSuccess(true)
-      setTimeout(() => window.dispatchEvent(new CustomEvent('navigate:home')), 2000)
+      setTimeout(isEdit ? goBack : () => window.dispatchEvent(new CustomEvent('navigate:home')), 1500)
     } catch (err) {
       if (err.errors) setErrors(err.errors)
-      else setErrors({ general: err.message || 'Error al publicar el producto' })
+      else setErrors({ general: err.message || 'Error al guardar el producto' })
     } finally {
       setLoading(false)
     }
@@ -84,8 +130,21 @@ export default function Sell() {
         <Header />
         <div className="tb-sell-success">
           <div className="tb-sell-success-icon"><Icon name="check" size={32} color="var(--badge-green-fg)" /></div>
-          <h2 className="tb-sell-success-title">Producto publicado</h2>
-          <p className="tb-text-muted">Redirigiendo a la página principal...</p>
+          <h2 className="tb-sell-success-title">
+            {isEdit ? 'Producto actualizado' : 'Producto publicado'}
+          </h2>
+          <p className="tb-text-muted">Volviendo...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (loadingProduct) {
+    return (
+      <div className="tb-page">
+        <Header />
+        <div className="tb-loading-state" style={{ paddingTop: 'var(--sp-9)' }}>
+          <p className="tb-text-muted">Cargando producto...</p>
         </div>
       </div>
     )
@@ -95,15 +154,14 @@ export default function Sell() {
     <div className="tb-page">
       <Header />
       <main className="tb-container-form">
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('navigate:home'))}
-          className="tb-btn-back"
-        >
+        <button onClick={goBack} className="tb-btn-back">
           <Icon name="arrow-left" size={16} /> Volver
         </button>
 
         <div className="tb-card">
-          <h1 className="tb-card-title">Publicar producto</h1>
+          <h1 className="tb-card-title">
+            {isEdit ? 'Editar producto' : 'Publicar producto'}
+          </h1>
 
           <form onSubmit={handleSubmit} className="tb-form-stack-lg">
 
@@ -113,27 +171,38 @@ export default function Sell() {
               </label>
 
               <div className="tb-upload-grid">
-                {previews.map((src, index) => (
-                  <div key={index} className="tb-upload-preview">
+                {activeExisting.map((img, index) => (
+                  <div key={`ex-${img.id}`} className="tb-upload-preview">
                     <img
-                      src={src}
+                      src={img.image_url}
                       alt={`Imagen ${index + 1}`}
                       className={`tb-upload-img${index === 0 ? ' tb-upload-img--primary' : ''}`}
                     />
-                    {index === 0 && (
-                      <span className="tb-upload-badge-primary">Principal</span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="tb-upload-remove"
-                    >
+                    {index === 0 && <span className="tb-upload-badge-primary">Principal</span>}
+                    <button type="button" onClick={() => removeExisting(img.id)} className="tb-upload-remove">
                       <Icon name="x" size={12} />
                     </button>
                   </div>
                 ))}
 
-                {images.length < 5 && (
+                {newPreviews.map((src, index) => {
+                  const isFirst = activeExisting.length === 0 && index === 0
+                  return (
+                    <div key={`new-${index}`} className="tb-upload-preview">
+                      <img
+                        src={src}
+                        alt={`Nueva imagen ${index + 1}`}
+                        className={`tb-upload-img${isFirst ? ' tb-upload-img--primary' : ''}`}
+                      />
+                      {isFirst && <span className="tb-upload-badge-primary">Principal</span>}
+                      <button type="button" onClick={() => removeNew(index)} className="tb-upload-remove">
+                        <Icon name="x" size={12} />
+                      </button>
+                    </div>
+                  )
+                })}
+
+                {totalImages < 5 && (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -240,12 +309,12 @@ export default function Sell() {
               {errors.category_id && <p className="tb-hint-error">{errors.category_id}</p>}
             </div>
 
-            {errors.general && (
-              <p className="tb-msg-error">{errors.general}</p>
-            )}
+            {errors.general && <p className="tb-msg-error">{errors.general}</p>}
 
             <button type="submit" disabled={loading} className="tb-btn-primary">
-              {loading ? 'Publicando...' : 'Publicar producto'}
+              {loading
+                ? (isEdit ? 'Guardando...' : 'Publicando...')
+                : (isEdit ? 'Guardar cambios' : 'Publicar producto')}
             </button>
 
           </form>
