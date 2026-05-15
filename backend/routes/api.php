@@ -26,9 +26,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me',      [AuthController::class, 'me']);
 
     // Productos
-    Route::post('/products',        [ProductController::class, 'store']);
-    Route::put('/products/{id}',    [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::post('/products',                              [ProductController::class, 'store']);
+    Route::put('/products/{id}',                          [ProductController::class, 'update']);
+    Route::patch('/products/{id}/toggle-visibility',      [ProductController::class, 'toggleVisibility']);
+    Route::delete('/products/{id}',                       [ProductController::class, 'destroy']);
 
     // Favoritos
     Route::get('/favorites',                [FavoriteController::class, 'index']);
