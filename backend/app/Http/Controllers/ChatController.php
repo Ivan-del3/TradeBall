@@ -163,6 +163,25 @@ class ChatController extends Controller
         return response()->json($message);
     }
 
+    public function markRead(Request $request, $orderId)
+    {
+        $userId = $request->user()->id;
+
+        Order::where('id', $orderId)
+            ->where(function ($q) use ($userId) {
+                $q->where('buyer_id', $userId)
+                  ->orWhere('seller_id', $userId);
+            })
+            ->firstOrFail();
+
+        Message::where('order_id', $orderId)
+            ->where('sender_id', '!=', $userId)
+            ->where('read', false)
+            ->update(['read' => true]);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function hideConversation(Request $request, $orderId)
     {
         $userId = $request->user()->id;
