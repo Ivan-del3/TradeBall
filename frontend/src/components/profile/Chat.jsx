@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import client from '../../api/client'
 import { LoadingCard } from './shared'
 import Icon from '../Icon'
@@ -7,6 +8,7 @@ import echo from '../../echo'
 
 export default function Chat({ initialOrderId }) {
   const { user }                            = useAuth()
+  const { refresh: refreshNotifs }          = useNotifications()
   const [conversations, setConversations]   = useState([])
   const [activeConv, setActiveConv]         = useState(null)
   const [messages, setMessages]             = useState([])
@@ -106,6 +108,9 @@ export default function Chat({ initialOrderId }) {
           ? { ...c, last_message: msg, unread_count: 0 }
           : c
       ))
+      client(`/chat/conversations/${activeConv.id}/read`, { method: 'PATCH' })
+        .then(() => refreshNotifs())
+        .catch(() => {})
     })
 
     client(`/chat/conversations/${activeConv.id}/messages`)
@@ -118,11 +123,12 @@ export default function Chat({ initialOrderId }) {
             ? { ...c, unread_count: 0, last_message: data[data.length - 1] ?? c.last_message }
             : c
         ))
+        refreshNotifs()
       })
       .catch(() => { fetchSettled = true })
 
     return () => { echo.leave(`order.${activeConv.id}`) }
-  }, [activeConv])
+  }, [activeConv, refreshNotifs])
 
   useEffect(() => {
     if (messages.length > prevMsgCountRef.current) {
