@@ -3,6 +3,7 @@ import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 import Icon from '../Icon'
 import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import ReviewPopup from './ReviewPopup'
 
 const STATUS_LABEL = {
@@ -14,6 +15,7 @@ const STATUS_LABEL = {
 
 export default function Sales() {
   const { user }                    = useAuth()
+  const { refresh: refreshNotifs }  = useNotifications()
   const [sales, setSales]           = useState([])
   const [loading, setLoading]       = useState(true)
   const [popup, setPopup]           = useState(null)
@@ -21,11 +23,11 @@ export default function Sales() {
   const [actionError, setActionErr] = useState('')
 
   const reload = () =>
-    client('/sales').then(data => setSales(data)).catch(() => {})
+    client('/sales').then(data => { setSales(data); refreshNotifs() }).catch(() => {})
 
   useEffect(() => {
     client('/sales')
-      .then(data => { setSales(data); setLoading(false) })
+      .then(data => { setSales(data); setLoading(false); refreshNotifs() })
       .catch(() => setLoading(false))
 
     const id = setInterval(reload, 15000)
@@ -58,6 +60,7 @@ export default function Sales() {
       await client(`/purchases/${popup.pending_order.id}/confirm`, { method: 'POST' })
       setSales(prev => prev.map(p => p.id === popup.id ? { ...p, pending_order: null } : p))
       closePopup()
+      refreshNotifs()
     } catch (err) {
       setActionErr(err.message || 'Error al confirmar.')
     } finally {
@@ -74,6 +77,7 @@ export default function Sales() {
         p.id === popup.id ? { ...p, available: 'disponible', pending_order: null } : p
       ))
       closePopup()
+      refreshNotifs()
     } catch (err) {
       setActionErr(err.message || 'Error al rechazar.')
     } finally {
@@ -90,6 +94,7 @@ export default function Sales() {
         p.id === popup.id ? { ...p, available: 'disponible', pending_order: null } : p
       ))
       closePopup()
+      refreshNotifs()
     } catch (err) {
       setActionErr(err.message || 'Error al confirmar la devolución.')
     } finally {
