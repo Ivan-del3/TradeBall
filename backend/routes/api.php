@@ -11,6 +11,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\NotificationController;
 
 // Públicas
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:20,1');
@@ -57,6 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/wallet/deposit',  [WalletController::class, 'deposit'])->middleware('throttle:20,1');
     Route::patch('/wallet/withdraw', [WalletController::class, 'withdraw'])->middleware('throttle:20,1');
 
+    // Notificaciones
+    Route::get('/notifications/counts', [NotificationController::class, 'counts'])->middleware('throttle:60,1');
+
     // Valoraciones
     Route::get('/reviews',        [ReviewController::class,   'index']);
     Route::post('/reviews',       [ReviewController::class,   'store']);
@@ -70,5 +74,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations/{orderId}/messages',     [ChatController::class, 'messages']);
     Route::post('/chat/conversations/{orderId}/messages',    [ChatController::class, 'sendMessage'])->middleware('throttle:30,1');
     Route::patch('/chat/conversations/{orderId}/hide',       [ChatController::class, 'hideConversation']);
+    Route::patch('/chat/conversations/{orderId}/read',       [ChatController::class, 'markRead']);
 
 });
