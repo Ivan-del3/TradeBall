@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationsContext'
 import Header from '../components/Header'
 import { usePageTitle } from '../hooks/usePageTitle'
 import Icon from '../components/Icon'
@@ -21,8 +22,11 @@ const SECTIONS = [
   { key: 'reviews',       label: 'Valoraciones',     icon: 'star'   },
 ]
 
+const SECTION_COUNT_KEY = { sales: 'sales', purchases: 'purchases', chat: 'chat', reviews: 'reviews' }
+
 export default function Profile({ initialSection, initialOrderId }) {
   const { user } = useAuth()
+  const { counts, markReviewsRead } = useNotifications()
   const [activeSection, setActiveSection] = useState(initialSection || 'info')
   usePageTitle(SECTIONS.find(s => s.key === activeSection)?.label ?? 'Perfil')
   const [sidebarOpen, setSidebarOpen]     = useState(false)
@@ -33,11 +37,17 @@ export default function Profile({ initialSection, initialOrderId }) {
     if (initialOrderId) setChatOrderId(initialOrderId)
   }, [initialSection, initialOrderId])
 
+  useEffect(() => {
+    if (activeSection === 'reviews') markReviewsRead()
+  }, [activeSection, counts.reviews, markReviewsRead])
+
   const handleSectionChange = (key) => {
     setActiveSection(key)
     window.dispatchEvent(new CustomEvent('navigate:profile', { detail: { section: key } }))
     if (key !== 'chat') setChatOrderId(null)
   }
+
+  const sectionCount = (key) => counts[SECTION_COUNT_KEY[key]] ?? 0
 
   const renderSection = () => {
     switch (activeSection) {
@@ -83,6 +93,9 @@ export default function Profile({ initialSection, initialOrderId }) {
                 >
                   <Icon name={section.icon} size={18} />
                   <span>{section.label}</span>
+                  {sectionCount(section.key) > 0 && (
+                    <span className="tb-nav-badge">{sectionCount(section.key)}</span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -97,6 +110,9 @@ export default function Profile({ initialSection, initialOrderId }) {
               <span className="tb-mobile-nav-current">
                 <Icon name={SECTIONS.find(s => s.key === activeSection)?.icon} size={18} />
                 <span>{SECTIONS.find(s => s.key === activeSection)?.label}</span>
+                {sectionCount(activeSection) > 0 && (
+                  <span className="tb-nav-badge">{sectionCount(activeSection)}</span>
+                )}
               </span>
               <Icon
                 name="chevron-down"
@@ -115,6 +131,9 @@ export default function Profile({ initialSection, initialOrderId }) {
                   >
                     <Icon name={section.icon} size={18} />
                     <span>{section.label}</span>
+                    {sectionCount(section.key) > 0 && (
+                      <span className="tb-nav-badge">{sectionCount(section.key)}</span>
+                    )}
                   </button>
                 ))}
               </div>

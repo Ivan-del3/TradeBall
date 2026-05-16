@@ -309,6 +309,45 @@
   }
 }
 
+/* ─── Notification badges ─── */
+.tb-nav-badge {
+  margin-left: auto;
+  background: var(--tb-red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  line-height: 18px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.tb-profile-nav-avatar {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.tb-profile-bubble {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  background: var(--tb-red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  min-width: 15px;
+  height: 15px;
+  line-height: 15px;
+  text-align: center;
+  pointer-events: none;
+  border: 1.5px solid #fff;
+  z-index: 1;
+}
+
 /* ─── Profile Edit Avatar ─── */
 .tb-profile-avatar-edit { position: relative; display: inline-block; }
 

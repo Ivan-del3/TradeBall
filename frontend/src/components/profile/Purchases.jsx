@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 import Icon from '../Icon'
+import { useNotifications } from '../../context/NotificationsContext'
 import ReviewPopup from './ReviewPopup'
 
 export default function Purchases() {
-  const [purchases, setPurchases] = useState([])
-  const [loading, setLoading]     = useState(true)
+  const [purchases, setPurchases]  = useState([])
+  const [loading, setLoading]      = useState(true)
+  const { refresh: refreshNotifs } = useNotifications()
 
   const reload = () =>
-    client('/purchases').then(data => setPurchases(data)).catch(() => {})
+    client('/purchases').then(data => { setPurchases(data); refreshNotifs() }).catch(() => {})
 
   useEffect(() => {
     client('/purchases')
-      .then(data => { setPurchases(data); setLoading(false) })
+      .then(data => { setPurchases(data); setLoading(false); refreshNotifs() })
       .catch(() => setLoading(false))
 
     const id = setInterval(reload, 15000)
@@ -31,7 +33,7 @@ export default function Purchases() {
       ) : (
         <div className="tb-order-list">
           {purchases.map(order => (
-            <PurchaseRow key={order.id} order={order} onReload={reload} />
+            <PurchaseRow key={order.id} order={order} onReload={reload} onRefreshNotifs={refreshNotifs} />
           ))}
         </div>
       )}
@@ -54,7 +56,7 @@ function StatusBadge({ status }) {
   )
 }
 
-function PurchaseRow({ order, onReload }) {
+function PurchaseRow({ order, onReload, onRefreshNotifs }) {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [reviewing, setReviewing] = useState(false)
@@ -74,6 +76,7 @@ function PurchaseRow({ order, onReload }) {
     try {
       await client(`/purchases/${order.id}/${endpoint}`, { method: 'POST' })
       onReload()
+      onRefreshNotifs()
     } catch (err) {
       setError(err.message || 'Error al procesar la acción.')
     } finally {

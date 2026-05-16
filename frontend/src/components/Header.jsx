@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useAuthModal } from '../context/AuthModalContext'
+import { useNotifications } from '../context/NotificationsContext'
 import { useState } from 'react'
 import Favorites from '../pages/Favorites'
 import Login from '../pages/Login'
@@ -10,6 +11,7 @@ import Icon from './Icon'
 export default function Header() {
   const { user, logout } = useAuth()
   const { modal, openLogin, openRegister, closeModal } = useAuthModal()
+  const { total: notifTotal } = useNotifications()
   const [showFavorites, setShowFavorites] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
 
@@ -55,11 +57,16 @@ export default function Header() {
                   onClick={() => window.dispatchEvent(new CustomEvent('navigate:profile'))}
                   className="tb-btn-profile-nav"
                 >
-                  <div className="tb-avatar-xs">
-                    {user.avatar_url ? (
-                      <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
-                    ) : (
-                      user.name.charAt(0).toUpperCase()
+                  <div className="tb-profile-nav-avatar">
+                    <div className="tb-avatar-xs">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
+                      ) : (
+                        user.name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    {notifTotal > 0 && (
+                      <span className="tb-profile-bubble">{notifTotal > 99 ? '99+' : notifTotal}</span>
                     )}
                   </div>
                   {user.name}
@@ -108,11 +115,16 @@ export default function Header() {
               onClick={() => window.dispatchEvent(new CustomEvent('navigate:profile'))}
               className="tb-bottom-nav-item"
             >
-              <div className="tb-avatar-xs">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
-                ) : (
-                  user.name.charAt(0).toUpperCase()
+              <div className="tb-profile-nav-avatar">
+                <div className="tb-avatar-xs">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="Avatar" className="tb-img-cover" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+                {notifTotal > 0 && (
+                  <span className="tb-profile-bubble">{notifTotal > 99 ? '99+' : notifTotal}</span>
                 )}
               </div>
               <span>Perfil</span>
