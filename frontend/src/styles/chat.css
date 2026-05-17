@@ -47,7 +47,6 @@
   gap: var(--sp-3);
   padding: var(--sp-6);
 }
-.tb-chat-empty-icon { font-size: 32px; line-height: 1; }
 .tb-chat-empty-text { font-size: var(--fs-small); color: var(--fg-3); text-align: center; }
 
 /* ─── Conversation row ─── */
@@ -261,5 +260,4 @@
   background: var(--bg-3);
 }
 @media (min-width: 681px) { .tb-chat-desktop-empty { display: flex; } }
-.tb-chat-desktop-empty-icon { font-size: 40px; line-height: 1; }
 .tb-chat-desktop-empty-text { font-size: var(--fs-small); color: var(--fg-3); }

@@ -241,10 +241,6 @@
 /* Stack (generic column gap-4) */
 .tb-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
 
-/* Flex rows */
-.tb-row         { display: flex; align-items: center; gap: var(--sp-3); }
-.tb-row-between { display: flex; align-items: center; justify-content: space-between; }
-
 /* Loading / empty center */
 .tb-loading-state {
   display: flex;

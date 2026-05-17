@@ -267,7 +267,6 @@
 }
 
 .tb-mobile-nav-current { display: flex; align-items: center; gap: var(--sp-2); }
-.tb-mobile-nav-chevron { color: var(--fg-3); font-size: var(--fs-meta); }
 
 .tb-mobile-nav-dropdown {
   background: #fff;
