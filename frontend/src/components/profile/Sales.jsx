@@ -19,6 +19,7 @@ export default function Sales() {
   const [sales, setSales]           = useState([])
   const [loading, setLoading]       = useState(true)
   const [popup, setPopup]           = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [actionLoading, setAction]  = useState(false)
   const [actionError, setActionErr] = useState('')
 
@@ -130,11 +131,18 @@ export default function Sales() {
         ) : (
           <div className="tb-order-list">
             {sales.map(product => (
-              <SaleRow key={product.id} product={product} userId={user?.id} onOpenPopup={openPopup} onToggleVisibility={handleToggleVisibility} onDelete={handleDelete} />
+              <SaleRow key={product.id} product={product} userId={user?.id} onOpenPopup={openPopup} onToggleVisibility={handleToggleVisibility} onDeleteRequest={setDeleteTarget} />
             ))}
           </div>
         )}
       </div>
+
+      {deleteTarget && (
+        <DeleteConfirmPopup
+          onConfirm={() => { handleDelete(deleteTarget); setDeleteTarget(null) }}
+          onClose={() => setDeleteTarget(null)}
+        />
+      )}
 
       {popup && (
         popup.pending_order?.status === 'devolucion_solicitada' ? (
@@ -160,9 +168,8 @@ export default function Sales() {
   )
 }
 
-function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete }) {
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [reviewing, setReviewing]               = useState(false)
+function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDeleteRequest }) {
+  const [reviewing, setReviewing] = useState(false)
   const [reviewed, setReviewed]                 = useState(
     product.completed_order?.reviews?.some(r => r.user_id === userId) ?? false
   )
@@ -220,50 +227,29 @@ function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete })
         )}
         {!hasPending && product.available === 'disponible' && (
           <div className="tb-sale-action-btns">
-            {confirmingDelete ? (
-              <>
-                <button
-                  className="tb-sale-edit-btn tb-sale-edit-btn--danger"
-                  title="Confirmar eliminación"
-                  onClick={e => { e.stopPropagation(); onDelete(product.id) }}
-                >
-                  <Icon name="check" size={14} />
-                </button>
-                <button
-                  className="tb-sale-edit-btn"
-                  title="Cancelar"
-                  onClick={e => { e.stopPropagation(); setConfirmingDelete(false) }}
-                >
-                  <Icon name="x" size={14} />
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="tb-sale-edit-btn"
-                  onClick={e => {
-                    e.stopPropagation()
-                    window.dispatchEvent(new CustomEvent('navigate:sell', { detail: { productId: product.id } }))
-                  }}
-                >
-                  <Icon name="edit" size={14} />
-                </button>
-                <button
-                  className="tb-sale-edit-btn"
-                  title={product.visible ? 'Pausar anuncio' : 'Reactivar anuncio'}
-                  onClick={e => { e.stopPropagation(); onToggleVisibility(product.id) }}
-                >
-                  <Icon name={product.visible ? 'eye' : 'eye-off'} size={14} />
-                </button>
-                <button
-                  className="tb-sale-edit-btn tb-sale-edit-btn--danger"
-                  title="Eliminar producto"
-                  onClick={e => { e.stopPropagation(); setConfirmingDelete(true) }}
-                >
-                  <Icon name="trash" size={14} />
-                </button>
-              </>
-            )}
+            <button
+              className="tb-sale-edit-btn"
+              onClick={e => {
+                e.stopPropagation()
+                window.dispatchEvent(new CustomEvent('navigate:sell', { detail: { productId: product.id } }))
+              }}
+            >
+              <Icon name="edit" size={14} />
+            </button>
+            <button
+              className="tb-sale-edit-btn"
+              title={product.visible ? 'Pausar anuncio' : 'Reactivar anuncio'}
+              onClick={e => { e.stopPropagation(); onToggleVisibility(product.id) }}
+            >
+              <Icon name={product.visible ? 'eye' : 'eye-off'} size={14} />
+            </button>
+            <button
+              className="tb-sale-edit-btn tb-sale-edit-btn--danger"
+              title="Eliminar producto"
+              onClick={e => { e.stopPropagation(); onDeleteRequest(product.id) }}
+            >
+              <Icon name="trash" size={14} />
+            </button>
           </div>
         )}
         {product.available === 'vendido' && product.completed_order && !reviewed && (
@@ -284,6 +270,23 @@ function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete })
           onDone={(submitted) => { setReviewing(false); if (submitted) setReviewed(true) }}
         />
       )}
+    </div>
+  )
+}
+
+function DeleteConfirmPopup({ onConfirm, onClose }) {
+  return (
+    <div className="tb-overlay" onClick={onClose}>
+      <div className="tb-modal tb-modal-logout" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="tb-modal-close">&times;</button>
+        <div className="tb-modal-emoji">🗑️</div>
+        <h2 className="tb-modal-title">Eliminar producto</h2>
+        <p className="tb-modal-subtitle">¿Seguro que quieres eliminar este producto?</p>
+        <div className="tb-action-row">
+          <button onClick={onClose} className="tb-btn-secondary">Cancelar</button>
+          <button onClick={onConfirm} className="tb-btn-dark">Eliminar</button>
+        </div>
+      </div>
     </div>
   )
 }
