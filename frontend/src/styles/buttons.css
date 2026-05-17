@@ -5,12 +5,9 @@
 /* Shared base */
 .tb-btn-primary,
 .tb-btn-secondary,
-.tb-btn-ghost,
 .tb-btn-dark,
-.tb-btn-success,
 .tb-btn-danger-outline,
 .tb-btn-danger-solid,
-.tb-btn-icon,
 .tb-btn-back,
 .tb-btn-sell,
 .tb-btn-favorites,
@@ -20,8 +17,7 @@
 .tb-btn-buy,
 .tb-btn-contact,
 .tb-btn-confirm,
-.tb-btn-reject,
-.tb-btn-send {
+.tb-btn-reject {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -39,13 +35,11 @@
 .tb-btn-primary:disabled,
 .tb-btn-secondary:disabled,
 .tb-btn-dark:disabled,
-.tb-btn-success:disabled,
 .tb-btn-danger-outline:disabled,
 .tb-btn-danger-solid:disabled,
 .tb-btn-buy:disabled,
 .tb-btn-confirm:disabled,
-.tb-btn-reject:disabled,
-.tb-btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.tb-btn-reject:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Primary — red CTA (full-width form button) */
 .tb-btn-primary {
@@ -81,17 +75,6 @@
   font-size: var(--fs-small);
 }
 .tb-btn-dark:hover:not(:disabled) { background: #2A2A2E; }
-
-/* ── Ghost */
-.tb-btn-ghost {
-  background: transparent;
-  color: var(--fg-1);
-  border-radius: var(--r-sm);
-  padding: var(--sp-1) var(--sp-2);
-  font-size: var(--fs-small);
-  font-weight: 500;
-}
-.tb-btn-ghost:hover:not(:disabled) { background: var(--bg-3); }
 
 /* ── Text (login link in header) */
 .tb-btn-text {
@@ -312,21 +295,6 @@
   font-family: var(--font-body);
 }
 .tb-btn-danger-outline:hover:not(:disabled) { background: var(--badge-red-bg); }
-
-/* ── Icon circular button */
-.tb-btn-icon {
-  background: var(--bg-3);
-  color: var(--fg-1);
-  border-radius: var(--r-pill);
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-  border: none;
-  font-family: var(--font-body);
-}
-.tb-btn-icon:hover { background: #EBEBED; }
 
 /* ── Clear filters */
 .tb-btn-clear {
