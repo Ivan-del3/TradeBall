@@ -219,7 +219,7 @@ function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete })
           </span>
         )}
         {!hasPending && product.available === 'disponible' && (
-          <>
+          <div className="tb-sale-action-btns">
             {confirmingDelete ? (
               <>
                 <button
@@ -264,7 +264,7 @@ function SaleRow({ product, userId, onOpenPopup, onToggleVisibility, onDelete })
                 </button>
               </>
             )}
-          </>
+          </div>
         )}
         {product.available === 'vendido' && product.completed_order && !reviewed && (
           <button
