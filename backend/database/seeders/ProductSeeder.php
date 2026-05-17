@@ -13,27 +13,34 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
+        $seedImagesPath = database_path('seeders/images');
+
+        Storage::disk('public')->put('avatars/cintia.jpg', file_get_contents($seedImagesPath . '/cintia.jpg'));
+        Storage::disk('public')->put('avatars/personal-image.png', file_get_contents($seedImagesPath . '/personal-image.png'));
+
         $user1 = User::firstOrCreate(
             ['email' => 'trainer@tradeball.com'],
             [
-                'name'      => 'Cintia',
-                'lastname'  => 'Artemis',
-                'password'  => bcrypt('garchomp'),
-                'rol'       => 'customer',
-                'is_active' => true,
+                'name'       => 'Cintia',
+                'lastname'   => 'Artemis',
+                'password'   => bcrypt('garchomp'),
+                'rol'        => 'customer',
+                'is_active'  => true,
+                'avatar_url' => config('app.url') . '/storage/avatars/cintia.jpg',
             ]
         );
 
         Wallet::firstOrCreate(['user_id' => $user1->id], ['balance' => 0]);
 
         $user2 = User::firstOrCreate(
-            ['email' => 'i@i.es'],
+            ['email' => 'ivan@tradeball.es'],
             [
-                'name'      => 'Iván',
-                'lastname'  => 'Nagato',
-                'password'  => bcrypt('12345678'),
-                'rol'       => 'customer',
-                'is_active' => true,
+                'name'       => 'Iván',
+                'lastname'   => 'Delgado',
+                'password'   => bcrypt('12345678'),
+                'rol'        => 'customer',
+                'is_active'  => true,
+                'avatar_url' => config('app.url') . '/storage/avatars/personal-image.png',
             ]
         );
 
@@ -149,8 +156,6 @@ class ProductSeeder extends Seeder
                 'images'      => ['lugia.png', 'carta-trasera.png'],
             ],
         ];
-
-        $seedImagesPath = database_path('seeders/images');
 
         foreach ($products as $data) {
             $imageFiles = $data['images'];
