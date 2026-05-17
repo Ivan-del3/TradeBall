@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 import Icon from '../Icon'
@@ -22,8 +22,9 @@ export default function Sales() {
   const [actionLoading, setAction]  = useState(false)
   const [actionError, setActionErr] = useState('')
 
-  const reload = () =>
-    client('/sales').then(data => { setSales(data); refreshNotifs() }).catch(() => {})
+  const reload = useCallback(() =>
+    client('/sales').then(data => { setSales(data); refreshNotifs() }).catch(() => {}),
+  [refreshNotifs])
 
   useEffect(() => {
     client('/sales')
@@ -32,7 +33,15 @@ export default function Sales() {
 
     const id = setInterval(reload, 15000)
     return () => clearInterval(id)
-  }, [])
+  }, [reload, refreshNotifs])
+
+  useEffect(() => {
+    const onCountsChanged = (e) => {
+      if (e.detail.next.sales > e.detail.prev.sales) reload()
+    }
+    window.addEventListener('trb:counts-changed', onCountsChanged)
+    return () => window.removeEventListener('trb:counts-changed', onCountsChanged)
+  }, [reload])
 
   const pendingCount = sales.filter(p => p.pending_order).length
 

@@ -13,6 +13,7 @@ export function NotificationsProvider({ children }) {
   const { user } = useAuth()
   const [counts, setCounts] = useState({ sales: 0, purchases: 0, chat: 0, reviews: 0 })
   const reviewsTotalRef = useRef(0)
+  const countsRef       = useRef({ sales: 0, purchases: 0, chat: 0, reviews: 0 })
 
   const refresh = useCallback(async () => {
     if (!user) {
@@ -26,12 +27,20 @@ export function NotificationsProvider({ children }) {
       const seen = parseInt(localStorage.getItem(seenKey) || '0') || 0
       reviewsTotalRef.current = data.reviews
 
-      setCounts({
+      const next = {
         sales:     data.sales,
         purchases: data.purchases,
         chat:      data.chat,
         reviews:   Math.max(0, data.reviews - seen),
-      })
+      }
+
+      const prev = countsRef.current
+      countsRef.current = next
+      setCounts(next)
+
+      if (next.sales > prev.sales || next.purchases > prev.purchases || next.chat > prev.chat) {
+        window.dispatchEvent(new CustomEvent('trb:counts-changed', { detail: { prev, next } }))
+      }
     } catch (err) {
       console.error('[Notifications] refresh failed:', err)
     }
