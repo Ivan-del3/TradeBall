@@ -13,6 +13,7 @@ class FavoriteController extends Controller
         $favorites = $request->user()
             ->favorites()
             ->where('visible', true)
+            ->where('available', '!=', 'vendido')
             ->with(['mainImage', 'category'])
             ->get();
 
