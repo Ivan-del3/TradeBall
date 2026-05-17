@@ -11,11 +11,6 @@ class WalletService
 {
     public function __construct(private WalletRepository $repo) {}
 
-    public function getOrCreate(User $user): Wallet
-    {
-        return $user->wallet ?? $this->repo->createForUser($user->id);
-    }
-
     public function deposit(User $user, float $amount): Wallet
     {
         if ($amount <= 0 || $amount > 99999) {

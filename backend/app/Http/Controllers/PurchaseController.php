@@ -13,6 +13,7 @@ class PurchaseController extends Controller
     {
         $purchases = $request->user()
             ->purchases()
+            ->where('escrow_active', true)
             ->whereIn('status', ['pendiente', 'confirmado', 'devolucion_solicitada', 'completado', 'cancelado'])
             ->with(['product.mainImage', 'seller', 'reviews'])
             ->orderBy('updated_at', 'desc')

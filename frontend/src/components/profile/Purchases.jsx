@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import client from '../../api/client'
 import { LoadingCard, Empty } from './shared'
 import Icon from '../Icon'
@@ -10,8 +10,9 @@ export default function Purchases() {
   const [loading, setLoading]      = useState(true)
   const { refresh: refreshNotifs } = useNotifications()
 
-  const reload = () =>
-    client('/purchases').then(data => { setPurchases(data); refreshNotifs() }).catch(() => {})
+  const reload = useCallback(() =>
+    client('/purchases').then(data => { setPurchases(data); refreshNotifs() }).catch(() => {}),
+  [refreshNotifs])
 
   useEffect(() => {
     client('/purchases')
@@ -20,7 +21,15 @@ export default function Purchases() {
 
     const id = setInterval(reload, 15000)
     return () => clearInterval(id)
-  }, [])
+  }, [reload, refreshNotifs])
+
+  useEffect(() => {
+    const onCountsChanged = (e) => {
+      if (e.detail.next.purchases > e.detail.prev.purchases) reload()
+    }
+    window.addEventListener('trb:counts-changed', onCountsChanged)
+    return () => window.removeEventListener('trb:counts-changed', onCountsChanged)
+  }, [reload])
 
   if (loading) return <LoadingCard />
 

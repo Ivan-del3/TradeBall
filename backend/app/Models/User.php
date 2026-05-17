@@ -48,23 +48,15 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'seller_id');
     }
 
-    public function reviews() { 
-        return $this->hasMany(Review::class); 
+    public function reviews() {
+        return $this->hasMany(Review::class);
     }
 
-    public function receivedReviews() { 
-        return $this->hasMany(Review::class, 'reviewed_user_id'); 
+    public function receivedReviews() {
+        return $this->hasMany(Review::class, 'reviewed_user_id');
     }
 
-    public function notifications() { 
-        return $this->belongsToMany(Notification::class, 'notification_user')->withPivot('read')->withTimestamps(); 
-    }
-
-    public function reports() { 
-        return $this->hasMany(Report::class); 
-    }
-
-    public function sentMessages() { 
+    public function sentMessages() {
         return $this->hasMany(Message::class, 'sender_id');
     }
 }

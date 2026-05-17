@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationsContext'
 import client from '../../api/client'
@@ -39,51 +39,59 @@ export default function Chat({ initialOrderId }) {
       .catch(() => setLoading(false))
   }, [initialOrderId])
 
-  useEffect(() => {
-    if (loading) return
-    const pollList = () => {
-      client('/chat/conversations')
-        .then(newConvs => {
-          setConversations(prev => {
-            const prevMap  = new Map(prev.map(c => [c.id, c]))
-            const freshMap = new Map(newConvs.map(c => [c.id, c]))
+  const pollList = useCallback(() => {
+    client('/chat/conversations')
+      .then(newConvs => {
+        setConversations(prev => {
+          const prevMap  = new Map(prev.map(c => [c.id, c]))
+          const freshMap = new Map(newConvs.map(c => [c.id, c]))
 
-            const merged = prev.map(c => {
-              const fresh = freshMap.get(c.id)
-              if (!fresh) return c
-              const isActive = activeConvRef.current?.id === c.id
-              return {
-                ...c,
-                unread_count: isActive ? c.unread_count : fresh.unread_count,
-                last_message: fresh.last_message ?? c.last_message,
-              }
-            })
+          const merged = prev.map(c => {
+            const fresh = freshMap.get(c.id)
+            if (!fresh) return c
+            const isActive = activeConvRef.current?.id === c.id
+            return {
+              ...c,
+              unread_count: isActive ? c.unread_count : fresh.unread_count,
+              last_message: fresh.last_message ?? c.last_message,
+            }
+          })
 
-            newConvs.forEach(fresh => {
-              if (prevMap.has(fresh.id)) return
-              const wasHiddenManually = hiddenIdsRef.current.has(fresh.id)
-              if (!wasHiddenManually) {
-                merged.push(fresh)
-              } else if (fresh.last_message) {
-                hiddenIdsRef.current.delete(fresh.id)
-                merged.push(fresh)
-              }
-            })
+          newConvs.forEach(fresh => {
+            if (prevMap.has(fresh.id)) return
+            const wasHiddenManually = hiddenIdsRef.current.has(fresh.id)
+            if (!wasHiddenManually) {
+              merged.push(fresh)
+            } else if (fresh.last_message) {
+              hiddenIdsRef.current.delete(fresh.id)
+              merged.push(fresh)
+            }
+          })
 
-            const seen = new Set()
-            return merged.filter(c => {
-              if (seen.has(c.id)) return false
-              seen.add(c.id)
-              return true
-            })
+          const seen = new Set()
+          return merged.filter(c => {
+            if (seen.has(c.id)) return false
+            seen.add(c.id)
+            return true
           })
         })
-        .catch(() => {})
-    }
+      })
+      .catch(() => {})
+  }, [])
 
+  useEffect(() => {
+    if (loading) return
     const intervalId = setInterval(pollList, 10000)
     return () => clearInterval(intervalId)
-  }, [loading])
+  }, [loading, pollList])
+
+  useEffect(() => {
+    const onCountsChanged = (e) => {
+      if (e.detail.next.chat > e.detail.prev.chat) pollList()
+    }
+    window.addEventListener('trb:counts-changed', onCountsChanged)
+    return () => window.removeEventListener('trb:counts-changed', onCountsChanged)
+  }, [pollList])
 
   useEffect(() => {
     if (!activeConv) return

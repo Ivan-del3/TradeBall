@@ -8,7 +8,6 @@ import UserInfo from '../components/profile/UserInfo'
 import Sales from '../components/profile/Sales'
 import Purchases from '../components/profile/Purchases'
 import Chat from '../components/profile/Chat'
-import Notifications from '../components/profile/Notifications'
 import Wallet from '../components/profile/Wallet'
 import Reviews from '../components/profile/Reviews'
 
@@ -16,9 +15,8 @@ const SECTIONS = [
   { key: 'info',          label: 'Mi perfil',       icon: 'user'   },
   { key: 'sales',         label: 'Mis ventas',       icon: 'box'    },
   { key: 'purchases',     label: 'Mis compras',      icon: 'bag'    },
-  { key: 'chat',          label: 'Chat',             icon: 'chat'   },
-  { key: 'notifications', label: 'Notificaciones',   icon: 'bell'   },
-  { key: 'wallet',        label: 'Monedero',         icon: 'wallet' },
+  { key: 'chat',   label: 'Chat',     icon: 'chat'   },
+  { key: 'wallet', label: 'Monedero', icon: 'wallet' },
   { key: 'reviews',       label: 'Valoraciones',     icon: 'star'   },
 ]
 
@@ -54,9 +52,8 @@ export default function Profile({ initialSection, initialOrderId }) {
       case 'info':          return <UserInfo />
       case 'sales':         return <Sales />
       case 'purchases':     return <Purchases />
-      case 'chat':          return <Chat initialOrderId={chatOrderId} />
-      case 'notifications': return <Notifications />
-      case 'wallet':        return <Wallet />
+      case 'chat':   return <Chat initialOrderId={chatOrderId} />
+      case 'wallet': return <Wallet />
       case 'reviews':       return <Reviews />
       default:              return <UserInfo />
     }
