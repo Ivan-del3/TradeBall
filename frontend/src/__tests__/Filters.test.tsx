@@ -19,6 +19,7 @@ const emptyFilters = {
   condition: '',
   min_price: '',
   max_price: '',
+  sort_price: '',
 }
 
 // ---------------------------------------------------------------------------
@@ -141,6 +142,38 @@ describe('Filters', () => {
     const toggleBtn = screen.getByRole('button', { name: /filtros/i })
     // Sin filtros de panel activos, no debe aparecer el badge
     expect(within(toggleBtn).queryByText(/^\d+$/)).not.toBeInTheDocument()
+  })
+
+  test('onChange se llama con sort_price=asc al seleccionar menor a mayor', async () => {
+    render(<FiltersWrapper spy={spy} />)
+    await openPanel(user)
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /ordenar por precio/i }), 'asc')
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ sort_price: 'asc' }))
+  })
+
+  test('onChange se llama con sort_price=desc al seleccionar mayor a menor', async () => {
+    render(<FiltersWrapper spy={spy} />)
+    await openPanel(user)
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /ordenar por precio/i }), 'desc')
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ sort_price: 'desc' }))
+  })
+
+  test('"Limpiar todo" resetea sort_price a vacío', async () => {
+    render(
+      <FiltersWrapper
+        initial={{ ...emptyFilters, sort_price: 'asc' }}
+        spy={spy}
+      />
+    )
+    await openPanel(user)
+
+    await user.click(screen.getByRole('button', { name: /limpiar todo/i }))
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ sort_price: '' }))
   })
 
   test('"Limpiar todo" resetea category, condition, min_price y max_price', async () => {
