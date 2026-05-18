@@ -4,10 +4,15 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true, // Escuchar en todas las interfaces de red
+    host: true,
     port: 5173,
     watch: {
-      usePolling: true, // Necesario para que detecte cambios en Docker si usas Windows/WSL
+      usePolling: true,
     },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
   },
 })
