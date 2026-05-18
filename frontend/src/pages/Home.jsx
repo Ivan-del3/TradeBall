@@ -15,7 +15,7 @@ export default function Home() {
   const [page, setPage]               = useState(1)
   const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters]         = useState({
-    search: '', category_id: '', condition: '', min_price: '', max_price: ''
+    search: '', category_id: '', condition: '', min_price: '', max_price: '', sort_price: ''
   })
   const isFirstLoad = useRef(true)
 

@@ -21,6 +21,7 @@ class ProductController extends Controller
             'condition'   => 'sometimes|in:nuevo,casi_nuevo,usado',
             'min_price'   => 'sometimes|numeric|min:0|max:99999',
             'max_price'   => 'sometimes|numeric|min:0|max:99999',
+            'sort_price'  => 'sometimes|in:asc,desc',
         ]);
 
         $query = Product::with(['user', 'mainImage', 'category'])
@@ -47,7 +48,13 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(15);
+        if ($request->sort_price) {
+            $query->orderBy('price', $request->sort_price);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $products = $query->paginate(15);
 
         return response()->json($products);
     }

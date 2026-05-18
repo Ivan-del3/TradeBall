@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -194,6 +195,60 @@ class ProductControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
+
+    #[Test]
+    public function sort_price_asc_devuelve_productos_de_menor_a_mayor_precio(): void
+    {
+        $this->makeProduct(['name' => 'Caro',    'price' => 200.00]);
+        $this->makeProduct(['name' => 'Barato',  'price' => 10.00]);
+        $this->makeProduct(['name' => 'Medio',   'price' => 50.00]);
+
+        $response = $this->getJson('/api/products?sort_price=asc');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertSame(['Barato', 'Medio', 'Caro'], $names);
+    }
+
+    #[Test]
+    public function sort_price_desc_devuelve_productos_de_mayor_a_menor_precio(): void
+    {
+        $this->makeProduct(['name' => 'Barato',  'price' => 10.00]);
+        $this->makeProduct(['name' => 'Caro',    'price' => 200.00]);
+        $this->makeProduct(['name' => 'Medio',   'price' => 50.00]);
+
+        $response = $this->getJson('/api/products?sort_price=desc');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertSame(['Caro', 'Medio', 'Barato'], $names);
+    }
+
+    #[Test]
+    public function sin_sort_price_el_orden_es_por_fecha_de_creacion_descendente(): void
+    {
+        $p1 = $this->makeProduct(['name' => 'Primero']);
+        $p2 = $this->makeProduct(['name' => 'Segundo']);
+        $p3 = $this->makeProduct(['name' => 'Último']);
+
+        // Forzar timestamps distintos ya que SQLite crea todos en el mismo instante
+        DB::table('products')->where('id', $p1->id)->update(['created_at' => now()->subSeconds(2)]);
+        DB::table('products')->where('id', $p2->id)->update(['created_at' => now()->subSeconds(1)]);
+
+        $response = $this->getJson('/api/products');
+
+        $response->assertOk();
+        $names = array_column($response->json('data'), 'name');
+        $this->assertSame(['Último', 'Segundo', 'Primero'], $names);
+    }
+
+    #[Test]
+    public function validacion_rechaza_sort_price_invalido(): void
+    {
+        $response = $this->getJson('/api/products?sort_price=random');
+
+        $response->assertStatus(422);
+    }
 
     #[Test]
     public function respuesta_json_contiene_estructura_data_current_page_last_page(): void

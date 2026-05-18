@@ -10,6 +10,7 @@ export default function Filters({ categories, filters, onChange }) {
     filters.condition,
     filters.min_price,
     filters.max_price,
+    filters.sort_price,
   ].filter(Boolean).length
 
   const clearAll = () => onChange(prev => ({
@@ -18,6 +19,7 @@ export default function Filters({ categories, filters, onChange }) {
     condition: '',
     min_price: '',
     max_price: '',
+    sort_price: '',
   }))
 
   return (
@@ -88,6 +90,21 @@ export default function Filters({ categories, filters, onChange }) {
                   <option value="nuevo">Nuevo</option>
                   <option value="casi_nuevo">Casi nuevo</option>
                   <option value="usado">Usado</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="filter-sort-price" className="tb-label-meta">Ordenar por precio</label>
+                <select
+                  id="filter-sort-price"
+                  name="sort_price"
+                  value={filters.sort_price}
+                  onChange={e => update('sort_price', e.target.value)}
+                  className="tb-select"
+                >
+                  <option value="">Sin ordenar</option>
+                  <option value="asc">Menor a mayor</option>
+                  <option value="desc">Mayor a menor</option>
                 </select>
               </div>
 

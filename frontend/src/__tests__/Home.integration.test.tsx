@@ -155,6 +155,46 @@ describe('Home — integración', () => {
   })
 
   // -------------------------------------------------------------------------
+  // Ordenación por precio
+  // -------------------------------------------------------------------------
+
+  test('al seleccionar sort_price=asc, client se llama con el param correcto', async () => {
+    const user = userEvent.setup()
+    render(<Home />)
+
+    await waitFor(() => expect(mockClient).toHaveBeenCalledWith('/categories'))
+
+    await user.click(screen.getByRole('button', { name: /filtros/i }))
+    await user.selectOptions(screen.getByRole('combobox', { name: /ordenar por precio/i }), 'asc')
+
+    await waitFor(() => {
+      const productCalls = mockClient.mock.calls.filter(
+        ([url]) => typeof url === 'string' && (url as string).startsWith('/products'),
+      )
+      const lastUrl = productCalls[productCalls.length - 1]?.[0] as string
+      expect(lastUrl).toContain('sort_price=asc')
+    })
+  })
+
+  test('al seleccionar sort_price=desc, client se llama con el param correcto', async () => {
+    const user = userEvent.setup()
+    render(<Home />)
+
+    await waitFor(() => expect(mockClient).toHaveBeenCalledWith('/categories'))
+
+    await user.click(screen.getByRole('button', { name: /filtros/i }))
+    await user.selectOptions(screen.getByRole('combobox', { name: /ordenar por precio/i }), 'desc')
+
+    await waitFor(() => {
+      const productCalls = mockClient.mock.calls.filter(
+        ([url]) => typeof url === 'string' && (url as string).startsWith('/products'),
+      )
+      const lastUrl = productCalls[productCalls.length - 1]?.[0] as string
+      expect(lastUrl).toContain('sort_price=desc')
+    })
+  })
+
+  // -------------------------------------------------------------------------
   // "Cargar más" — concatena productos
   // -------------------------------------------------------------------------
 
