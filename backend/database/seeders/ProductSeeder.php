@@ -17,6 +17,7 @@ class ProductSeeder extends Seeder
 
         Storage::disk('public')->put('avatars/cintia.jpg', file_get_contents($seedImagesPath . '/cintia.jpg'));
         Storage::disk('public')->put('avatars/personal-image.png', file_get_contents($seedImagesPath . '/personal-image.png'));
+        Storage::disk('public')->put('avatars/jocarsa.jpg', file_get_contents($seedImagesPath . '/jocarsa.jpg'));
 
         $user1 = User::firstOrCreate(
             ['email' => 'trainer@tradeball.com'],
@@ -30,7 +31,7 @@ class ProductSeeder extends Seeder
             ]
         );
 
-        Wallet::firstOrCreate(['user_id' => $user1->id], ['balance' => 0]);
+        Wallet::firstOrCreate(['user_id' => $user1->id], ['balance' => 10000]);
 
         $user2 = User::firstOrCreate(
             ['email' => 'ivan@tradeball.es'],
@@ -44,7 +45,21 @@ class ProductSeeder extends Seeder
             ]
         );
 
-        Wallet::firstOrCreate(['user_id' => $user2->id], ['balance' => 0]);
+        Wallet::firstOrCreate(['user_id' => $user2->id], ['balance' => 10000]);
+
+        $user3 = User::firstOrCreate(
+            ['email' => 'jocarsa@tradeball.com'],
+            [
+                'name'       => 'José Vicente',
+                'lastname'   => 'Carratalá',
+                'password'   => bcrypt('12345678'),
+                'rol'        => 'customer',
+                'is_active'  => true,
+                'avatar_url' => config('app.url') . '/storage/avatars/jocarsa.jpg',
+            ]
+        );
+
+        Wallet::firstOrCreate(['user_id' => $user3->id], ['balance' => 10000]);
 
         $products = [
             [
