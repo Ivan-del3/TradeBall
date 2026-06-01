@@ -17,10 +17,10 @@ use App\Http\Controllers\NotificationController;
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:20,1');
 Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:20,1');
 
-Route::get('/products',        [ProductController::class, 'index'])->middleware('throttle:60,1');
-Route::get('/products/{id}',   [ProductController::class, 'show'])->middleware('throttle:60,1');
-Route::get('/categories',      [ProductController::class, 'categories'])->middleware('throttle:30,1');
-Route::get('/users/{id}/reviews', [ReviewController::class, 'userReviews'])->middleware('throttle:60,1');
+Route::get('/products',        [ProductController::class, 'index'])->middleware('throttle:300,1');
+Route::get('/products/{id}',   [ProductController::class, 'show'])->middleware('throttle:300,1');
+Route::get('/categories',      [ProductController::class, 'categories'])->middleware('throttle:300,1');
+Route::get('/users/{id}/reviews', [ReviewController::class, 'userReviews'])->middleware('throttle:300,1');
 
 // Protegidas (necesitan el token Bearer en el header)
 Route::middleware('auth:sanctum')->group(function () {

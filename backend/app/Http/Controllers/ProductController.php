@@ -49,12 +49,12 @@ class ProductController extends Controller
         }
 
         if ($request->sort_price) {
-            $query->orderBy('price', $request->sort_price);
+            $query->orderBy('price', $request->sort_price)->orderBy('id', 'desc');
         } else {
-            $query->orderBy('created_at', 'desc');
+            $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
         }
 
-        $products = $query->paginate(15);
+        $products = $query->paginate(10);
 
         return response()->json($products);
     }
